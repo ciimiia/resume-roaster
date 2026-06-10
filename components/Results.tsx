@@ -174,6 +174,7 @@ function ShareModal({ mode, result, onClose }: { mode: ModeId; result: AnalysisR
         </div>
         <div style={{ borderRadius: 14, overflow: 'hidden', border: '1px solid var(--line-2)', background: '#0b0b10', aspectRatio: '1/1' }}>
           {url
+            // eslint-disable-next-line @next/next/no-img-element
             ? <img src={url} alt="Share card" style={{ width: '100%', display: 'block' }} />
             : <div style={{ display: 'grid', placeItems: 'center', height: '100%', color: 'var(--ink-mute)' }}>Rendering…</div>}
         </div>

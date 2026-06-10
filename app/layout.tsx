@@ -1,23 +1,5 @@
 import type { Metadata } from 'next'
-import { Space_Grotesk, Space_Mono, Hanken_Grotesk } from 'next/font/google'
 import './globals.css'
-
-const spaceGrotesk = Space_Grotesk({
-  subsets: ['latin'],
-  variable: '--font-space-grotesk',
-  display: 'swap',
-})
-const spaceMono = Space_Mono({
-  subsets: ['latin'],
-  weight: ['400', '700'],
-  variable: '--font-space-mono',
-  display: 'swap',
-})
-const hankenGrotesk = Hanken_Grotesk({
-  subsets: ['latin'],
-  variable: '--font-hanken-grotesk',
-  display: 'swap',
-})
 
 export const metadata: Metadata = {
   title: 'Resume Roaster — AI Resume Feedback',
@@ -29,24 +11,29 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <head>
+        {/*
+          Load all fonts via a single <link> so the build never needs to reach
+          fonts.gstatic.com. next/font/google fetches at build time and fails
+          in environments where Google Fonts is blocked/throttled.
+        */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Hanken+Grotesk:wght@400;500;600;700&family=Syne:wght@400;700;800&display=swap"
           rel="stylesheet"
         />
       </head>
-      <body className={`${spaceGrotesk.variable} ${spaceMono.variable} ${hankenGrotesk.variable}`}>
-        {/* Wire up font CSS vars so the rest of the app can use var(--font-display) etc. */}
+      <body>
+        {/* Wire CSS vars so every component can use var(--font-display) etc. */}
         <style>{`
           :root {
-            --font-display: var(--font-space-grotesk), system-ui, sans-serif;
-            --font-body:    var(--font-hanken-grotesk), system-ui, sans-serif;
-            --font-mono:    var(--font-space-mono), ui-monospace, monospace;
+            --font-display: 'Space Grotesk', system-ui, sans-serif;
+            --font-body:    'Hanken Grotesk', system-ui, sans-serif;
+            --font-mono:    'Space Mono', ui-monospace, monospace;
           }
         `}</style>
 
-        {/* Atmosphere — fixed full-screen glow; reacts to data-theme via CSS vars */}
+        {/* Atmosphere — fixed full-screen glow that reacts to data-theme CSS vars */}
         <div
           id="atmosphere"
           style={{

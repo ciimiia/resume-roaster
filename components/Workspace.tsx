@@ -6,7 +6,7 @@ import type { ModeId, Step, AnalysisResult } from '@/lib/types'
 import Button from './ui/Button'
 import Icon from './ui/Icon'
 import Pill from './ui/Pill'
-import { ModeSelectorCard, cardStyle } from './Landing'
+import { ModeSelectorCard } from './Landing'
 
 /* ---- StepRail ---- */
 function StepRail({ step }: { step: Step }) {
@@ -282,7 +282,7 @@ export default function Workspace({ mode, setMode, step, setStep, file, setFile,
                 {LOADING_LINES[mode][lineIdx]}
               </p>
               <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {['Parsing structure','Scanning keywords','Scoring sections','Generating verdict'].map((label, i) => (
+                {['Parsing structure','Scanning keywords','Scoring sections','Generating verdict'].map((label) => (
                   <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <div style={{ width: 18, height: 18, borderRadius: '50%', background: 'color-mix(in srgb, var(--accent) 20%, transparent)', border: '1.5px solid var(--accent)', display: 'grid', placeItems: 'center', color: 'var(--accent)' }}>
                       <Icon name="check" size={10} stroke={2.5} />
