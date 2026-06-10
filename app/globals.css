@@ -2,26 +2,141 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+   Design Tokens — Resume Roaster
+   ============================================================ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #0A0A0F;
+  --bg-2: #0E0E15;
+  --surface: #121219;
+  --surface-2: #17171F;
+  --surface-3: #1E1E27;
+  --line: rgba(255,255,255,0.08);
+  --line-2: rgba(255,255,255,0.14);
+  --ink: #F5F5F7;
+  --ink-soft: #C7C7D1;
+  --ink-mute: #84848F;
+  --ink-faint: #56565F;
+  --roast: #FF4D4D;
+  --roast-2: #FF8A3D;
+  --coach: #4D9FFF;
+  --coach-2: #7C7CFF;
+  --intl: #4DCC88;
+  --intl-2: #36D6C3;
+  --accent: #6E6E7A;
+  --accent-2: #6E6E7A;
+  --accent-ink: #0A0A0F;
+  --glow: rgba(110,110,122,0.0);
+  --tint: transparent;
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'Hanken Grotesk', system-ui, sans-serif;
+  --font-mono: 'Space Mono', ui-monospace, monospace;
+  --shadow-1: 0 1px 0 rgba(255,255,255,0.04) inset, 0 8px 24px rgba(0,0,0,0.4);
+  --shadow-2: 0 24px 80px rgba(0,0,0,0.6);
+  --r-sm: 10px; --r-md: 16px; --r-lg: 24px; --r-xl: 32px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html[data-theme="roast"] {
+  --accent: #FF4D4D; --accent-2: #FF8A3D;
+  --glow: rgba(255,77,77,0.16); --tint: rgba(255,77,77,0.05);
+  --bg: #0E0809; --bg-2: #140A0B; --surface: #17100F;
+  --surface-2: #1D1413; --surface-3: #261917; --accent-ink: #160404;
+}
+html[data-theme="coach"] {
+  --accent: #4D9FFF; --accent-2: #7C7CFF;
+  --glow: rgba(77,159,255,0.14); --tint: rgba(77,159,255,0.04);
+  --accent-ink: #02060f;
+}
+html[data-theme="intl"] {
+  --accent: #4DCC88; --accent-2: #36D6C3;
+  --glow: rgba(77,204,136,0.14); --tint: rgba(77,204,136,0.04);
+  --accent-ink: #02100a;
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+/* ============================================================
+   Base Reset
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.1;
 }
+
+button { cursor: pointer; font-family: inherit; }
+a { color: inherit; text-decoration: none; }
+
+.mono { font-family: var(--font-mono); }
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  display: block;
+}
+
+/* ============================================================
+   Keyframes
+   ============================================================ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes pop {
+  0%   { transform: scale(.96); opacity: 0; }
+  60%  { transform: scale(1.01); }
+  100% { transform: none; opacity: 1; }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes scanmove {
+  0%   { top: 0%; }
+  100% { top: 100%; }
+}
+@keyframes blink {
+  0%, 49%  { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+@keyframes floaty {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+
+/* ============================================================
+   Scrollbar
+   ============================================================ */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-2); }
+::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* ============================================================
+   Responsive breakpoints
+   ============================================================ */
+@media (max-width: 940px) {
+  .hero-grid, .results-grid { grid-template-columns: 1fr !important; }
+  .results-aside { position: static !important; }
+  .nav-links { display: none !important; }
+}
+@media (max-width: 760px) {
+  .steps-grid, .modes-grid, .lists-grid { grid-template-columns: 1fr !important; }
+}
+
+.corners-sharp { --r-sm: 3px; --r-md: 5px; --r-lg: 7px; --r-xl: 9px; }
