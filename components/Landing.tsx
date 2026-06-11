@@ -19,10 +19,13 @@ export const cardStyle = (extra: React.CSSProperties = {}): React.CSSProperties 
 
 /* ---- Header ---- */
 function Header({ onStart }: { onStart: () => void }) {
+  const scrollTo = (id: string) =>
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
+
   const links = [
-    { id: 'how-it-works', label: 'How it works', href: '#how-it-works' },
-    { id: 'modes',        label: 'Modes',        href: '#modes' },
-    { id: 'app',          label: 'The App',      href: undefined },
+    { id: 'how-it-works', label: 'How it works', onClick: () => scrollTo('how-it-works') },
+    { id: 'modes',        label: 'Modes',        onClick: () => scrollTo('modes') },
+    { id: 'app',          label: 'The App',      onClick: onStart },
   ]
   return (
     <header style={{
@@ -35,22 +38,13 @@ function Header({ onStart }: { onStart: () => void }) {
       <Logo />
       <nav style={{ display: 'flex', alignItems: 'center', gap: 4 }} className="nav-links">
         {links.map(l => (
-          l.href ? (
-            <a key={l.id} href={l.href}
-              style={{ background: 'none', border: 'none', color: 'var(--ink-mute)', fontFamily: 'var(--font-body)', fontSize: 15, padding: '8px 14px', borderRadius: 9, transition: 'color .2s', textDecoration: 'none', cursor: 'pointer' }}
-              onMouseEnter={e => (e.currentTarget.style.color = 'var(--ink)')}
-              onMouseLeave={e => (e.currentTarget.style.color = 'var(--ink-mute)')}>
-              {l.label}
-            </a>
-          ) : (
-            <button key={l.id}
-              onClick={onStart}
-              style={{ background: 'none', border: 'none', color: 'var(--ink-mute)', fontFamily: 'var(--font-body)', fontSize: 15, padding: '8px 14px', borderRadius: 9, transition: 'color .2s' }}
-              onMouseEnter={e => (e.currentTarget.style.color = 'var(--ink)')}
-              onMouseLeave={e => (e.currentTarget.style.color = 'var(--ink-mute)')}>
-              {l.label}
-            </button>
-          )
+          <button key={l.id}
+            onClick={l.onClick}
+            style={{ background: 'none', border: 'none', color: 'var(--ink-mute)', fontFamily: 'var(--font-body)', fontSize: 15, padding: '8px 14px', borderRadius: 9, transition: 'color .2s', cursor: 'pointer' }}
+            onMouseEnter={e => (e.currentTarget.style.color = 'var(--ink)')}
+            onMouseLeave={e => (e.currentTarget.style.color = 'var(--ink-mute)')}>
+            {l.label}
+          </button>
         ))}
       </nav>
       <Button size="sm" icon="upload" onClick={onStart}>Upload your resume</Button>
