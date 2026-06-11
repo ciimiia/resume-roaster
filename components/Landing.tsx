@@ -20,9 +20,9 @@ export const cardStyle = (extra: React.CSSProperties = {}): React.CSSProperties 
 /* ---- Header ---- */
 function Header({ onStart }: { onStart: () => void }) {
   const links = [
-    { id: 'how', label: 'How it works' },
-    { id: 'modes', label: 'Modes' },
-    { id: 'app', label: 'The App' },
+    { id: 'how-it-works', label: 'How it works', href: '#how-it-works' },
+    { id: 'modes',        label: 'Modes',        href: '#modes' },
+    { id: 'app',          label: 'The App',      href: undefined },
   ]
   return (
     <header style={{
@@ -35,13 +35,22 @@ function Header({ onStart }: { onStart: () => void }) {
       <Logo />
       <nav style={{ display: 'flex', alignItems: 'center', gap: 4 }} className="nav-links">
         {links.map(l => (
-          <button key={l.id}
-            onClick={l.id === 'app' ? onStart : undefined}
-            style={{ background: 'none', border: 'none', color: 'var(--ink-mute)', fontFamily: 'var(--font-body)', fontSize: 15, padding: '8px 14px', borderRadius: 9, transition: 'color .2s' }}
-            onMouseEnter={e => (e.currentTarget.style.color = 'var(--ink)')}
-            onMouseLeave={e => (e.currentTarget.style.color = 'var(--ink-mute)')}>
-            {l.label}
-          </button>
+          l.href ? (
+            <a key={l.id} href={l.href}
+              style={{ background: 'none', border: 'none', color: 'var(--ink-mute)', fontFamily: 'var(--font-body)', fontSize: 15, padding: '8px 14px', borderRadius: 9, transition: 'color .2s', textDecoration: 'none', cursor: 'pointer' }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--ink)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--ink-mute)')}>
+              {l.label}
+            </a>
+          ) : (
+            <button key={l.id}
+              onClick={onStart}
+              style={{ background: 'none', border: 'none', color: 'var(--ink-mute)', fontFamily: 'var(--font-body)', fontSize: 15, padding: '8px 14px', borderRadius: 9, transition: 'color .2s' }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--ink)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--ink-mute)')}>
+              {l.label}
+            </button>
+          )
         ))}
       </nav>
       <Button size="sm" icon="upload" onClick={onStart}>Upload your resume</Button>
@@ -215,7 +224,7 @@ export default function Landing({ mode, setMode, onStart }: LandingProps) {
             </div>
 
             {/* Mode selector */}
-            <div style={{ marginTop: 14 }}>
+            <div id="modes" style={{ marginTop: 14 }}>
               <div className="eyebrow" style={{ marginBottom: 10 }}>Pick a mode — watch the room change</div>
               <div style={{ display: 'flex', gap: 10 }}>
                 {MODE_ORDER.map(id => (
@@ -228,7 +237,7 @@ export default function Landing({ mode, setMode, onStart }: LandingProps) {
       </section>
 
       {/* HOW IT WORKS */}
-      <section style={{ maxWidth: 1240, margin: '0 auto', padding: '40px clamp(20px,5vw,60px) 90px' }}>
+      <section id="how-it-works" style={{ maxWidth: 1240, margin: '0 auto', padding: '40px clamp(20px,5vw,60px) 90px' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 28 }}>
           <h2 style={{ fontSize: 'clamp(26px,3vw,38px)' }}>Three steps. Twelve seconds. Zero excuses.</h2>
           <span className="eyebrow">How it works</span>
