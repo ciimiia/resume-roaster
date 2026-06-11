@@ -218,7 +218,7 @@ export default function Landing({ mode, setMode, onStart }: LandingProps) {
             </div>
 
             {/* Mode selector */}
-            <div id="modes" style={{ marginTop: 14 }}>
+            <div id="modes" style={{ marginTop: 14, scrollMarginTop: 80 }}>
               <div className="eyebrow" style={{ marginBottom: 10 }}>Pick a mode — watch the room change</div>
               <div style={{ display: 'flex', gap: 10 }}>
                 {MODE_ORDER.map(id => (
@@ -231,7 +231,7 @@ export default function Landing({ mode, setMode, onStart }: LandingProps) {
       </section>
 
       {/* HOW IT WORKS */}
-      <section id="how-it-works" style={{ maxWidth: 1240, margin: '0 auto', padding: '40px clamp(20px,5vw,60px) 90px' }}>
+      <section id="how-it-works" style={{ maxWidth: 1240, margin: '0 auto', padding: '40px clamp(20px,5vw,60px) 90px', scrollMarginTop: 80 }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 28 }}>
           <h2 style={{ fontSize: 'clamp(26px,3vw,38px)' }}>Three steps. Twelve seconds. Zero excuses.</h2>
           <span className="eyebrow">How it works</span>
