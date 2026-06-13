@@ -6,6 +6,7 @@ import '@/app/builder/print.css'
 import Button from '@/components/ui/Button'
 import Icon from '@/components/ui/Icon'
 import Logo from '@/components/ui/Logo'
+import { useLang } from '@/lib/LangContext'
 
 /* ── Types ───────────────────────────────────────────── */
 interface Experience {
@@ -51,13 +52,7 @@ const EMPTY: ResumeData = {
 }
 
 type StepId = 'personal' | 'experience' | 'education' | 'skills' | 'preview'
-const STEPS: { id: StepId; label: string }[] = [
-  { id: 'personal',   label: 'Personal Info' },
-  { id: 'experience', label: 'Experience' },
-  { id: 'education',  label: 'Education' },
-  { id: 'skills',     label: 'Skills' },
-  { id: 'preview',    label: 'Preview' },
-]
+const STEP_IDS: StepId[] = ['personal', 'experience', 'education', 'skills', 'preview']
 
 /* ── Shared input style ──────────────────────────────── */
 const inp: React.CSSProperties = {
@@ -74,7 +69,7 @@ const inp: React.CSSProperties = {
   boxSizing: 'border-box',
 }
 
-const label: React.CSSProperties = {
+const labelStyle: React.CSSProperties = {
   display: 'block',
   fontSize: 12,
   fontFamily: 'var(--font-mono)',
@@ -86,7 +81,7 @@ const label: React.CSSProperties = {
 function Field({ lbl, children }: { lbl: string; children: React.ReactNode }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
-      <span style={label}>{lbl}</span>
+      <span style={labelStyle}>{lbl}</span>
       {children}
     </div>
   )
@@ -115,14 +110,14 @@ function FocusTA({ style: extra, ...props }: React.TextareaHTMLAttributes<HTMLTe
 }
 
 /* ── Step rail ───────────────────────────────────────── */
-function StepRail({ step, setStep }: { step: StepId; setStep: (s: StepId) => void }) {
-  const idx = STEPS.findIndex(s => s.id === step)
+function StepRail({ step, setStep, labels }: { step: StepId; setStep: (s: StepId) => void; labels: string[] }) {
+  const idx = STEP_IDS.findIndex(s => s === step)
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: 36, flexWrap: 'wrap', rowGap: 10 }}>
-      {STEPS.map((s, i) => (
-        <div key={s.id} style={{ display: 'flex', alignItems: 'center' }}>
+      {STEP_IDS.map((id, i) => (
+        <div key={id} style={{ display: 'flex', alignItems: 'center' }}>
           <button
-            onClick={() => setStep(s.id)}
+            onClick={() => setStep(id)}
             style={{
               display: 'flex', alignItems: 'center', gap: 8,
               background: 'none', border: 'none', cursor: 'pointer', padding: '4px 2px',
@@ -143,10 +138,10 @@ function StepRail({ step, setStep }: { step: StepId; setStep: (s: StepId) => voi
               color: i === idx ? 'var(--ink)' : i < idx ? 'var(--ink-soft)' : 'var(--ink-faint)',
               transition: 'color .2s',
             }}>
-              {s.label}
+              {labels[i]}
             </span>
           </button>
-          {i < STEPS.length - 1 && (
+          {i < STEP_IDS.length - 1 && (
             <div style={{ width: 28, height: 1, background: i < idx ? 'var(--accent)' : 'var(--line-2)', margin: '0 6px', transition: 'background .3s' }} />
           )}
         </div>
@@ -157,21 +152,22 @@ function StepRail({ step, setStep }: { step: StepId; setStep: (s: StepId) => voi
 
 /* ── Step: Personal Info ─────────────────────────────── */
 function StepPersonal({ data, onChange }: { data: ResumeData['personal']; onChange: (d: ResumeData['personal']) => void }) {
+  const { t } = useLang()
   const set = (k: keyof typeof data) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     onChange({ ...data, [k]: e.target.value })
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18, animation: 'fadeUp .4s both' }}>
-      <h2 style={{ fontSize: 'clamp(22px,3vw,30px)', marginBottom: 4 }}>Personal Info</h2>
+      <h2 style={{ fontSize: 'clamp(22px,3vw,30px)', marginBottom: 4 }}>{t.builderSteps[0]}</h2>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-        <Field lbl="FULL NAME"><FocusInp value={data.name} onChange={set('name')} placeholder="Alex Johnson" /></Field>
-        <Field lbl="JOB TITLE"><FocusInp value={data.title} onChange={set('title')} placeholder="Senior Product Manager" /></Field>
-        <Field lbl="EMAIL"><FocusInp type="email" value={data.email} onChange={set('email')} placeholder="alex@example.com" /></Field>
-        <Field lbl="PHONE"><FocusInp value={data.phone} onChange={set('phone')} placeholder="+1 (555) 000-0000" /></Field>
-        <Field lbl="LOCATION"><FocusInp value={data.location} onChange={set('location')} placeholder="San Francisco, CA" /></Field>
-        <Field lbl="WEBSITE / LINKEDIN"><FocusInp value={data.website} onChange={set('website')} placeholder="linkedin.com/in/alexj" /></Field>
+        <Field lbl={t.builderFullName}><FocusInp value={data.name} onChange={set('name')} placeholder="Alex Johnson" /></Field>
+        <Field lbl={t.builderJobTitle}><FocusInp value={data.title} onChange={set('title')} placeholder="Senior Product Manager" /></Field>
+        <Field lbl={t.builderEmail}><FocusInp type="email" value={data.email} onChange={set('email')} placeholder="alex@example.com" /></Field>
+        <Field lbl={t.builderPhone}><FocusInp value={data.phone} onChange={set('phone')} placeholder="+1 (555) 000-0000" /></Field>
+        <Field lbl={t.builderLocation}><FocusInp value={data.location} onChange={set('location')} placeholder="San Francisco, CA" /></Field>
+        <Field lbl={t.builderWebsite}><FocusInp value={data.website} onChange={set('website')} placeholder="linkedin.com/in/alexj" /></Field>
       </div>
-      <Field lbl="PROFESSIONAL SUMMARY">
-        <FocusTA value={data.summary} onChange={set('summary')} placeholder="2–3 sentence overview of your background and what you bring..." rows={4} />
+      <Field lbl={t.builderSummary}>
+        <FocusTA value={data.summary} onChange={set('summary')} placeholder={t.builderSummaryPlaceholder} rows={4} />
       </Field>
     </div>
   )
@@ -179,6 +175,7 @@ function StepPersonal({ data, onChange }: { data: ResumeData['personal']; onChan
 
 /* ── Step: Experience ────────────────────────────────── */
 function StepExperience({ data, onChange }: { data: Experience[]; onChange: (d: Experience[]) => void }) {
+  const { t } = useLang()
   const add = () => onChange([...data, { id: crypto.randomUUID(), company: '', role: '', start: '', end: '', current: false, bullets: [''] }])
   const remove = (id: string) => onChange(data.filter(e => e.id !== id))
   const update = (id: string, patch: Partial<Experience>) =>
@@ -193,20 +190,20 @@ function StepExperience({ data, onChange }: { data: Experience[]; onChange: (d: 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20, animation: 'fadeUp .4s both' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <h2 style={{ fontSize: 'clamp(22px,3vw,30px)' }}>Work Experience</h2>
-        <Button size="sm" variant="ghost" onClick={add}>+ Add Job</Button>
+        <h2 style={{ fontSize: 'clamp(22px,3vw,30px)' }}>{t.builderWorkExp}</h2>
+        <Button size="sm" variant="ghost" onClick={add}>{t.builderAddJob}</Button>
       </div>
       {data.length === 0 && (
         <div style={{ textAlign: 'center', padding: '40px 20px', border: '2px dashed var(--line-2)', borderRadius: 'var(--r-lg)', color: 'var(--ink-mute)' }}>
           <div style={{ fontSize: 32, marginBottom: 12 }}>💼</div>
-          <p style={{ fontSize: 15 }}>No jobs yet. Click <strong>+ Add Job</strong> to start.</p>
+          <p style={{ fontSize: 15 }}>{t.builderNoJobs}</p>
         </div>
       )}
       {data.map((exp, ei) => (
         <div key={exp.id} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 'var(--r-md)', padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 15, color: 'var(--ink-soft)' }}>
-              Job {ei + 1}
+              {t.builderJobLabel} {ei + 1}
             </span>
             <button onClick={() => remove(exp.id)} style={{ background: 'none', border: 'none', color: 'var(--ink-faint)', cursor: 'pointer', padding: 4 }}
               onMouseEnter={e => (e.currentTarget.style.color = 'var(--roast)')}
@@ -215,19 +212,19 @@ function StepExperience({ data, onChange }: { data: Experience[]; onChange: (d: 
             </button>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <Field lbl="COMPANY"><FocusInp value={exp.company} onChange={e => update(exp.id, { company: e.target.value })} placeholder="Acme Corp" /></Field>
-            <Field lbl="ROLE / TITLE"><FocusInp value={exp.role} onChange={e => update(exp.id, { role: e.target.value })} placeholder="Senior Engineer" /></Field>
-            <Field lbl="START DATE"><FocusInp value={exp.start} onChange={e => update(exp.id, { start: e.target.value })} placeholder="Jan 2022" /></Field>
-            <Field lbl="END DATE">
+            <Field lbl={t.builderCompany}><FocusInp value={exp.company} onChange={e => update(exp.id, { company: e.target.value })} placeholder="Acme Corp" /></Field>
+            <Field lbl={t.builderRole}><FocusInp value={exp.role} onChange={e => update(exp.id, { role: e.target.value })} placeholder="Senior Engineer" /></Field>
+            <Field lbl={t.builderStartDate}><FocusInp value={exp.start} onChange={e => update(exp.id, { start: e.target.value })} placeholder="Jan 2022" /></Field>
+            <Field lbl={t.builderEndDate}>
               <FocusInp value={exp.current ? 'Present' : exp.end} onChange={e => update(exp.id, { end: e.target.value })} placeholder="Dec 2024" disabled={exp.current} style={{ opacity: exp.current ? 0.5 : 1 }} />
             </Field>
           </div>
           <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13, color: 'var(--ink-mute)' }}>
             <input type="checkbox" checked={exp.current} onChange={e => update(exp.id, { current: e.target.checked, end: '' })} />
-            Currently working here
+            {t.builderCurrently}
           </label>
           <div>
-            <span style={label}>BULLET POINTS</span>
+            <span style={labelStyle}>{t.builderBullets}</span>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {exp.bullets.map((b, bi) => (
                 <div key={bi} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
@@ -246,7 +243,7 @@ function StepExperience({ data, onChange }: { data: Experience[]; onChange: (d: 
                 style={{ alignSelf: 'flex-start', background: 'none', border: '1px dashed var(--line-2)', borderRadius: 'var(--r-sm)', padding: '6px 12px', fontSize: 13, color: 'var(--ink-mute)', cursor: 'pointer', transition: 'all .2s' }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--accent)' }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--line-2)'; e.currentTarget.style.color = 'var(--ink-mute)' }}>
-                + Add bullet
+                {t.builderAddBullet}
               </button>
             </div>
           </div>
@@ -258,6 +255,7 @@ function StepExperience({ data, onChange }: { data: Experience[]; onChange: (d: 
 
 /* ── Step: Education ─────────────────────────────────── */
 function StepEducation({ data, onChange }: { data: Education[]; onChange: (d: Education[]) => void }) {
+  const { t } = useLang()
   const add = () => onChange([...data, { id: crypto.randomUUID(), school: '', degree: '', field: '', start: '', end: '', gpa: '' }])
   const remove = (id: string) => onChange(data.filter(e => e.id !== id))
   const update = (id: string, patch: Partial<Education>) =>
@@ -266,19 +264,19 @@ function StepEducation({ data, onChange }: { data: Education[]; onChange: (d: Ed
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20, animation: 'fadeUp .4s both' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <h2 style={{ fontSize: 'clamp(22px,3vw,30px)' }}>Education</h2>
-        <Button size="sm" variant="ghost" onClick={add}>+ Add School</Button>
+        <h2 style={{ fontSize: 'clamp(22px,3vw,30px)' }}>{t.builderEducation}</h2>
+        <Button size="sm" variant="ghost" onClick={add}>{t.builderAddSchool}</Button>
       </div>
       {data.length === 0 && (
         <div style={{ textAlign: 'center', padding: '40px 20px', border: '2px dashed var(--line-2)', borderRadius: 'var(--r-lg)', color: 'var(--ink-mute)' }}>
           <div style={{ fontSize: 32, marginBottom: 12 }}>🎓</div>
-          <p style={{ fontSize: 15 }}>No education yet. Click <strong>+ Add School</strong> to start.</p>
+          <p style={{ fontSize: 15 }}>{t.builderNoSchools}</p>
         </div>
       )}
       {data.map((edu, ei) => (
         <div key={edu.id} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 'var(--r-md)', padding: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 15, color: 'var(--ink-soft)' }}>Entry {ei + 1}</span>
+            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 15, color: 'var(--ink-soft)' }}>{t.builderEntryLabel} {ei + 1}</span>
             <button onClick={() => remove(edu.id)} style={{ background: 'none', border: 'none', color: 'var(--ink-faint)', cursor: 'pointer', padding: 4 }}
               onMouseEnter={e => (e.currentTarget.style.color = 'var(--roast)')}
               onMouseLeave={e => (e.currentTarget.style.color = 'var(--ink-faint)')}>
@@ -286,12 +284,12 @@ function StepEducation({ data, onChange }: { data: Education[]; onChange: (d: Ed
             </button>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <Field lbl="SCHOOL / UNIVERSITY"><FocusInp value={edu.school} onChange={e => update(edu.id, { school: e.target.value })} placeholder="MIT" /></Field>
-            <Field lbl="DEGREE"><FocusInp value={edu.degree} onChange={e => update(edu.id, { degree: e.target.value })} placeholder="Bachelor of Science" /></Field>
-            <Field lbl="FIELD OF STUDY"><FocusInp value={edu.field} onChange={e => update(edu.id, { field: e.target.value })} placeholder="Computer Science" /></Field>
-            <Field lbl="GPA (optional)"><FocusInp value={edu.gpa} onChange={e => update(edu.id, { gpa: e.target.value })} placeholder="3.8 / 4.0" /></Field>
-            <Field lbl="START YEAR"><FocusInp value={edu.start} onChange={e => update(edu.id, { start: e.target.value })} placeholder="2018" /></Field>
-            <Field lbl="END YEAR"><FocusInp value={edu.end} onChange={e => update(edu.id, { end: e.target.value })} placeholder="2022" /></Field>
+            <Field lbl={t.builderSchool}><FocusInp value={edu.school} onChange={e => update(edu.id, { school: e.target.value })} placeholder="MIT" /></Field>
+            <Field lbl={t.builderDegree}><FocusInp value={edu.degree} onChange={e => update(edu.id, { degree: e.target.value })} placeholder="Bachelor of Science" /></Field>
+            <Field lbl={t.builderField}><FocusInp value={edu.field} onChange={e => update(edu.id, { field: e.target.value })} placeholder="Computer Science" /></Field>
+            <Field lbl={t.builderGpa}><FocusInp value={edu.gpa} onChange={e => update(edu.id, { gpa: e.target.value })} placeholder="3.8 / 4.0" /></Field>
+            <Field lbl={t.builderStartYear}><FocusInp value={edu.start} onChange={e => update(edu.id, { start: e.target.value })} placeholder="2018" /></Field>
+            <Field lbl={t.builderEndYear}><FocusInp value={edu.end} onChange={e => update(edu.id, { end: e.target.value })} placeholder="2022" /></Field>
           </div>
         </div>
       ))}
@@ -301,6 +299,7 @@ function StepEducation({ data, onChange }: { data: Education[]; onChange: (d: Ed
 
 /* ── Step: Skills ────────────────────────────────────── */
 function StepSkills({ data, onChange }: { data: string[]; onChange: (d: string[]) => void }) {
+  const { t } = useLang()
   const [input, setInput] = useState('')
 
   const add = () => {
@@ -318,9 +317,12 @@ function StepSkills({ data, onChange }: { data: string[]; onChange: (d: string[]
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20, animation: 'fadeUp .4s both' }}>
-      <h2 style={{ fontSize: 'clamp(22px,3vw,30px)', marginBottom: 4 }}>Skills</h2>
+      <h2 style={{ fontSize: 'clamp(22px,3vw,30px)', marginBottom: 4 }}>{t.builderSkills}</h2>
       <p style={{ fontSize: 14, color: 'var(--ink-mute)', marginTop: -12 }}>
-        Type a skill and press <kbd style={{ background: 'var(--surface-3)', padding: '2px 6px', borderRadius: 4, fontSize: 12 }}>Enter</kbd> or <kbd style={{ background: 'var(--surface-3)', padding: '2px 6px', borderRadius: 4, fontSize: 12 }}>,</kbd> to add.
+        {t.builderSkillsHint.split('Enter').map((part, i) => i === 0
+          ? <span key={i}>{part}<kbd style={{ background: 'var(--surface-3)', padding: '2px 6px', borderRadius: 4, fontSize: 12 }}>Enter</kbd></span>
+          : <span key={i}>{part}</span>
+        )}
       </p>
       <div style={{
         display: 'flex', flexWrap: 'wrap', gap: 8,
@@ -353,7 +355,7 @@ function StepSkills({ data, onChange }: { data: string[]; onChange: (d: string[]
           onChange={e => setInput(e.target.value)}
           onKeyDown={onKey}
           onBlur={add}
-          placeholder={data.length === 0 ? 'e.g. React, TypeScript, Python…' : ''}
+          placeholder={data.length === 0 ? t.builderSkillsPlaceholder : ''}
           style={{ background: 'none', border: 'none', outline: 'none', color: 'var(--ink)', fontFamily: 'var(--font-body)', fontSize: 14, minWidth: 140, flex: 1 }}
         />
       </div>
@@ -362,7 +364,7 @@ function StepSkills({ data, onChange }: { data: string[]; onChange: (d: string[]
           style={{ alignSelf: 'flex-start', background: 'none', border: 'none', color: 'var(--ink-faint)', fontSize: 13, cursor: 'pointer', padding: 0 }}
           onMouseEnter={e => (e.currentTarget.style.color = 'var(--roast)')}
           onMouseLeave={e => (e.currentTarget.style.color = 'var(--ink-faint)')}>
-          Clear all
+          {t.builderClearAll}
         </button>
       )}
     </div>
@@ -370,7 +372,7 @@ function StepSkills({ data, onChange }: { data: string[]; onChange: (d: string[]
 }
 
 /* ── Resume Preview Doc ──────────────────────────────── */
-function ResumeDoc({ data }: { data: ResumeData }) {
+function ResumeDoc({ data, t }: { data: ResumeData; t: ReturnType<typeof useLang>['t'] }) {
   const { personal: p, experience, education, skills } = data
   const hasContent = p.name || p.email || experience.length > 0 || education.length > 0 || skills.length > 0
 
@@ -385,7 +387,7 @@ function ResumeDoc({ data }: { data: ResumeData }) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--ink-faint)', gap: 12, padding: 40 }}>
         <div style={{ fontSize: 40 }}>📄</div>
-        <p style={{ fontSize: 14, textAlign: 'center' }}>Your resume preview will appear here as you fill in the form.</p>
+        <p style={{ fontSize: 14, textAlign: 'center' }}>{t.builderPreviewEmpty}</p>
       </div>
     )
   }
@@ -399,7 +401,6 @@ function ResumeDoc({ data }: { data: ResumeData }) {
       boxShadow: '0 8px 40px rgba(0,0,0,0.3)',
       minHeight: 600,
     }}>
-      {/* Header */}
       {p.name && (
         <div style={{ marginBottom: 16 }}>
           <h1 style={{ fontSize: 26, fontWeight: 700, margin: 0, lineHeight: 1.1, color: '#111' }}>{p.name}</h1>
@@ -413,18 +414,16 @@ function ResumeDoc({ data }: { data: ResumeData }) {
         </div>
       )}
 
-      {/* Summary */}
       {p.summary && (
         <>
-          <div style={sectionHead}>Summary</div>
+          <div style={sectionHead}>{t.builderSummarySection}</div>
           <p style={{ margin: 0, color: '#333', fontSize: 13 }}>{p.summary}</p>
         </>
       )}
 
-      {/* Experience */}
       {experience.length > 0 && (
         <>
-          <div style={sectionHead}>Experience</div>
+          <div style={sectionHead}>{t.builderExpSection}</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {experience.map(exp => (
               <div key={exp.id}>
@@ -448,10 +447,9 @@ function ResumeDoc({ data }: { data: ResumeData }) {
         </>
       )}
 
-      {/* Education */}
       {education.length > 0 && (
         <>
-          <div style={sectionHead}>Education</div>
+          <div style={sectionHead}>{t.builderEduSection}</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {education.map(edu => (
               <div key={edu.id}>
@@ -469,10 +467,9 @@ function ResumeDoc({ data }: { data: ResumeData }) {
         </>
       )}
 
-      {/* Skills */}
       {skills.length > 0 && (
         <>
-          <div style={sectionHead}>Skills</div>
+          <div style={sectionHead}>{t.builderSkillsSection}</div>
           <p style={{ margin: 0, fontSize: 13, color: '#333' }}>{skills.join(' · ')}</p>
         </>
       )}
@@ -482,15 +479,16 @@ function ResumeDoc({ data }: { data: ResumeData }) {
 
 /* ── Main Builder ────────────────────────────────────── */
 export default function BuilderApp() {
+  const { t } = useLang()
   const [step, setStep] = useState<StepId>('personal')
   const [data, setData] = useState<ResumeData>(EMPTY)
 
-  const stepIdx = STEPS.findIndex(s => s.id === step)
-  const isLast = stepIdx === STEPS.length - 1
+  const stepIdx = STEP_IDS.findIndex(s => s === step)
+  const isLast = stepIdx === STEP_IDS.length - 1
   const isFirst = stepIdx === 0
 
-  const next = () => !isLast && setStep(STEPS[stepIdx + 1].id)
-  const prev = () => !isFirst && setStep(STEPS[stepIdx - 1].id)
+  const next = () => !isLast && setStep(STEP_IDS[stepIdx + 1])
+  const prev = () => !isFirst && setStep(STEP_IDS[stepIdx - 1])
 
   const card: React.CSSProperties = {
     background: 'var(--surface)',
@@ -513,14 +511,14 @@ export default function BuilderApp() {
           <Logo size={24} />
         </Link>
         <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 16, color: 'var(--ink-soft)' }}>
-          Resume Builder
+          {t.builderTitle}
         </span>
-        <Button size="sm" icon="download" onClick={() => window.print()}>Export PDF</Button>
+        <Button size="sm" icon="download" onClick={() => window.print()}>{t.builderExportPdf}</Button>
       </div>
 
-      {/* Print wrapper — only this div survives print */}
+      {/* Print wrapper */}
       <div className="resume-print-root" style={{ display: 'none' }}>
-        <ResumeDoc data={data} />
+        <ResumeDoc data={data} t={t} />
       </div>
 
       {/* Main two-column layout */}
@@ -535,7 +533,7 @@ export default function BuilderApp() {
       >
         {/* Left: form */}
         <div style={{ ...card, padding: 'clamp(24px,3vw,36px)' }}>
-          <StepRail step={step} setStep={setStep} />
+          <StepRail step={step} setStep={setStep} labels={t.builderSteps} />
 
           {step === 'personal'   && <StepPersonal   data={data.personal}   onChange={p  => setData({ ...data, personal:   p  })} />}
           {step === 'experience' && <StepExperience data={data.experience} onChange={ex => setData({ ...data, experience: ex })} />}
@@ -543,29 +541,29 @@ export default function BuilderApp() {
           {step === 'skills'     && <StepSkills     data={data.skills}     onChange={sk => setData({ ...data, skills:     sk })} />}
           {step === 'preview'    && (
             <div style={{ animation: 'fadeUp .4s both' }}>
-              <h2 style={{ fontSize: 'clamp(22px,3vw,30px)', marginBottom: 8 }}>Looking good!</h2>
+              <h2 style={{ fontSize: 'clamp(22px,3vw,30px)', marginBottom: 8 }}>{t.builderLookingGood}</h2>
               <p style={{ fontSize: 15, color: 'var(--ink-mute)', marginBottom: 24 }}>
-                Review your resume on the right, then export it as a PDF.
+                {t.builderPreviewDesc}
               </p>
-              <Button size="lg" icon="download" onClick={() => window.print()}>Export PDF</Button>
+              <Button size="lg" icon="download" onClick={() => window.print()}>{t.builderExportPdf}</Button>
             </div>
           )}
 
           {/* Nav buttons */}
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 32, paddingTop: 24, borderTop: '1px solid var(--line)' }}>
-            <Button variant="quiet" size="sm" icon="back" onClick={prev} style={{ visibility: isFirst ? 'hidden' : 'visible' }}>Back</Button>
-            {!isLast && <Button size="md" iconRight="arrow" onClick={next}>Next: {STEPS[stepIdx + 1].label}</Button>}
-            {isLast  && <Button size="md" icon="download" onClick={() => window.print()}>Export PDF</Button>}
+            <Button variant="quiet" size="sm" icon="back" onClick={prev} style={{ visibility: isFirst ? 'hidden' : 'visible' }}>{t.builderBack}</Button>
+            {!isLast && <Button size="md" iconRight="arrow" onClick={next}>{t.builderNextPrefix} {t.builderSteps[stepIdx + 1]}</Button>}
+            {isLast  && <Button size="md" icon="download" onClick={() => window.print()}>{t.builderExportPdf}</Button>}
           </div>
         </div>
 
         {/* Right: live preview */}
         <div style={{ position: 'sticky', top: 90 }}>
           <div style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span className="eyebrow">Live preview</span>
+            <span className="eyebrow">{t.builderLivePreview}</span>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--intl)', boxShadow: '0 0 6px var(--intl)', animation: 'blink 1.4s infinite' }} />
           </div>
-          <ResumeDoc data={data} />
+          <ResumeDoc data={data} t={t} />
         </div>
       </div>
     </div>

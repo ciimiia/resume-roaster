@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import type { ModeId, Step, View, AnalysisResult } from '@/lib/types'
-import { LangProvider } from '@/lib/LangContext'
 import Landing from './Landing'
 import Workspace from './Workspace'
 import Results from './Results'
@@ -78,9 +77,5 @@ function AppInner() {
 }
 
 export default function App() {
-  return (
-    <LangProvider>
-      <AppInner />
-    </LangProvider>
-  )
+  return <AppInner />
 }

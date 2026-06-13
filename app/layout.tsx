@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { LangProvider } from '@/lib/LangContext'
 
 export const metadata: Metadata = {
   title: 'Resume Roaster — AI Resume Feedback',
@@ -39,7 +40,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
 
-        <div style={{ position: 'relative', zIndex: 1 }}>{children}</div>
+        <LangProvider>
+          <div style={{ position: 'relative', zIndex: 1 }}>{children}</div>
+        </LangProvider>
       </body>
     </html>
   )

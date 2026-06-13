@@ -1,11 +1,9 @@
+'use client'
+
 import Link from 'next/link'
 import { POSTS } from '@/lib/posts'
 import Logo from '@/components/ui/Logo'
-
-export const metadata = {
-  title: 'Blog — Resume Roaster',
-  description: 'Resume tips, ATS strategies, and career advice from the Resume Roaster team.',
-}
+import { useLang } from '@/lib/LangContext'
 
 const TAG_COLORS: Record<string, string> = {
   ATS:        '#4D9FFF',
@@ -18,6 +16,8 @@ function formatDate(iso: string) {
 }
 
 export default function BlogIndex() {
+  const { t } = useLang()
+
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
       {/* Top bar */}
@@ -34,7 +34,7 @@ export default function BlogIndex() {
           textDecoration: 'none', fontSize: 14, color: 'var(--ink-mute)',
           fontFamily: 'var(--font-body)', padding: '8px 14px',
           transition: 'color .2s',
-        }}>← Back to home</Link>
+        }}>{t.blogBackHome}</Link>
       </header>
 
       <main style={{ maxWidth: 1100, margin: '0 auto', padding: 'clamp(40px,6vw,80px) clamp(20px,5vw,60px)' }}>
@@ -43,15 +43,15 @@ export default function BlogIndex() {
           <span style={{
             display: 'inline-block', fontFamily: 'var(--font-mono)', fontSize: 11,
             letterSpacing: '.12em', color: 'var(--accent)', marginBottom: 14,
-          }}>RESUME ROASTER · BLOG</span>
+          }}>{t.blogEyebrow}</span>
           <h1 style={{ fontSize: 'clamp(34px,5vw,60px)', fontWeight: 700, lineHeight: 1.05 }}>
-            Career advice worth<br />
+            {t.blogH1a}<br />
             <span style={{ background: 'linear-gradient(120deg,var(--accent),var(--accent-2))', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>
-              actually reading.
+              {t.blogH1b}
             </span>
           </h1>
           <p style={{ fontSize: 18, color: 'var(--ink-soft)', marginTop: 18, maxWidth: 520, lineHeight: 1.6 }}>
-            ATS strategy, resume writing, and how to land the job — no fluff.
+            {t.blogSubtitle}
           </p>
         </div>
 
@@ -90,7 +90,6 @@ export default function BlogIndex() {
                     el.style.boxShadow = '0 1px 0 rgba(255,255,255,0.04) inset, 0 8px 24px rgba(0,0,0,0.35)'
                   }}
                 >
-                  {/* Tag */}
                   <span style={{
                     alignSelf: 'flex-start',
                     padding: '4px 11px', borderRadius: 999,
@@ -100,26 +99,23 @@ export default function BlogIndex() {
                     color: accent,
                   }}>{post.tag}</span>
 
-                  {/* Title */}
                   <h2 style={{
                     fontFamily: 'var(--font-display)', fontWeight: 700,
                     fontSize: 20, lineHeight: 1.25, color: 'var(--ink)',
                     flex: 1,
                   }}>{post.title}</h2>
 
-                  {/* Excerpt */}
                   <p style={{ fontSize: 14.5, color: 'var(--ink-mute)', lineHeight: 1.6, margin: 0 }}>
                     {post.excerpt}
                   </p>
 
-                  {/* Meta */}
                   <div style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     paddingTop: 16, borderTop: '1px solid var(--line)',
                     fontSize: 12, fontFamily: 'var(--font-mono)', color: 'var(--ink-faint)',
                   }}>
                     <span>{formatDate(post.date)}</span>
-                    <span>{post.readTime} min read</span>
+                    <span>{post.readTime} {t.blogMinRead}</span>
                   </div>
                 </article>
               </Link>
@@ -131,7 +127,7 @@ export default function BlogIndex() {
       <footer style={{ borderTop: '1px solid var(--line)', padding: '26px clamp(20px,5vw,60px)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14 }}>
         <Logo size={24} />
         <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--ink-faint)' }}>
-          © 2026 Resume Roaster · No resumes were truly harmed.
+          {t.footer}
         </span>
       </footer>
     </div>
