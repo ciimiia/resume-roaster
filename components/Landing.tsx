@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { MODES, MODE_ORDER, RESULTS } from '@/lib/data'
 import type { ModeId } from '@/lib/types'
 import { useLang } from '@/lib/LangContext'
@@ -52,6 +53,8 @@ function Header({ onStart }: { onStart: () => void }) {
   const links = [
     { id: 'how-it-works', label: t.navHowItWorks, onClick: () => scrollTo('how-it-works') },
     { id: 'modes',        label: t.navModes,       onClick: () => scrollTo('modes') },
+    { id: 'blog',          label: 'Blog',             href: '/blog' },
+    { id: 'builder',      label: 'Builder',         href: '/builder' },
     { id: 'app',          label: t.navTheApp,      onClick: onStart },
   ]
 
@@ -65,15 +68,19 @@ function Header({ onStart }: { onStart: () => void }) {
     }}>
       <Logo />
       <nav style={{ display: 'flex', alignItems: 'center', gap: 4 }} className="nav-links">
-        {links.map(l => (
-          <button key={l.id}
-            onClick={l.onClick}
-            style={{ background: 'none', border: 'none', color: 'var(--ink-mute)', fontFamily: 'var(--font-body)', fontSize: 15, padding: '8px 14px', borderRadius: 9, transition: 'color .2s', cursor: 'pointer' }}
-            onMouseEnter={e => (e.currentTarget.style.color = 'var(--ink)')}
-            onMouseLeave={e => (e.currentTarget.style.color = 'var(--ink-mute)')}>
-            {l.label}
-          </button>
-        ))}
+        {links.map(l => {
+          const btnStyle: React.CSSProperties = { background: 'none', border: 'none', color: 'var(--ink-mute)', fontFamily: 'var(--font-body)', fontSize: 15, padding: '8px 14px', borderRadius: 9, transition: 'color .2s', cursor: 'pointer', textDecoration: 'none', display: 'inline-block' }
+          const hover = (e: React.MouseEvent<HTMLElement>) => (e.currentTarget.style.color = 'var(--ink)')
+          const unhover = (e: React.MouseEvent<HTMLElement>) => (e.currentTarget.style.color = 'var(--ink-mute)')
+          if ('href' in l && l.href) {
+            return <Link key={l.id} href={l.href} style={btnStyle} onMouseEnter={hover} onMouseLeave={unhover}>{l.label}</Link>
+          }
+          return (
+            <button key={l.id} onClick={(l as {onClick:()=>void}).onClick} style={btnStyle} onMouseEnter={hover} onMouseLeave={unhover}>
+              {l.label}
+            </button>
+          )
+        })}
       </nav>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <LangToggle />

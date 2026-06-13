@@ -1,0 +1,21 @@
+@media print {
+  body > * { display: none !important; }
+  .resume-print-root { display: block !important; }
+  .resume-print-root * { visibility: visible !important; }
+
+  @page {
+    margin: 0.6in;
+    size: letter;
+  }
+
+  .resume-doc {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+}
