@@ -513,7 +513,11 @@ export default function BuilderApp() {
         <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 16, color: 'var(--ink-soft)' }}>
           {t.builderTitle}
         </span>
-        <Button size="sm" icon="download" onClick={() => window.print()}>{t.builderExportPdf}</Button>
+        <Link href="/" style={{
+          textDecoration: 'none', fontSize: 14, color: 'var(--ink-mute)',
+          fontFamily: 'var(--font-body)', padding: '8px 14px',
+          transition: 'color .2s',
+        }}>{t.blogBackHome}</Link>
       </div>
 
       {/* Print wrapper */}
