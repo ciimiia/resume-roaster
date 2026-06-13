@@ -24,15 +24,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
-        {/* Wire CSS vars so every component can use var(--font-display) etc. */}
-        <style>{`
-          :root {
-            --font-display: 'Space Grotesk', system-ui, sans-serif;
-            --font-body:    'Hanken Grotesk', system-ui, sans-serif;
-            --font-mono:    'Space Mono', ui-monospace, monospace;
-          }
-        `}</style>
-
         {/* Atmosphere — fixed full-screen glow that reacts to data-theme CSS vars */}
         <div
           id="atmosphere"

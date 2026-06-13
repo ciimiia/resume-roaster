@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { MODES, MODE_ORDER, LOADING_LINES, SAMPLE_RESUME, EMPTY_STATES } from '@/lib/data'
+import { MODES, MODE_ORDER, SAMPLE_RESUME } from '@/lib/data'
 import type { ModeId, Step, AnalysisResult } from '@/lib/types'
+import { useLang } from '@/lib/LangContext'
 import Button from './ui/Button'
 import Icon from './ui/Icon'
 import Pill from './ui/Pill'
@@ -10,10 +11,11 @@ import { ModeSelectorCard } from './Landing'
 
 /* ---- StepRail ---- */
 function StepRail({ step }: { step: Step }) {
+  const { t } = useLang()
   const steps: { id: Step; label: string }[] = [
-    { id: 'mode',      label: 'Choose mode' },
-    { id: 'upload',    label: 'Upload resume' },
-    { id: 'analyzing', label: 'Analyzing' },
+    { id: 'mode',      label: t.stepChooseMode },
+    { id: 'upload',    label: t.stepUploadResume },
+    { id: 'analyzing', label: t.stepAnalyzing },
   ]
   const idx = steps.findIndex(s => s.id === step)
   return (
@@ -60,16 +62,17 @@ function UploadZone({
   onFile: (f: File) => void
   onSample: () => void
 }) {
+  const { t } = useLang()
   const [drag, setDrag] = useState(false)
   const [error, setError] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
   const handleFile = useCallback((f: File) => {
-    if (f.type !== 'application/pdf') { setError(EMPTY_STATES.error); return }
-    if (f.size > 10 * 1024 * 1024)   { setError(EMPTY_STATES.error); return }
+    if (f.type !== 'application/pdf') { setError(t.emptyStates.error); return }
+    if (f.size > 10 * 1024 * 1024)   { setError(t.emptyStates.error); return }
     setError('')
     onFile(f)
-  }, [onFile])
+  }, [onFile, t])
 
   return (
     <div>
@@ -97,7 +100,7 @@ function UploadZone({
             </div>
             <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 18 }}>{file.name}</div>
             <div style={{ fontSize: 13.5, color: 'var(--ink-mute)', marginTop: 6 }}>
-              {(file.size / 1024).toFixed(0)} KB · Click to replace
+              {(file.size / 1024).toFixed(0)} KB · {t.clickToReplace}
             </div>
           </div>
         ) : (
@@ -106,10 +109,10 @@ function UploadZone({
               <Icon name="upload" size={32} />
             </div>
             <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 20 }}>
-              {drag ? EMPTY_STATES.dragHint : 'Drop your PDF here'}
+              {drag ? t.emptyStates.dragHint : t.dropYourPdf}
             </div>
             <div style={{ fontSize: 14, color: 'var(--ink-mute)', marginTop: 8 }}>
-              or click to browse · PDF only · max 10 MB
+              {t.orClickToBrowse}
             </div>
           </div>
         )}
@@ -123,7 +126,7 @@ function UploadZone({
 
       <div style={{ marginTop: 18, display: 'flex', alignItems: 'center', gap: 14 }}>
         <div style={{ flex: 1, height: 1, background: 'var(--line)' }} />
-        <span style={{ fontSize: 13, color: 'var(--ink-faint)' }}>or</span>
+        <span style={{ fontSize: 13, color: 'var(--ink-faint)' }}>{t.or}</span>
         <div style={{ flex: 1, height: 1, background: 'var(--line)' }} />
       </div>
 
@@ -133,7 +136,7 @@ function UploadZone({
         onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--ink)' }}
         onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--line-2)'; e.currentTarget.style.color = 'var(--ink-soft)' }}
       >
-        <Icon name="spark" size={16} /> Use sample resume
+        <Icon name="spark" size={16} /> {t.useSampleResume}
       </button>
     </div>
   )
@@ -143,7 +146,6 @@ function UploadZone({
 function FauxResume() {
   return (
     <div style={{ background: '#fff', borderRadius: 'var(--r-md)', padding: '28px 24px', position: 'relative', overflow: 'hidden', minHeight: 380, boxShadow: 'var(--shadow-2)' }}>
-      {/* scan beam */}
       <div style={{ position: 'absolute', left: 0, right: 0, height: 3, background: 'linear-gradient(90deg, transparent, var(--accent), transparent)', animation: 'scanmove 2s linear infinite', opacity: 0.85, zIndex: 2 }} />
       <div style={{ color: '#111', marginBottom: 12 }}>
         <div style={{ fontSize: 15, fontWeight: 700 }}>{SAMPLE_RESUME.name}</div>
@@ -175,18 +177,18 @@ interface WorkspaceProps {
 }
 
 export default function Workspace({ mode, setMode, step, setStep, file, setFile, onAnalyze }: WorkspaceProps) {
+  const { t } = useLang()
   const [lineIdx, setLineIdx] = useState(0)
   const [analyzeError, setAnalyzeError] = useState('')
   const usingSample = useRef(false)
 
-  // Rotate loading lines while analyzing
   useEffect(() => {
     if (step !== 'analyzing') return
-    const id = setInterval(() => setLineIdx(v => (v + 1) % LOADING_LINES[mode].length), 1800)
+    const lines = t.loadingLines[mode]
+    const id = setInterval(() => setLineIdx(v => (v + 1) % lines.length), 1800)
     return () => clearInterval(id)
-  }, [step, mode])
+  }, [step, mode, t])
 
-  // Fire API call when analyzing step begins
   useEffect(() => {
     if (step !== 'analyzing') return
     const run = async () => {
@@ -206,14 +208,17 @@ export default function Workspace({ mode, setMode, step, setStep, file, setFile,
         onAnalyze(result)
       } catch (err) {
         console.error(err)
-        setAnalyzeError('API unavailable — showing sample analysis.')
+        setAnalyzeError(t.apiError)
         const { RESULTS } = await import('@/lib/data')
         onAnalyze(RESULTS[mode])
       }
     }
-    const t = setTimeout(run, 2400)   // let the animation play a beat first
-    return () => clearTimeout(t)
+    const timer = setTimeout(run, 2400)
+    return () => clearTimeout(timer)
   }, [step]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const tm = t.modes[mode]
+  const analysisSteps = [t.parseStructure, t.scanKeywords, t.scoreSections, t.generateVerdict]
 
   return (
     <div style={{ maxWidth: 860, margin: '0 auto', padding: 'clamp(32px,5vw,64px) clamp(20px,5vw,60px)' }}>
@@ -223,8 +228,8 @@ export default function Workspace({ mode, setMode, step, setStep, file, setFile,
       {step === 'mode' && (
         <div style={{ animation: 'fadeUp .5s both' }}>
           <div style={{ marginBottom: 28 }}>
-            <h2 style={{ fontSize: 'clamp(26px,4vw,38px)' }}>Choose your mode</h2>
-            <p style={{ fontSize: 16, color: 'var(--ink-mute)', marginTop: 8 }}>Each mode reads your resume with a different agenda.</p>
+            <h2 style={{ fontSize: 'clamp(26px,4vw,38px)' }}>{t.chooseYourMode}</h2>
+            <p style={{ fontSize: 16, color: 'var(--ink-mute)', marginTop: 8 }}>{t.chooseYourModeDesc}</p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16 }} className="modes-grid">
             {MODE_ORDER.map(id => (
@@ -233,7 +238,7 @@ export default function Workspace({ mode, setMode, step, setStep, file, setFile,
           </div>
           <div style={{ marginTop: 32, display: 'flex', justifyContent: 'flex-end' }}>
             <Button size="lg" iconRight="arrow" onClick={() => setStep('upload')}>
-              Continue with {MODES[mode].glyph} {MODES[mode].name}
+              {t.continueWith} {MODES[mode].glyph} {tm.name}
             </Button>
           </div>
         </div>
@@ -243,12 +248,12 @@ export default function Workspace({ mode, setMode, step, setStep, file, setFile,
       {step === 'upload' && (
         <div style={{ animation: 'fadeUp .5s both' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 28 }}>
-            <Button variant="quiet" size="sm" icon="back" onClick={() => setStep('mode')}>Back</Button>
-            <Pill tone="accent">{MODES[mode].glyph} {MODES[mode].name}</Pill>
+            <Button variant="quiet" size="sm" icon="back" onClick={() => setStep('mode')}>{t.back}</Button>
+            <Pill tone="accent">{MODES[mode].glyph} {tm.name}</Pill>
           </div>
           <div style={{ marginBottom: 28 }}>
-            <h2 style={{ fontSize: 'clamp(26px,4vw,38px)' }}>Upload your resume</h2>
-            <p style={{ fontSize: 16, color: 'var(--ink-mute)', marginTop: 8 }}>PDF only · max 10 MB.</p>
+            <h2 style={{ fontSize: 'clamp(26px,4vw,38px)' }}>{t.uploadYourResume}</h2>
+            <p style={{ fontSize: 16, color: 'var(--ink-mute)', marginTop: 8 }}>{t.uploadDesc}</p>
           </div>
           <UploadZone
             file={file}
@@ -259,7 +264,7 @@ export default function Workspace({ mode, setMode, step, setStep, file, setFile,
             <div style={{ marginTop: 24, display: 'flex', justifyContent: 'flex-end' }}>
               <Button size="lg" icon="spark"
                 onClick={() => { usingSample.current = false; setStep('analyzing') }}>
-                {MODES[mode].cta} →
+                {tm.cta} →
               </Button>
             </div>
           )}
@@ -270,19 +275,18 @@ export default function Workspace({ mode, setMode, step, setStep, file, setFile,
       {step === 'analyzing' && (
         <div style={{ animation: 'fadeUp .5s both' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 32 }}>
-            <Pill tone="accent">{MODES[mode].glyph} {MODES[mode].name}</Pill>
+            <Pill tone="accent">{MODES[mode].glyph} {tm.name}</Pill>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40, alignItems: 'center' }} className="hero-grid">
             <FauxResume />
             <div>
-              {/* spinner */}
               <div style={{ width: 52, height: 52, borderRadius: '50%', border: '3px solid var(--surface-3)', borderTopColor: 'var(--accent)', animation: 'spin 1s linear infinite', marginBottom: 28 }} />
-              <h2 style={{ fontSize: 'clamp(22px,3vw,32px)', lineHeight: 1.2 }}>Analyzing your resume…</h2>
+              <h2 style={{ fontSize: 'clamp(22px,3vw,32px)', lineHeight: 1.2 }}>{t.analyzingH2}</h2>
               <p key={lineIdx} style={{ fontSize: 16, color: 'var(--accent)', marginTop: 14, fontFamily: 'var(--font-mono)', animation: 'fadeUp .4s both' }}>
-                {LOADING_LINES[mode][lineIdx]}
+                {t.loadingLines[mode][lineIdx]}
               </p>
               <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {['Parsing structure','Scanning keywords','Scoring sections','Generating verdict'].map((label) => (
+                {analysisSteps.map((label) => (
                   <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <div style={{ width: 18, height: 18, borderRadius: '50%', background: 'color-mix(in srgb, var(--accent) 20%, transparent)', border: '1.5px solid var(--accent)', display: 'grid', placeItems: 'center', color: 'var(--accent)' }}>
                       <Icon name="check" size={10} stroke={2.5} />

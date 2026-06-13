@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { MODES, MODE_ORDER, RESULTS } from '@/lib/data'
 import type { ModeId } from '@/lib/types'
+import { useLang } from '@/lib/LangContext'
 import Button from './ui/Button'
 import Icon from './ui/Icon'
 import Logo from './ui/Logo'
@@ -17,16 +18,43 @@ export const cardStyle = (extra: React.CSSProperties = {}): React.CSSProperties 
   ...extra,
 })
 
+/* ---- LangToggle ---- */
+function LangToggle() {
+  const { lang, setLang } = useLang()
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 2, background: 'var(--surface-2)', border: '1px solid var(--line-2)', borderRadius: 8, padding: 3 }}>
+      {(['en', 'fa'] as const).map(l => (
+        <button
+          key={l}
+          onClick={() => setLang(l)}
+          style={{
+            background: lang === l ? 'var(--accent)' : 'none',
+            color: lang === l ? 'var(--accent-ink)' : 'var(--ink-mute)',
+            border: 'none', borderRadius: 6,
+            fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700,
+            padding: '4px 9px', cursor: 'pointer', transition: 'all .2s',
+            letterSpacing: '.04em',
+          }}
+        >
+          {l.toUpperCase()}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 /* ---- Header ---- */
 function Header({ onStart }: { onStart: () => void }) {
+  const { t } = useLang()
   const scrollTo = (id: string) =>
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
 
   const links = [
-    { id: 'how-it-works', label: 'How it works', onClick: () => scrollTo('how-it-works') },
-    { id: 'modes',        label: 'Modes',        onClick: () => scrollTo('modes') },
-    { id: 'app',          label: 'The App',      onClick: onStart },
+    { id: 'how-it-works', label: t.navHowItWorks, onClick: () => scrollTo('how-it-works') },
+    { id: 'modes',        label: t.navModes,       onClick: () => scrollTo('modes') },
+    { id: 'app',          label: t.navTheApp,      onClick: onStart },
   ]
+
   return (
     <header style={{
       position: 'sticky', top: 0, zIndex: 40,
@@ -47,13 +75,17 @@ function Header({ onStart }: { onStart: () => void }) {
           </button>
         ))}
       </nav>
-      <Button size="sm" icon="upload" onClick={onStart}>Upload your resume</Button>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <LangToggle />
+        <Button size="sm" icon="upload" onClick={onStart}>{t.navUploadBtn}</Button>
+      </div>
     </header>
   )
 }
 
 /* ---- StatTicker ---- */
 function StatTicker() {
+  const { t } = useLang()
   const [n, setN] = useState(10428)
   useEffect(() => {
     const id = setInterval(() => setN(v => v + Math.floor(Math.random() * 3)), 2600)
@@ -78,7 +110,7 @@ function StatTicker() {
             {n.toLocaleString()}+
           </div>
           <div className="mono" style={{ fontSize: 11, color: 'var(--ink-mute)', letterSpacing: '.06em' }}>
-            resumes roasted
+            {t.statLabel}
           </div>
         </div>
       </div>
@@ -87,7 +119,7 @@ function StatTicker() {
         <span style={{ color: 'var(--accent)', display: 'flex', gap: 2 }}>
           {[0,1,2,3,4].map(i => <Icon key={i} name="star" size={15} />)}
         </span>
-        <span style={{ fontSize: 14, color: 'var(--ink-soft)' }}>4.9 · loved &amp; feared</span>
+        <span style={{ fontSize: 14, color: 'var(--ink-soft)' }}>{t.statRating}</span>
       </div>
     </div>
   )
@@ -102,6 +134,8 @@ export function ModeSelectorCard({
   onPick: () => void
   compact?: boolean
 }) {
+  const { t } = useLang()
+  const tm = t.modes[mode.id]
   const [hover, setHover] = useState(false)
   const on = active || hover
   return (
@@ -138,14 +172,14 @@ export function ModeSelectorCard({
       </div>
       <div style={{ position: 'relative', marginTop: 14 }}>
         <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: compact ? 18 : 21 }}>
-          {mode.name}
+          {tm.name}
         </div>
         <div className="mono" style={{ fontSize: 11.5, letterSpacing: '.04em', color: mode.accent, marginTop: 4 }}>
-          {mode.tagline}
+          {tm.tagline}
         </div>
         {!compact && (
           <p style={{ fontSize: 14.5, color: 'var(--ink-mute)', marginTop: 10, lineHeight: 1.5 }}>
-            {mode.blurb}
+            {tm.blurb}
           </p>
         )}
       </div>
@@ -161,7 +195,9 @@ interface LandingProps {
 }
 
 export default function Landing({ mode, setMode, onStart }: LandingProps) {
+  const { t } = useLang()
   const m = MODES[mode]
+  const tm = t.modes[mode]
 
   return (
     <div style={{ animation: 'fadeIn .5s both' }}>
@@ -174,21 +210,20 @@ export default function Landing({ mode, setMode, onStart }: LandingProps) {
           {/* Left */}
           <div style={{ animation: 'fadeUp .6s both' }}>
             <Pill tone="accent" style={{ marginBottom: 22 }}>
-              <Icon name="spark" size={13} /> AI resume feedback · in 12 seconds
+              <Icon name="spark" size={13} /> {t.heroPill}
             </Pill>
             <h1 style={{ fontSize: 'clamp(40px, 6vw, 72px)', fontWeight: 700, lineHeight: 0.98 }}>
-              Your resume<br />called. It&apos;s<br />
+              {t.heroH1a}<br />{t.heroH1b}<br />
               <span style={{ background: 'linear-gradient(120deg, var(--accent), var(--accent-2))', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>
-                embarrassed.
+                {t.heroH1c}
               </span>
             </h1>
             <p style={{ fontSize: 'clamp(17px,2vw,20px)', color: 'var(--ink-soft)', maxWidth: 520, marginTop: 22, lineHeight: 1.55 }}>
-              Upload your PDF, pick your poison, and get instant feedback that&apos;s actually
-              useful — whether you want it brutal, professional, or built for the global remote market.
+              {t.heroBody}
             </p>
             <div style={{ display: 'flex', gap: 14, marginTop: 30, flexWrap: 'wrap' }}>
-              <Button size="lg" icon="upload" onClick={onStart}>Upload your resume</Button>
-              <Button size="lg" variant="ghost" iconRight="arrow" onClick={onStart}>See a sample {m.glyph}</Button>
+              <Button size="lg" icon="upload" onClick={onStart}>{t.heroCta1}</Button>
+              <Button size="lg" variant="ghost" iconRight="arrow" onClick={onStart}>{t.heroCta2} {m.glyph}</Button>
             </div>
             <div style={{ marginTop: 34 }}><StatTicker /></div>
           </div>
@@ -198,7 +233,7 @@ export default function Landing({ mode, setMode, onStart }: LandingProps) {
             <div style={cardStyle({ padding: 24, position: 'relative', overflow: 'hidden' })}>
               <div style={{ position: 'absolute', top: -40, right: -40, width: 180, height: 180, borderRadius: '50%', background: 'radial-gradient(circle, var(--glow), transparent 70%)', pointerEvents: 'none' }} />
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
-                <span className="eyebrow">Live preview · {m.name}</span>
+                <span className="eyebrow">{t.livePreview} {tm.name}</span>
                 <span style={{ display: 'flex', gap: 6 }}>
                   {['#ff5f57','#febc2e','#28c840'].map(c => <span key={c} style={{ width: 11, height: 11, borderRadius: '50%', background: c }} />)}
                 </span>
@@ -211,7 +246,7 @@ export default function Landing({ mode, setMode, onStart }: LandingProps) {
                     &quot;{RESULTS[mode].verdict}&quot;
                   </p>
                   <p style={{ fontSize: 13.5, color: 'var(--ink-mute)', marginTop: 10 }}>
-                    {RESULTS[mode].sections.length} sections analyzed · {RESULTS[mode].fixes.length} fixes
+                    {RESULTS[mode].sections.length} {t.sectionsAnalyzed} · {RESULTS[mode].fixes.length} {t.fixes}
                   </p>
                 </div>
               </div>
@@ -219,7 +254,7 @@ export default function Landing({ mode, setMode, onStart }: LandingProps) {
 
             {/* Mode selector */}
             <div id="modes" style={{ marginTop: 14, scrollMarginTop: 80 }}>
-              <div className="eyebrow" style={{ marginBottom: 10 }}>Pick a mode — watch the room change</div>
+              <div className="eyebrow" style={{ marginBottom: 10 }}>{t.pickMode}</div>
               <div style={{ display: 'flex', gap: 10 }}>
                 {MODE_ORDER.map(id => (
                   <ModeSelectorCard key={id} compact mode={MODES[id]} active={mode === id} onPick={() => setMode(id)} />
@@ -233,16 +268,12 @@ export default function Landing({ mode, setMode, onStart }: LandingProps) {
       {/* HOW IT WORKS */}
       <section id="how-it-works" style={{ maxWidth: 1240, margin: '0 auto', padding: '40px clamp(20px,5vw,60px) 90px', scrollMarginTop: 80 }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 28 }}>
-          <h2 style={{ fontSize: 'clamp(26px,3vw,38px)' }}>Three steps. Twelve seconds. Zero excuses.</h2>
-          <span className="eyebrow">How it works</span>
+          <h2 style={{ fontSize: 'clamp(26px,3vw,38px)' }}>{t.howH2}</h2>
+          <span className="eyebrow">{t.howEyebrow}</span>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }} className="steps-grid">
-          {[
-            { n: '01', t: 'Choose your mode',    d: 'Roast, Coach, or International. Each one reads your resume with a different agenda.' },
-            { n: '02', t: 'Drop your PDF',        d: 'Drag it into the zone. We scan structure, keywords, metrics, and ATS-readiness.' },
-            { n: '03', t: 'Get your report card', d: 'A scored breakdown, the wins, the fixes, the red flags — and a card worth sharing.' },
-          ].map(s => (
+          {t.steps.map(s => (
             <div key={s.n} style={cardStyle({ padding: 26 })}>
               <div className="mono" style={{ fontSize: 13, color: 'var(--accent)', letterSpacing: '.1em' }}>{s.n}</div>
               <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 21, marginTop: 14 }}>{s.t}</div>
@@ -255,13 +286,13 @@ export default function Landing({ mode, setMode, onStart }: LandingProps) {
         <div style={cardStyle({ marginTop: 48, padding: 'clamp(28px,4vw,52px)', textAlign: 'center', position: 'relative', overflow: 'hidden', background: 'linear-gradient(140deg, var(--surface-2), var(--surface))' })}>
           <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(600px 200px at 50% 0%, var(--glow), transparent 70%)', pointerEvents: 'none' }} />
           <h2 style={{ position: 'relative', fontSize: 'clamp(28px,4vw,46px)', maxWidth: 720, margin: '0 auto' }}>
-            Be honest. You already know it needs work.
+            {t.ctaH2}
           </h2>
           <p style={{ position: 'relative', color: 'var(--ink-soft)', fontSize: 18, marginTop: 14 }}>
-            Find out exactly what — before a recruiter does.
+            {t.ctaBody}
           </p>
           <div style={{ position: 'relative', marginTop: 26, display: 'flex', justifyContent: 'center' }}>
-            <Button size="lg" icon="upload" onClick={onStart}>Upload your resume</Button>
+            <Button size="lg" icon="upload" onClick={onStart}>{t.ctaBtn}</Button>
           </div>
         </div>
       </section>
@@ -269,7 +300,7 @@ export default function Landing({ mode, setMode, onStart }: LandingProps) {
       <footer style={{ borderTop: '1px solid var(--line)', padding: '26px clamp(20px,5vw,60px)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14 }}>
         <Logo size={24} />
         <span className="mono" style={{ fontSize: 12, color: 'var(--ink-faint)' }}>
-          © 2026 Resume Roaster · No resumes were truly harmed.
+          {t.footer}
         </span>
       </footer>
     </div>

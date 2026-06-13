@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useLang } from '@/lib/LangContext'
 
 function useCountUp(target: number, run: boolean, dur = 1200) {
   const [v, setV] = useState(0)
@@ -29,12 +30,14 @@ interface ScoreRingProps {
   grade?: string
 }
 
-export default function ScoreRing({ score, run = true, size = 180, label = 'ATS SCORE', grade }: ScoreRingProps) {
+export default function ScoreRing({ score, run = true, size = 180, label, grade }: ScoreRingProps) {
+  const { t } = useLang()
   const v    = useCountUp(score, run, 1300)
   const r    = (size - 22) / 2
   const c    = 2 * Math.PI * r
   const off  = c * (1 - v / 100)
-  const band = score >= 75 ? 'Hire-ready' : score >= 60 ? 'Getting there' : 'Needs work'
+  const band = score >= 75 ? t.hireReady : score >= 60 ? t.gettingThere : t.needsWork
+  const displayLabel = label ?? t.atsScore
   const gid  = `g-${size}`
 
   return (
@@ -69,7 +72,7 @@ export default function ScoreRing({ score, run = true, size = 180, label = 'ATS 
           {grade && <span style={{ fontSize: size * 0.13, color: 'var(--accent)', marginLeft: 4 }}>{grade}</span>}
         </div>
         <div className="mono" style={{ fontSize: 10, letterSpacing: '0.16em', color: 'var(--ink-mute)', marginTop: 6 }}>
-          {label}
+          {displayLabel}
         </div>
         <div style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 600, marginTop: 2 }}>{band}</div>
       </div>

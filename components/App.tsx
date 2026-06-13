@@ -2,19 +2,21 @@
 
 import { useState, useEffect } from 'react'
 import type { ModeId, Step, View, AnalysisResult } from '@/lib/types'
+import { LangProvider } from '@/lib/LangContext'
 import Landing from './Landing'
 import Workspace from './Workspace'
 import Results from './Results'
 import Button from './ui/Button'
+import { useLang } from '@/lib/LangContext'
 
-export default function App() {
-  const [view, setView]   = useState<View>('landing')
-  const [mode, setMode]   = useState<ModeId>('roast')
-  const [step, setStep]   = useState<Step>('mode')
-  const [file, setFile]   = useState<File | null>(null)
+function AppInner() {
+  const { t } = useLang()
+  const [view, setView]     = useState<View>('landing')
+  const [mode, setMode]     = useState<ModeId>('roast')
+  const [step, setStep]     = useState<Step>('mode')
+  const [file, setFile]     = useState<File | null>(null)
   const [result, setResult] = useState<AnalysisResult | null>(null)
 
-  // Theme shift: update data-theme on <html> whenever mode changes
   useEffect(() => {
     document.documentElement.dataset.theme = mode
   }, [mode])
@@ -52,7 +54,7 @@ export default function App() {
               variant="quiet" size="sm" icon="back"
               onClick={() => { setView('landing'); window.scrollTo({ top: 0 }) }}
             >
-              Home
+              {t.home}
             </Button>
           </div>
           <Workspace
@@ -72,5 +74,13 @@ export default function App() {
         />
       )}
     </>
+  )
+}
+
+export default function App() {
+  return (
+    <LangProvider>
+      <AppInner />
+    </LangProvider>
   )
 }

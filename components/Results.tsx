@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { MODES, MODE_ORDER, RESULTS as CANNED } from '@/lib/data'
 import type { ModeId, AnalysisResult } from '@/lib/types'
+import { useLang } from '@/lib/LangContext'
 import Button from './ui/Button'
 import Icon from './ui/Icon'
 import Logo from './ui/Logo'
@@ -50,17 +51,14 @@ function drawShareCard(canvas: HTMLCanvasElement, mode: ModeId, r: AnalysisResul
   const M = MODES[mode]
   const PAD = 84
 
-  // background gradient
   const g = ctx.createLinearGradient(0, 0, W, H)
   g.addColorStop(0, t.bg1); g.addColorStop(1, t.bg2)
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
 
-  // accent glow top-right
   const rg = ctx.createRadialGradient(W * 0.85, 120, 40, W * 0.85, 120, 620)
   rg.addColorStop(0, t.a + '40'); rg.addColorStop(1, 'transparent')
   ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H)
 
-  // header wordmark
   ctx.textBaseline = 'middle'
   ctx.font = '52px "Space Grotesk", sans-serif'
   ctx.fillText('🔥', PAD, 110)
@@ -68,7 +66,6 @@ function drawShareCard(canvas: HTMLCanvasElement, mode: ModeId, r: AnalysisResul
   ctx.font = '700 38px "Space Grotesk", sans-serif'
   ctx.fillText('Resume Roaster', PAD + 64, 112)
 
-  // mode badge
   ctx.font = '700 24px "Space Mono", monospace'
   const badge = `${M.glyph} ${M.name.toUpperCase()}`
   const bw = ctx.measureText(badge).width + 44
@@ -80,7 +77,6 @@ function drawShareCard(canvas: HTMLCanvasElement, mode: ModeId, r: AnalysisResul
   ctx.fillText(badge, W - PAD - bw / 2, 115)
   ctx.textAlign = 'left'
 
-  // score ring
   const cx = PAD + 150, cy = 420, rad = 130
   ctx.lineWidth = 26; ctx.lineCap = 'round'
   ctx.strokeStyle = 'rgba(255,255,255,0.08)'
@@ -97,14 +93,12 @@ function drawShareCard(canvas: HTMLCanvasElement, mode: ModeId, r: AnalysisResul
   ctx.fillText(r.grade + ' · ATS', cx, cy + 56)
   ctx.textAlign = 'left'
 
-  // verdict
   const vx = cx + rad + 70, vw = W - PAD - vx
   ctx.fillStyle = '#9A9AA8'; ctx.font = '700 20px "Space Mono", monospace'
   ctx.fillText('THE VERDICT', vx, cy - 110)
   ctx.fillStyle = '#F5F5F7'; ctx.font = '600 42px "Space Grotesk", sans-serif'
   wrapText(ctx, '"' + r.verdict + '"', vx, cy - 60, vw, 50)
 
-  // section mini-bars
   let y = 660
   ctx.font = '700 22px "Space Mono", monospace'; ctx.fillStyle = '#9A9AA8'
   ctx.fillText('THE BREAKDOWN', PAD, y)
@@ -124,7 +118,6 @@ function drawShareCard(canvas: HTMLCanvasElement, mode: ModeId, r: AnalysisResul
     y += 74
   })
 
-  // footer
   ctx.fillStyle = '#56565F'; ctx.font = '400 24px "Space Mono", monospace'
   ctx.fillText('resumeroaster.app', PAD, H - 60)
   ctx.textAlign = 'right'; ctx.fillStyle = t.a
@@ -134,6 +127,7 @@ function drawShareCard(canvas: HTMLCanvasElement, mode: ModeId, r: AnalysisResul
 
 /* ---- ShareModal ---- */
 function ShareModal({ mode, result, onClose }: { mode: ModeId; result: AnalysisResult; onClose: () => void }) {
+  const { t } = useLang()
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const [url, setUrl] = useState('')
 
@@ -142,9 +136,9 @@ function ShareModal({ mode, result, onClose }: { mode: ModeId; result: AnalysisR
     const render = () => { drawShareCard(c, mode, result); setUrl(c.toDataURL('image/png')) }
     render()
     if (document.fonts?.ready) document.fonts.ready.then(render)
-    const t = setTimeout(render, 350)
+    const timer = setTimeout(render, 350)
     canvasRef.current = c
-    return () => clearTimeout(t)
+    return () => clearTimeout(timer)
   }, [mode, result])
 
   const download = () => {
@@ -167,7 +161,7 @@ function ShareModal({ mode, result, onClose }: { mode: ModeId; result: AnalysisR
     <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 80, display: 'grid', placeItems: 'center', background: 'rgba(5,5,8,0.78)', backdropFilter: 'blur(8px)', animation: 'fadeIn .25s both', padding: 20 }}>
       <div onClick={e => e.stopPropagation()} style={cardStyle({ padding: 26, maxWidth: 460, width: '100%', animation: 'pop .3s both' })}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
-          <h3 style={{ fontSize: 21 }}>Share your roast</h3>
+          <h3 style={{ fontSize: 21 }}>{t.shareModalTitle}</h3>
           <button onClick={onClose} style={{ width: 34, height: 34, borderRadius: '50%', background: 'var(--surface-3)', border: '1px solid var(--line-2)', color: 'var(--ink-mute)', display: 'grid', placeItems: 'center' }}>
             <Icon name="x" size={16} />
           </button>
@@ -176,14 +170,14 @@ function ShareModal({ mode, result, onClose }: { mode: ModeId; result: AnalysisR
           {url
             // eslint-disable-next-line @next/next/no-img-element
             ? <img src={url} alt="Share card" style={{ width: '100%', display: 'block' }} />
-            : <div style={{ display: 'grid', placeItems: 'center', height: '100%', color: 'var(--ink-mute)' }}>Rendering…</div>}
+            : <div style={{ display: 'grid', placeItems: 'center', height: '100%', color: 'var(--ink-mute)' }}>{t.rendering}</div>}
         </div>
         <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
-          <Button full icon="download" onClick={download}>Download PNG</Button>
-          <Button variant="ghost" icon="share" onClick={share}>Share</Button>
+          <Button full icon="download" onClick={download}>{t.downloadPng}</Button>
+          <Button variant="ghost" icon="share" onClick={share}>{t.share}</Button>
         </div>
         <p className="mono" style={{ fontSize: 11.5, color: 'var(--ink-faint)', textAlign: 'center', marginTop: 14 }}>
-          1080×1080 · perfect for the group chat you&apos;ll regret posting in
+          {t.shareFooter}
         </p>
       </div>
     </div>
@@ -240,26 +234,28 @@ interface ResultsProps {
 }
 
 export default function Results({ mode, setMode, file, result, onReanalyze }: ResultsProps) {
+  const { t } = useLang()
   const m = MODES[mode]
+  const tm = t.modes[mode]
   const [typed, setTyped] = useState(false)
   const [share, setShare] = useState(false)
 
-  // Re-run typewriter when mode changes
   useEffect(() => { setTyped(false) }, [mode])
+
+  const scoreDesc = result.score >= 75 ? t.scoreHigh : result.score >= 60 ? t.scoreMid : t.scoreLow
 
   return (
     <div style={{ animation: 'fadeIn .4s both', minHeight: '100vh' }}>
       {/* Sticky top bar */}
       <div style={{ position: 'sticky', top: 0, zIndex: 40, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px clamp(20px,5vw,60px)', background: 'color-mix(in srgb, var(--bg) 72%, transparent)', backdropFilter: 'blur(16px)', borderBottom: '1px solid var(--line)' }}>
-        <Button variant="quiet" size="sm" icon="back" onClick={() => onReanalyze('upload')}>New analysis</Button>
+        <Button variant="quiet" size="sm" icon="back" onClick={() => onReanalyze('upload')}>{t.newAnalysis}</Button>
         <Logo size={24} />
-        <Button size="sm" icon="share" onClick={() => setShare(true)}>Share your roast</Button>
+        <Button size="sm" icon="share" onClick={() => setShare(true)}>{t.shareYourRoast}</Button>
       </div>
 
       <div style={{ maxWidth: 1180, margin: '0 auto', padding: 'clamp(28px,4vw,52px) clamp(20px,5vw,60px) 90px' }}>
-        {/* Verdict header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 18 }}>
-          <Pill tone="accent">{m.glyph} {m.name}</Pill>
+          <Pill tone="accent">{m.glyph} {tm.name}</Pill>
           {file && (
             <span className="mono" style={{ fontSize: 12.5, color: 'var(--ink-faint)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               <Icon name="doc" size={12} style={{ verticalAlign: '-2px', marginRight: 6 }} />{file.name}
@@ -273,64 +269,58 @@ export default function Results({ mode, setMode, file, result, onReanalyze }: Re
           {result.summary}
         </p>
 
-        {/* Main two-column grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.55fr) minmax(0,1fr)', gap: 22, marginTop: 40, alignItems: 'start' }} className="results-grid">
 
-          {/* Left: breakdown + lists */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
             <div style={cardStyle({ padding: 26 })}>
               <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 4 }}>
-                <h3 style={{ fontSize: 19 }}>The breakdown</h3>
-                <span className="eyebrow">{result.sections.length} sections</span>
+                <h3 style={{ fontSize: 19 }}>{t.theBreakdown}</h3>
+                <span className="eyebrow">{result.sections.length} {t.sectionsSuffix}</span>
               </div>
               {result.sections.map((s, i) => <SectionRow key={s.label} s={s} i={i} run />)}
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 22 }} className="lists-grid">
-              <ListBlock icon="star" title="What's working" items={result.wins}  tone="win"  run />
-              <ListBlock icon="flag" title="Red flags"      items={result.flags} tone="flag" run />
+              <ListBlock icon="star" title={t.whatsWorking} items={result.wins}  tone="win"  run />
+              <ListBlock icon="flag" title={t.redFlags}     items={result.flags} tone="flag" run />
             </div>
-            <ListBlock icon="bolt" title="Fix these first" items={result.fixes} tone="fix" run />
+            <ListBlock icon="bolt" title={t.fixTheseFirst} items={result.fixes} tone="fix" run />
           </div>
 
-          {/* Right: sticky score ring + mode switcher */}
           <div style={{ position: 'sticky', top: 90, display: 'flex', flexDirection: 'column', gap: 18 }} className="results-aside">
             <div style={cardStyle({ padding: 28, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', position: 'relative', overflow: 'hidden' })}>
               <div style={{ position: 'absolute', top: -50, left: '50%', transform: 'translateX(-50%)', width: 240, height: 160, background: 'radial-gradient(circle, var(--glow), transparent 70%)', pointerEvents: 'none' }} />
-              <span className="eyebrow" style={{ position: 'relative' }}>Overall ATS score</span>
+              <span className="eyebrow" style={{ position: 'relative' }}>{t.overallAtsScore}</span>
               <div style={{ position: 'relative', margin: '18px 0 8px' }}>
                 <ScoreRing score={result.score} size={200} grade={result.grade} />
               </div>
               <p style={{ position: 'relative', fontSize: 14.5, color: 'var(--ink-mute)', maxWidth: 240 }}>
-                {result.score >= 75
-                  ? 'Recruiter-ready. Tighten the edges and send it.'
-                  : result.score >= 60
-                  ? 'Above the fold, below your potential. The fixes below close the gap.'
-                  : "It's not personal. It's fixable. Start with the three fixes below."}
+                {scoreDesc}
               </p>
               <Button full icon="share" onClick={() => setShare(true)} style={{ position: 'relative', marginTop: 22 }}>
-                Share your roast
+                {t.shareYourRoast}
               </Button>
             </div>
 
             {/* Mode switcher */}
             <div style={cardStyle({ padding: 22 })}>
-              <h3 style={{ fontSize: 16, marginBottom: 4 }}>Same resume, different lens</h3>
-              <p style={{ fontSize: 13.5, color: 'var(--ink-mute)', marginBottom: 16 }}>Re-run instantly in another mode.</p>
+              <h3 style={{ fontSize: 16, marginBottom: 4 }}>{t.sameLens}</h3>
+              <p style={{ fontSize: 13.5, color: 'var(--ink-mute)', marginBottom: 16 }}>{t.reRunInstantly}</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {MODE_ORDER.map(id => {
                   const mm = MODES[id]; const active = id === mode
                   const modeResult = CANNED[id]
+                  const mml = t.modes[id]
                   return (
                     <button key={id}
                       onClick={() => { if (!active) { setMode(id); window.scrollTo({ top: 0 }) } }}
                       style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 12, textAlign: 'left', background: active ? `color-mix(in srgb, ${mm.accent} 14%, var(--surface-2))` : 'var(--surface-2)', border: `1px solid ${active ? mm.accent : 'var(--line)'}`, cursor: active ? 'default' : 'pointer', transition: 'all .2s' }}>
                       <span style={{ fontSize: 22 }}>{mm.glyph}</span>
                       <span style={{ flex: 1 }}>
-                        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 15, display: 'block' }}>{mm.name}</span>
-                        <span className="mono" style={{ fontSize: 11, color: 'var(--ink-mute)' }}>Score {modeResult.score} · {modeResult.grade}</span>
+                        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 15, display: 'block' }}>{mml.name}</span>
+                        <span className="mono" style={{ fontSize: 11, color: 'var(--ink-mute)' }}>{t.scoreLabel} {modeResult.score} · {modeResult.grade}</span>
                       </span>
                       {active
-                        ? <Pill tone="accent" style={{ padding: '4px 9px', fontSize: 10 }}>Viewing</Pill>
+                        ? <Pill tone="accent" style={{ padding: '4px 9px', fontSize: 10 }}>{t.viewing}</Pill>
                         : <span style={{ color: mm.accent }}><Icon name="refresh" size={17} /></span>}
                     </button>
                   )
