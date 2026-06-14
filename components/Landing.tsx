@@ -55,6 +55,7 @@ function Header({ onStart }: { onStart: () => void }) {
     { id: 'modes',        label: t.navModes,       onClick: () => scrollTo('modes') },
     { id: 'blog',          label: 'Blog',             href: '/blog' },
     { id: 'builder',      label: 'Builder',         href: '/builder' },
+    { id: 'cover-letter', label: t.clTitle,          href: '/cover-letter' },
     { id: 'app',          label: t.navTheApp,      onClick: onStart },
   ]
 
