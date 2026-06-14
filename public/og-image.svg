@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <radialGradient id="glow1" cx="75%" cy="-5%" r="60%">
+      <stop offset="0%" stop-color="#FF4D4D" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#FF4D4D" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="10%" cy="110%" r="55%">
+      <stop offset="0%" stop-color="#FF4D4D" stop-opacity="0.07"/>
+      <stop offset="100%" stop-color="#FF4D4D" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FF4D4D"/>
+      <stop offset="100%" stop-color="#FF8A3D"/>
+    </linearGradient>
+    <linearGradient id="tagline-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#F5F5F7"/>
+      <stop offset="100%" stop-color="#84848F"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#0E0809"/>
+  <rect width="1200" height="630" fill="url(#glow1)"/>
+  <rect width="1200" height="630" fill="url(#glow2)"/>
+
+  <!-- Subtle grid lines -->
+  <line x1="0" y1="210" x2="1200" y2="210" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+  <line x1="0" y1="420" x2="1200" y2="420" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+  <line x1="400" y1="0" x2="400" y2="630" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+  <line x1="800" y1="0" x2="800" y2="630" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+
+  <!-- Flame emoji / logo mark -->
+  <text x="96" y="290" font-size="96" font-family="system-ui">🔥</text>
+
+  <!-- Brand name -->
+  <text x="96" y="374" font-family="system-ui, -apple-system, sans-serif" font-weight="800" font-size="72" fill="url(#tagline-grad)" letter-spacing="-2">Resume Roaster</text>
+
+  <!-- Accent underline -->
+  <rect x="96" y="390" width="480" height="4" rx="2" fill="url(#accent)"/>
+
+  <!-- Tagline -->
+  <text x="96" y="450" font-family="system-ui, -apple-system, sans-serif" font-weight="400" font-size="28" fill="#84848F" letter-spacing="0.5">AI resume feedback · in 12 seconds · free</text>
+
+  <!-- Feature pills -->
+  <rect x="96" y="490" width="148" height="44" rx="22" fill="rgba(255,77,77,0.12)" stroke="rgba(255,77,77,0.35)" stroke-width="1.5"/>
+  <text x="170" y="518" font-family="monospace, system-ui" font-weight="700" font-size="14" fill="#FF4D4D" text-anchor="middle" letter-spacing="1">ATS SCORE</text>
+
+  <rect x="260" y="490" width="142" height="44" rx="22" fill="rgba(77,159,255,0.12)" stroke="rgba(77,159,255,0.35)" stroke-width="1.5"/>
+  <text x="331" y="518" font-family="monospace, system-ui" font-weight="700" font-size="14" fill="#4D9FFF" text-anchor="middle" letter-spacing="1">RED FLAGS</text>
+
+  <rect x="418" y="490" width="148" height="44" rx="22" fill="rgba(77,204,136,0.12)" stroke="rgba(77,204,136,0.35)" stroke-width="1.5"/>
+  <text x="492" y="518" font-family="monospace, system-ui" font-weight="700" font-size="14" fill="#4DCC88" text-anchor="middle" letter-spacing="1">ACTIONABLE</text>
+
+  <!-- Right side: score card mockup -->
+  <rect x="780" y="120" width="330" height="390" rx="24" fill="rgba(23,16,15,0.9)" stroke="rgba(255,77,77,0.2)" stroke-width="1.5"/>
+  <!-- Score ring suggestion -->
+  <circle cx="945" cy="270" r="90" fill="none" stroke="rgba(255,77,77,0.12)" stroke-width="16"/>
+  <circle cx="945" cy="270" r="90" fill="none" stroke="url(#accent)" stroke-width="16" stroke-dasharray="424" stroke-dashoffset="106" stroke-linecap="round" transform="rotate(-90 945 270)"/>
+  <text x="945" y="258" font-family="system-ui, -apple-system, sans-serif" font-weight="800" font-size="52" fill="#F5F5F7" text-anchor="middle">78</text>
+  <text x="945" y="292" font-family="monospace, system-ui" font-weight="700" font-size="13" fill="#FF4D4D" text-anchor="middle" letter-spacing="2">ATS SCORE</text>
+
+  <!-- Grade badge -->
+  <rect x="895" y="380" width="100" height="44" rx="10" fill="rgba(255,77,77,0.15)" stroke="rgba(255,77,77,0.4)" stroke-width="1.5"/>
+  <text x="945" y="408" font-family="system-ui, -apple-system, sans-serif" font-weight="800" font-size="22" fill="#FF4D4D" text-anchor="middle">B+</text>
+
+  <!-- URL watermark -->
+  <text x="1104" y="612" font-family="monospace, system-ui" font-size="14" fill="rgba(255,255,255,0.15)" text-anchor="end">resume-roaster.vercel.app</text>
+</svg>

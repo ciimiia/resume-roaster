@@ -3,10 +3,43 @@ import './globals.css'
 import { LangProvider } from '@/lib/LangContext'
 import { SessionProvider } from '@/lib/SessionContext'
 
+const SITE_URL = 'https://resume-roaster.vercel.app'
+const OG_IMAGE = `${SITE_URL}/opengraph-image`
+
 export const metadata: Metadata = {
-  title: 'Resume Roaster — AI Resume Feedback',
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: 'Resume Roaster — AI Resume Feedback in 12 Seconds',
+    template: '%s — Resume Roaster',
+  },
   description:
-    'Upload your PDF and get brutal, honest, constructive AI feedback on your resume in 12 seconds.',
+    'Upload your PDF and get brutal, honest, AI-powered resume feedback in 12 seconds. ATS score, red flags, and actionable fixes — free.',
+  keywords: [
+    'AI resume feedback', 'ATS resume checker', 'resume review', 'resume score',
+    'resume roaster', 'free resume checker', 'ATS optimization', 'resume tips',
+    'job search', 'career advice',
+  ],
+  authors: [{ name: 'Resume Roaster' }],
+  creator: 'Resume Roaster',
+  openGraph: {
+    type: 'website',
+    siteName: 'Resume Roaster',
+    title: 'Resume Roaster — AI Resume Feedback in 12 Seconds',
+    description:
+      'Upload your PDF and get brutal, honest, AI-powered resume feedback in 12 seconds. ATS score, red flags, and actionable fixes — free.',
+    url: SITE_URL,
+    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: 'Resume Roaster — AI Resume Feedback' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Resume Roaster — AI Resume Feedback in 12 Seconds',
+    description:
+      'Upload your PDF and get brutal, honest, AI-powered resume feedback in 12 seconds. Free.',
+    images: [OG_IMAGE],
+    creator: '@resumeroaster',
+  },
+  alternates: { canonical: SITE_URL },
+  robots: { index: true, follow: true },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
