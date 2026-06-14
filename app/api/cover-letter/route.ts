@@ -1,9 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
+import { kv } from '@/lib/kv'
+import { verifySession, SESSION_COOKIE } from '@/lib/session'
+
+export interface CoverLetterSummary {
+  id: string
+  preview: string  // first 120 chars of the letter
+  savedAt: string
+}
 
 const SYSTEM = `You are an expert cover letter writer with 15+ years of experience in recruiting and career coaching.
 You write concise, compelling, highly personalized cover letters that match candidates to specific roles.`
 
-const prompt = (resumeText: string, jobDescription: string) => `
+const buildPrompt = (resumeText: string, jobDescription: string) => `
 Write a tailored, professional cover letter based on the resume and job description below.
 
 RESUME:
@@ -49,7 +58,7 @@ export async function POST(req: NextRequest) {
       model: 'openrouter/free',
       messages: [
         { role: 'system', content: SYSTEM },
-        { role: 'user', content: prompt(resumeText, jobDescription) },
+        { role: 'user', content: buildPrompt(resumeText, jobDescription) },
       ],
       temperature: 0.75,
       max_tokens: 1000,
@@ -72,5 +81,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `No content returned. Model response: ${JSON.stringify(data)}` }, { status: 502 })
   }
 
-  return NextResponse.json({ letter })
+  // Persist to user's account if logged in
+  const token = cookies().get(SESSION_COOKIE)?.value
+  const session = token ? await verifySession(token) : null
+  let savedId: string | undefined
+
+  if (session) {
+    savedId = crypto.randomUUID().slice(0, 8)
+    const summary: CoverLetterSummary = {
+      id: savedId,
+      preview: letter.slice(0, 120),
+      savedAt: new Date().toISOString(),
+    }
+    await kv.set(`coverletter:${savedId}`, { id: savedId, letter, userId: session.userId, savedAt: summary.savedAt })
+    const existing = await kv.get<CoverLetterSummary[]>(`user:coverletters:${session.userId}`) ?? []
+    await kv.set(`user:coverletters:${session.userId}`, [summary, ...existing].slice(0, 50))
+  }
+
+  return NextResponse.json({ letter, savedId })
 }

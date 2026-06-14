@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { MODES, MODE_ORDER, RESULTS } from '@/lib/data'
 import type { ModeId } from '@/lib/types'
 import { useLang } from '@/lib/LangContext'
@@ -10,6 +11,7 @@ import Icon from './ui/Icon'
 import Logo from './ui/Logo'
 import Pill from './ui/Pill'
 import ScoreRing from './ui/ScoreRing'
+import { useSession } from '@/lib/SessionContext'
 
 export const cardStyle = (extra: React.CSSProperties = {}): React.CSSProperties => ({
   background: 'var(--surface)',
@@ -40,6 +42,48 @@ function LangToggle() {
           {l.toUpperCase()}
         </button>
       ))}
+    </div>
+  )
+}
+
+/* ---- UserNav ---- */
+function UserNav() {
+  const { t } = useLang()
+  const { user, loading } = useSession()
+  const router = useRouter()
+
+  const signOut = async () => {
+    await fetch('/api/auth/signout', { method: 'POST' })
+    router.refresh()
+    window.location.href = '/'
+  }
+
+  if (loading) return null
+
+  if (!user) {
+    return (
+      <Link href="/signin" style={{
+        fontSize: 13, color: 'var(--ink-mute)', textDecoration: 'none',
+        padding: '7px 14px', borderRadius: 'var(--r-md)',
+        border: '1px solid var(--line-2)', background: 'var(--surface-2)',
+        transition: 'color .2s',
+      }}>{t.signIn}</Link>
+    )
+  }
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      <Link href="/dashboard" style={{
+        fontSize: 13, color: 'var(--ink-mute)', textDecoration: 'none',
+        padding: '7px 14px', borderRadius: 'var(--r-md)',
+        border: '1px solid var(--line-2)', background: 'var(--surface-2)',
+      }}>
+        {user.email.split('@')[0]}
+      </Link>
+      <button onClick={signOut} style={{
+        background: 'none', border: 'none', cursor: 'pointer',
+        color: 'var(--ink-mute)', fontSize: 12, padding: 0,
+      }}>{t.signOut}</button>
     </div>
   )
 }
@@ -85,6 +129,7 @@ function Header({ onStart }: { onStart: () => void }) {
       </nav>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <LangToggle />
+        <UserNav />
         <Button size="sm" icon="upload" onClick={onStart}>{t.navUploadBtn}</Button>
       </div>
     </header>
