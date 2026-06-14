@@ -28,6 +28,7 @@ export default function Icon({ name, size = 20, stroke = 1.7, style }: IconProps
     case 'flag':     return <svg {...p}><path d="M4 21V4M4 4h12l-2 4 2 4H4"/></svg>
     case 'bolt':     return <svg {...p}><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>
     case 'star':     return <svg {...p} fill="currentColor" stroke="none"><path d="M12 3.5 14.4 9l5.6.5-4.3 3.7 1.3 5.5L12 15.8 7 18.7l1.3-5.5L4 9.5 9.6 9z"/></svg>
+    case 'link':     return <svg {...p}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
     default:         return null
   }
 }

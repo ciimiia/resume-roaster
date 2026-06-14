@@ -239,8 +239,35 @@ export default function Results({ mode, setMode, file, result, onReanalyze }: Re
   const tm = t.modes[mode]
   const [typed, setTyped] = useState(false)
   const [share, setShare] = useState(false)
+  const [shareId, setShareId] = useState<string | null>(null)
+  const [copying, setCopying] = useState(false)
+  const [copied, setCopied] = useState(false)
 
-  useEffect(() => { setTyped(false) }, [mode])
+  useEffect(() => { setTyped(false); setShareId(null); setCopied(false) }, [mode])
+
+  const copyShareLink = async () => {
+    setCopying(true)
+    try {
+      let id = shareId
+      if (!id) {
+        const res = await fetch('/api/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mode, result }),
+        })
+        const data = await res.json() as { id: string }
+        id = data.id
+        setShareId(id)
+      }
+      await navigator.clipboard.writeText(`${window.location.origin}/r/${id}`)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2500)
+    } catch (err) {
+      console.error('Copy share link failed:', err)
+    } finally {
+      setCopying(false)
+    }
+  }
 
   const scoreDesc = result.score >= 75 ? t.scoreHigh : result.score >= 60 ? t.scoreMid : t.scoreLow
 
@@ -299,6 +326,23 @@ export default function Results({ mode, setMode, file, result, onReanalyze }: Re
               <Button full icon="share" onClick={() => setShare(true)} style={{ position: 'relative', marginTop: 22 }}>
                 {t.shareYourRoast}
               </Button>
+              <button
+                onClick={copyShareLink}
+                disabled={copying}
+                style={{
+                  position: 'relative', marginTop: 10, width: '100%',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  padding: '11px 18px', borderRadius: 'var(--r-md)', cursor: copying ? 'wait' : 'pointer',
+                  background: copied ? 'color-mix(in srgb, var(--intl) 14%, var(--surface-2))' : 'var(--surface-2)',
+                  border: `1px solid ${copied ? 'var(--intl)' : 'var(--line-2)'}`,
+                  color: copied ? 'var(--intl)' : 'var(--ink-mute)',
+                  fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 14,
+                  transition: 'all .2s',
+                }}
+              >
+                <Icon name={copied ? 'check' : 'link'} size={15} />
+                {copied ? 'Link copied!' : copying ? 'Saving…' : 'Copy share link'}
+              </button>
             </div>
 
             {/* Mode switcher */}
