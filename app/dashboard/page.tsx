@@ -6,6 +6,11 @@ import type { AnalysisSummary } from '@/app/api/save/route'
 import type { CoverLetterSummary } from '@/app/api/cover-letter/route'
 import DashboardClient from './DashboardClient'
 
+function isAdminEmail(email: string): boolean {
+  const list = (process.env.ADMIN_EMAILS ?? '').split(',').map(e => e.trim().toLowerCase())
+  return list.includes(email.toLowerCase())
+}
+
 export default async function DashboardPage() {
   const token = cookies().get(SESSION_COOKIE)?.value
   const session = token ? await verifySession(token) : null
@@ -21,6 +26,7 @@ export default async function DashboardPage() {
       email={session.email}
       analyses={analyses ?? []}
       coverLetters={coverLetters ?? []}
+      isAdmin={isAdminEmail(session.email)}
     />
   )
 }

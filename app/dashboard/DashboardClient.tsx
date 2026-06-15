@@ -14,6 +14,7 @@ interface Props {
   email: string
   analyses: AnalysisSummary[]
   coverLetters: CoverLetterSummary[]
+  isAdmin?: boolean
 }
 
 // Colour per analysis grade
@@ -166,10 +167,72 @@ function CoverLetterCard({ cl, savedLabel }: { cl: CoverLetterSummary; savedLabe
   )
 }
 
+/* ── Generate Post Button ── */
+function GeneratePostButton() {
+  const { t } = useLang()
+  const [state, setState] = React.useState<'idle' | 'loading' | 'done'>('idle')
+  const [slug, setSlug] = React.useState('')
+  const [error, setError] = React.useState('')
+
+  const generate = async () => {
+    setState('loading')
+    setError('')
+    try {
+      const res = await fetch('/api/admin/generate-post', { method: 'POST' })
+      const data = await res.json() as { ok?: boolean; post?: { slug: string }; error?: string }
+      if (!res.ok || !data.ok) { setError(data.error ?? 'Failed'); setState('idle'); return }
+      setSlug(data.post?.slug ?? '')
+      setState('done')
+    } catch (e) {
+      setError(String(e))
+      setState('idle')
+    }
+  }
+
+  return (
+    <div style={{ marginTop: 56, paddingTop: 40, borderTop: '1px dashed var(--line-2)' }}>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '.1em', color: 'var(--ink-faint)', marginBottom: 12 }}>
+        ADMIN · BLOG
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+        <button
+          onClick={generate}
+          disabled={state === 'loading'}
+          style={{
+            padding: '10px 20px', borderRadius: 'var(--r-md)', border: '1px solid var(--line-2)',
+            background: 'var(--surface-2)', color: 'var(--ink-mute)',
+            fontFamily: 'var(--font-body)', fontSize: 14, cursor: state === 'loading' ? 'wait' : 'pointer',
+            display: 'flex', alignItems: 'center', gap: 8,
+            opacity: state === 'loading' ? 0.6 : 1, transition: 'opacity .2s',
+          }}
+        >
+          {state === 'loading'
+            ? <><span style={{ width: 14, height: 14, border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin .7s linear infinite', display: 'inline-block' }} /> {t.dashboardGenerating}</>
+            : `✨ ${t.dashboardGeneratePost}`}
+        </button>
+
+        {state === 'done' && slug && (
+          <Link href={`/blog/${slug}`} style={{
+            fontSize: 14, color: 'var(--accent)', textDecoration: 'none',
+            padding: '10px 18px', borderRadius: 'var(--r-md)',
+            border: '1px solid color-mix(in srgb, var(--accent) 35%, transparent)',
+          }}>
+            {t.dashboardGenerateSuccess} {t.dashboardGenerateView}
+          </Link>
+        )}
+
+        {error && (
+          <span style={{ fontSize: 13, color: 'var(--roast)' }}>{error}</span>
+        )}
+      </div>
+    </div>
+  )
+}
+
 /* ── Main component ── */
 import React from 'react'
 
-export default function DashboardClient({ email, analyses, coverLetters }: Props) {
+export default function DashboardClient({ email, analyses, coverLetters, isAdmin }: Props) {
   const { t } = useLang()
   const { refresh } = useSession()
   const router = useRouter()
@@ -298,6 +361,7 @@ export default function DashboardClient({ email, analyses, coverLetters }: Props
         <Divider />
 
         {/* ── Cover Letters ── */}
+
         <section>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 24 }}>
             <div>
@@ -331,6 +395,8 @@ export default function DashboardClient({ email, analyses, coverLetters }: Props
               </div>
             )}
         </section>
+
+        {isAdmin && <GeneratePostButton />}
       </div>
     </div>
   )

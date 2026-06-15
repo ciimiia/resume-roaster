@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { POSTS, getPost } from '@/lib/posts'
+import type { Post } from '@/lib/posts'
+import { kv } from '@/lib/kv'
 import PostContent from '@/components/blog/PostContent'
 
 const SITE_URL = 'https://resume-roaster.vercel.app'
@@ -25,8 +27,18 @@ export function generateStaticParams() {
   return POSTS.map(p => ({ slug: p.slug }))
 }
 
+async function resolvePost(slug: string): Promise<Post | null> {
+  const staticPost = getPost(slug)
+  if (staticPost) return staticPost
+  try {
+    return await kv.get<Post>(`blog:post:${slug}`)
+  } catch {
+    return null
+  }
+}
+
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const post = getPost(params.slug)
+  const post = await resolvePost(params.slug)
   if (!post) return {}
   const url = `${SITE_URL}/blog/${post.slug}`
   return {
@@ -53,8 +65,8 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
-export default function PostPage({ params }: { params: { slug: string } }) {
-  const post = getPost(params.slug)
+export default async function PostPage({ params }: { params: { slug: string } }) {
+  const post = await resolvePost(params.slug)
   if (!post) notFound()
 
   const others = POSTS.filter(p => p.slug !== post.slug).slice(0, 2)

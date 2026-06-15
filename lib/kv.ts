@@ -15,6 +15,7 @@ async function cmd<T>(command: unknown[]): Promise<T> {
     method: 'POST',
     headers: { Authorization: `Bearer ${auth}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(command),
+    cache: 'no-store',
   })
 
   if (!res.ok) throw new Error(`KV error ${res.status}: ${await res.text()}`)

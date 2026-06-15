@@ -190,6 +190,10 @@ const en = {
   dashboardCLCta: 'Generate a cover letter',
   dashboardGrade: 'Grade',
   dashboardMode: 'Mode',
+  dashboardGeneratePost: 'Generate test blog post',
+  dashboardGenerating: 'Generating…',
+  dashboardGenerateSuccess: 'Post generated!',
+  dashboardGenerateView: 'View post →',
 
   // ── Cover Letter ──────────────────────────────────────
   clTitle: 'Cover Letter Generator',
@@ -447,6 +451,10 @@ const fa: typeof en = {
   dashboardCLCta: 'نامه پوششی بساز',
   dashboardGrade: 'رتبه',
   dashboardMode: 'حالت',
+  dashboardGeneratePost: 'ساخت پست بلاگ آزمایشی',
+  dashboardGenerating: 'در حال ساخت…',
+  dashboardGenerateSuccess: 'پست ساخته شد!',
+  dashboardGenerateView: 'مشاهده پست →',
 
   clTitle: 'ساخت نامه پوششی',
   clEyebrow: 'هوش مصنوعی · نامه پوششی',
