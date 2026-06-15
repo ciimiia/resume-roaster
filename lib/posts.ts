@@ -14,6 +14,7 @@ export interface Post {
   readTime: number
   tag: string
   content: Block[]
+  coverImage?: string
 }
 
 export const POSTS: Post[] = [

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import Logo from '@/components/ui/Logo'
+import ThemeToggle from '@/components/ui/ThemeToggle'
 import { useLang } from '@/lib/LangContext'
 import type { Post, Block } from '@/lib/posts'
 
@@ -107,10 +108,28 @@ export default function PostContent({ post, others }: { post: Post; others: Post
         backdropFilter: 'blur(16px)', borderBottom: '1px solid var(--line)',
       }}>
         <Link href="/" style={{ textDecoration: 'none' }}><Logo /></Link>
-        <Link href="/blog" style={{ fontSize: 14, color: 'var(--ink-mute)', fontFamily: 'var(--font-body)', textDecoration: 'none', padding: '8px 14px', transition: 'color .2s' }}>
-          {t.blogAllPosts}
-        </Link>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <ThemeToggle />
+          <Link href="/blog" style={{ fontSize: 14, color: 'var(--ink-mute)', fontFamily: 'var(--font-body)', textDecoration: 'none', padding: '8px 14px', transition: 'color .2s' }}>
+            {t.blogAllPosts}
+          </Link>
+        </div>
       </header>
+
+      {post.coverImage && (
+        <div style={{
+          width: '100%', maxHeight: 420, overflow: 'hidden',
+          background: 'var(--surface-2)',
+        }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={post.coverImage}
+            alt={post.title}
+            style={{ width: '100%', height: '100%', maxHeight: 420, objectFit: 'cover', display: 'block' }}
+            onError={e => { (e.currentTarget.parentElement as HTMLElement).style.display = 'none' }}
+          />
+        </div>
+      )}
 
       <main style={{ maxWidth: 760, margin: '0 auto', padding: 'clamp(40px,6vw,72px) clamp(20px,5vw,40px) 80px' }}>
         <div style={{ marginBottom: 40, animation: 'fadeUp .5s both' }}>

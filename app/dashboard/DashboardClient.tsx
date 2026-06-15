@@ -6,6 +6,7 @@ import { useLang } from '@/lib/LangContext'
 import { useSession } from '@/lib/SessionContext'
 import Logo from '@/components/ui/Logo'
 import Icon from '@/components/ui/Icon'
+import ThemeToggle from '@/components/ui/ThemeToggle'
 import { cardStyle } from '@/components/Landing'
 import type { AnalysisSummary } from '@/app/api/save/route'
 import type { CoverLetterSummary } from '@/app/api/cover-letter/route'
@@ -257,6 +258,7 @@ export default function DashboardClient({ email, analyses, coverLetters, isAdmin
       }}>
         <Link href="/" style={{ textDecoration: 'none' }}><Logo /></Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <ThemeToggle />
           <span style={{
             fontSize: 12, fontFamily: 'var(--font-mono)', letterSpacing: '.04em',
             color: 'var(--ink-faint)', display: 'flex', alignItems: 'center', gap: 6,

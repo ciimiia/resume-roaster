@@ -36,6 +36,39 @@
   --r-sm: 10px; --r-md: 16px; --r-lg: 24px; --r-xl: 32px;
 }
 
+/* ── Light mode ─────────────────────────────────────────────────────────── */
+html[data-color-theme="light"] {
+  --bg: #F4F4F6;
+  --bg-2: #EEEEF2;
+  --surface: #FFFFFF;
+  --surface-2: #F0F0F4;
+  --surface-3: #E4E4EA;
+  --line: rgba(0,0,0,0.08);
+  --line-2: rgba(0,0,0,0.14);
+  --ink: #0A0A0F;
+  --ink-soft: #2C2C38;
+  --ink-mute: #6B6B78;
+  --ink-faint: #9A9AAA;
+  --shadow-1: 0 1px 0 rgba(255,255,255,0.8) inset, 0 4px 16px rgba(0,0,0,0.10);
+  --shadow-2: 0 16px 60px rgba(0,0,0,0.15);
+}
+
+/* Light mode per-theme accent overrides — keep glows subtle */
+html[data-color-theme="light"][data-theme="roast"] {
+  --glow: rgba(255,77,77,0.08);
+  --tint: rgba(255,77,77,0.03);
+  --bg: #FDF4F4; --bg-2: #F9EDED;
+  --surface: #FFFFFF; --surface-2: #F9F0F0; --surface-3: #F3E8E8;
+}
+html[data-color-theme="light"][data-theme="coach"] {
+  --glow: rgba(77,159,255,0.07);
+  --tint: rgba(77,159,255,0.02);
+}
+html[data-color-theme="light"][data-theme="intl"] {
+  --glow: rgba(77,204,136,0.07);
+  --tint: rgba(77,204,136,0.02);
+}
+
 html[data-theme="roast"] {
   --accent: #FF4D4D; --accent-2: #FF8A3D;
   --glow: rgba(255,77,77,0.16); --tint: rgba(255,77,77,0.05);

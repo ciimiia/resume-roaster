@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import type { Post } from '@/lib/posts'
 import Logo from '@/components/ui/Logo'
+import ThemeToggle from '@/components/ui/ThemeToggle'
 import { useLang } from '@/lib/LangContext'
 
 const TAG_COLORS: Record<string, string> = {
@@ -30,11 +31,14 @@ export default function BlogIndex({ allPosts }: { allPosts: Post[] }) {
       }}>
         <Link href="/" style={{ textDecoration: 'none' }}><Logo /></Link>
         <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 16, color: 'var(--ink-soft)' }}>Blog</span>
-        <Link href="/" style={{
-          textDecoration: 'none', fontSize: 14, color: 'var(--ink-mute)',
-          fontFamily: 'var(--font-body)', padding: '8px 14px',
-          transition: 'color .2s',
-        }}>{t.blogBackHome}</Link>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <ThemeToggle />
+          <Link href="/" style={{
+            textDecoration: 'none', fontSize: 14, color: 'var(--ink-mute)',
+            fontFamily: 'var(--font-body)', padding: '8px 14px',
+            transition: 'color .2s',
+          }}>{t.blogBackHome}</Link>
+        </div>
       </header>
 
       <main style={{ maxWidth: 1100, margin: '0 auto', padding: 'clamp(40px,6vw,80px) clamp(20px,5vw,60px)' }}>
@@ -71,8 +75,8 @@ export default function BlogIndex({ allPosts }: { allPosts: Post[] }) {
                   border: '1px solid var(--line)',
                   borderRadius: 'var(--r-lg)',
                   boxShadow: '0 1px 0 rgba(255,255,255,0.04) inset, 0 8px 24px rgba(0,0,0,0.35)',
-                  padding: 28,
-                  display: 'flex', flexDirection: 'column', gap: 16,
+                  overflow: 'hidden',
+                  display: 'flex', flexDirection: 'column',
                   transition: 'transform .25s cubic-bezier(.34,1.4,.64,1), border-color .2s, box-shadow .2s',
                   animation: `fadeUp .5s ${i * 0.08}s both`,
                   cursor: 'pointer',
@@ -90,6 +94,36 @@ export default function BlogIndex({ allPosts }: { allPosts: Post[] }) {
                     el.style.boxShadow = '0 1px 0 rgba(255,255,255,0.04) inset, 0 8px 24px rgba(0,0,0,0.35)'
                   }}
                 >
+                  {post.coverImage ? (
+                    <div style={{
+                      width: '100%', height: 180, overflow: 'hidden',
+                      background: 'var(--surface-2)', flexShrink: 0, position: 'relative',
+                    }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={post.coverImage}
+                        alt={post.title}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                        loading="lazy"
+                        onError={e => {
+                          const img = e.currentTarget
+                          img.style.display = 'none'
+                          const parent = img.parentElement
+                          if (parent) {
+                            parent.style.height = '8px'
+                            parent.style.background = `linear-gradient(90deg, ${accent}, color-mix(in srgb, ${accent} 60%, transparent))`
+                          }
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <div style={{
+                      width: '100%', height: 8, flexShrink: 0,
+                      background: `linear-gradient(90deg, ${accent}, color-mix(in srgb, ${accent} 60%, transparent))`,
+                    }} />
+                  )}
+
+                  <div style={{ padding: 28, display: 'flex', flexDirection: 'column', gap: 16, flex: 1 }}>
                   <span style={{
                     alignSelf: 'flex-start',
                     padding: '4px 11px', borderRadius: 999,
@@ -117,6 +151,7 @@ export default function BlogIndex({ allPosts }: { allPosts: Post[] }) {
                     <span>{formatDate(post.date)}</span>
                     <span>{post.readTime} {t.blogMinRead}</span>
                   </div>
+                  </div>{/* end inner padding div */}
                 </article>
               </Link>
             )

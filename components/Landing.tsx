@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { MODES, MODE_ORDER, RESULTS } from '@/lib/data'
 import type { ModeId } from '@/lib/types'
 import { useLang } from '@/lib/LangContext'
+import ThemeToggle from './ui/ThemeToggle'
 import Button from './ui/Button'
 import Icon from './ui/Icon'
 import Logo from './ui/Logo'
@@ -128,6 +129,7 @@ function Header({ onStart }: { onStart: () => void }) {
         })}
       </nav>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <ThemeToggle />
         <LangToggle />
         <UserNav />
         <Button size="sm" icon="upload" onClick={onStart}>{t.navUploadBtn}</Button>

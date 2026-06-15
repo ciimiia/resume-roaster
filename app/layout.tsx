@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { LangProvider } from '@/lib/LangContext'
 import { SessionProvider } from '@/lib/SessionContext'
+import { ThemeProvider } from '@/lib/ThemeContext'
 
 const SITE_URL = 'https://resume-roaster.vercel.app'
 const OG_IMAGE = `${SITE_URL}/opengraph-image`
@@ -76,7 +77,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <SessionProvider>
           <LangProvider>
-            <div style={{ position: 'relative', zIndex: 1 }}>{children}</div>
+            <ThemeProvider>
+              <div style={{ position: 'relative', zIndex: 1 }}>{children}</div>
+            </ThemeProvider>
           </LangProvider>
         </SessionProvider>
       </body>

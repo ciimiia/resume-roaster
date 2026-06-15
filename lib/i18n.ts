@@ -154,6 +154,10 @@ const en = {
     error: "That file didn't cooperate. PDF only, under 10 MB.",
   },
 
+  // ── Theme toggle ──────────────────────────────────────
+  themeLight: 'Light',
+  themeDark: 'Dark',
+
   // ── Auth ──────────────────────────────────────────────
   signIn: 'Sign In',
   signOut: 'Sign Out',
@@ -416,6 +420,10 @@ const fa: typeof en = {
     dragHint: 'PDF رو بنداز اینجا. قول می‌دیم (تقریباً) ملایم باشیم.',
     error: 'این فایل همکاری نکرد. فقط PDF، زیر ۱۰ مگابایت.',
   },
+
+  // ── Theme toggle ──────────────────────────────────────
+  themeLight: 'روشن',
+  themeDark: 'تاریک',
 
   signIn: 'ورود',
   signOut: 'خروج',

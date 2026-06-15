@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import Logo from '@/components/ui/Logo'
 import Icon from '@/components/ui/Icon'
+import ThemeToggle from '@/components/ui/ThemeToggle'
 import { useLang } from '@/lib/LangContext'
 import { useSession } from '@/lib/SessionContext'
 import { cardStyle } from '@/components/Landing'
@@ -62,7 +63,8 @@ export default function SignInPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: '40px 20px' }}>
+    <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: '40px 20px', position: 'relative' }}>
+      <div style={{ position: 'absolute', top: 20, right: 20 }}><ThemeToggle /></div>
       <div style={{ width: '100%', maxWidth: 420 }}>
         <div style={{ textAlign: 'center', marginBottom: 36 }}>
           <Link href="/" style={{ textDecoration: 'none', display: 'inline-block', marginBottom: 28 }}><Logo /></Link>
