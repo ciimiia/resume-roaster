@@ -35,6 +35,12 @@ export async function POST(req: NextRequest) {
   await kv.set(`user:email:${normalizedEmail}`, user)
   await kv.set(`user:id:${id}`, user)
 
+  // Maintain global user list for admin panel
+  const allEmails = (await kv.get<string[]>('users:all')) ?? []
+  if (!allEmails.includes(normalizedEmail)) {
+    await kv.set('users:all', [normalizedEmail, ...allEmails])
+  }
+
   const token = await createSession(id, normalizedEmail)
   cookies().set(SESSION_COOKIE, token, {
     httpOnly: true,

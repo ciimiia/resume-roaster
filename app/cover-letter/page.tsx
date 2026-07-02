@@ -1,5 +1,10 @@
 import type { Metadata } from 'next'
 import CoverLetterClient from './CoverLetterClient'
+import { kv } from '@/lib/kv'
+import { SiteContentProvider } from '@/lib/SiteContentContext'
+import type { SiteContent } from '@/lib/SiteContentContext'
+
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'AI Cover Letter Generator',
@@ -18,6 +23,11 @@ export const metadata: Metadata = {
   },
 }
 
-export default function CoverLetterPage() {
-  return <CoverLetterClient />
+export default async function CoverLetterPage() {
+  const siteContent = (await kv.get<SiteContent>('site:content')) ?? {}
+  return (
+    <SiteContentProvider content={siteContent}>
+      <CoverLetterClient />
+    </SiteContentProvider>
+  )
 }

@@ -7,6 +7,7 @@ import { MODES, MODE_ORDER, RESULTS } from '@/lib/data'
 import type { ModeId } from '@/lib/types'
 import { useLang } from '@/lib/LangContext'
 import ThemeToggle from './ui/ThemeToggle'
+import { useSiteContent } from '@/lib/SiteContentContext'
 import Button from './ui/Button'
 import Icon from './ui/Icon'
 import Logo from './ui/Logo'
@@ -74,6 +75,15 @@ function UserNav() {
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      {user.isAdmin && (
+        <Link href="/admin" style={{
+          fontSize: 12, color: 'var(--accent)', textDecoration: 'none',
+          padding: '5px 11px', borderRadius: 'var(--r-md)',
+          border: '1px solid color-mix(in srgb, var(--accent) 35%, transparent)',
+          background: 'color-mix(in srgb, var(--accent) 8%, transparent)',
+          fontFamily: 'var(--font-mono)', letterSpacing: '.04em',
+        }}>{t.adminNav}</Link>
+      )}
       <Link href="/dashboard" style={{
         fontSize: 13, color: 'var(--ink-mute)', textDecoration: 'none',
         padding: '7px 14px', borderRadius: 'var(--r-md)',
@@ -250,9 +260,14 @@ interface LandingProps {
 }
 
 export default function Landing({ mode, setMode, onStart }: LandingProps) {
-  const { t } = useLang()
+  const { t, lang } = useLang()
+  const sc = useSiteContent()
   const m = MODES[mode]
   const tm = t.modes[mode]
+
+  // Helper: use KV override if present, else fall back to i18n
+  const s = (field: keyof typeof sc, fallback: string) =>
+    sc[field]?.[lang as 'en' | 'fa'] || fallback
 
   return (
     <div style={{ animation: 'fadeIn .5s both' }}>
@@ -268,17 +283,17 @@ export default function Landing({ mode, setMode, onStart }: LandingProps) {
               <Icon name="spark" size={13} /> {t.heroPill}
             </Pill>
             <h1 style={{ fontSize: 'clamp(40px, 6vw, 72px)', fontWeight: 700, lineHeight: 0.98 }}>
-              {t.heroH1a}<br />{t.heroH1b}<br />
+              {s('heroH1a', t.heroH1a)}<br />{s('heroH1b', t.heroH1b)}<br />
               <span style={{ background: 'linear-gradient(120deg, var(--accent), var(--accent-2))', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>
-                {t.heroH1c}
+                {s('heroH1c', t.heroH1c)}
               </span>
             </h1>
             <p style={{ fontSize: 'clamp(17px,2vw,20px)', color: 'var(--ink-soft)', maxWidth: 520, marginTop: 22, lineHeight: 1.55 }}>
-              {t.heroBody}
+              {s('heroBody', t.heroBody)}
             </p>
             <div style={{ display: 'flex', gap: 14, marginTop: 30, flexWrap: 'wrap' }}>
-              <Button size="lg" icon="upload" onClick={onStart}>{t.heroCta1}</Button>
-              <Button size="lg" variant="ghost" iconRight="arrow" onClick={onStart}>{t.heroCta2} {m.glyph}</Button>
+              <Button size="lg" icon="upload" onClick={onStart}>{s('heroCta1', t.heroCta1)}</Button>
+              <Button size="lg" variant="ghost" iconRight="arrow" onClick={onStart}>{s('heroCta2', t.heroCta2)} {m.glyph}</Button>
             </div>
             <div style={{ marginTop: 34 }}><StatTicker /></div>
           </div>
@@ -341,10 +356,10 @@ export default function Landing({ mode, setMode, onStart }: LandingProps) {
         <div style={cardStyle({ marginTop: 48, padding: 'clamp(28px,4vw,52px)', textAlign: 'center', position: 'relative', overflow: 'hidden', background: 'linear-gradient(140deg, var(--surface-2), var(--surface))' })}>
           <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(600px 200px at 50% 0%, var(--glow), transparent 70%)', pointerEvents: 'none' }} />
           <h2 style={{ position: 'relative', fontSize: 'clamp(28px,4vw,46px)', maxWidth: 720, margin: '0 auto' }}>
-            {t.ctaH2}
+            {s('ctaH2', t.ctaH2)}
           </h2>
           <p style={{ position: 'relative', color: 'var(--ink-soft)', fontSize: 18, marginTop: 14 }}>
-            {t.ctaBody}
+            {s('ctaBody', t.ctaBody)}
           </p>
           <div style={{ position: 'relative', marginTop: 26, display: 'flex', justifyContent: 'center' }}>
             <Button size="lg" icon="upload" onClick={onStart}>{t.ctaBtn}</Button>
@@ -355,7 +370,7 @@ export default function Landing({ mode, setMode, onStart }: LandingProps) {
       <footer style={{ borderTop: '1px solid var(--line)', padding: '26px clamp(20px,5vw,60px)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14 }}>
         <Logo size={24} />
         <span className="mono" style={{ fontSize: 12, color: 'var(--ink-faint)' }}>
-          {t.footer}
+          {s('footerTagline', t.footer)}
         </span>
       </footer>
     </div>

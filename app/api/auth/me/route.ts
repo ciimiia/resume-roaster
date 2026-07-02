@@ -9,5 +9,7 @@ export async function GET() {
   const session = await verifySession(token)
   if (!session) return NextResponse.json({ user: null })
 
-  return NextResponse.json({ user: { userId: session.userId, email: session.email } })
+  const adminList = (process.env.ADMIN_EMAILS ?? '').split(',').map(e => e.trim().toLowerCase())
+  const isAdmin = adminList.includes(session.email.toLowerCase())
+  return NextResponse.json({ user: { userId: session.userId, email: session.email, isAdmin } })
 }

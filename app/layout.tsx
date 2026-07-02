@@ -3,6 +3,7 @@ import './globals.css'
 import { LangProvider } from '@/lib/LangContext'
 import { SessionProvider } from '@/lib/SessionContext'
 import { ThemeProvider } from '@/lib/ThemeContext'
+import Tracker from '@/components/Tracker'
 
 const SITE_URL = 'https://resume-roaster.vercel.app'
 const OG_IMAGE = `${SITE_URL}/opengraph-image`
@@ -78,6 +79,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SessionProvider>
           <LangProvider>
             <ThemeProvider>
+              <Tracker />
               <div style={{ position: 'relative', zIndex: 1 }}>{children}</div>
             </ThemeProvider>
           </LangProvider>

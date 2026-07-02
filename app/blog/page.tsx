@@ -2,6 +2,8 @@ import { POSTS } from '@/lib/posts'
 import type { Post } from '@/lib/posts'
 import { kv } from '@/lib/kv'
 import BlogIndex from '@/components/blog/BlogIndex'
+import { SiteContentProvider } from '@/lib/SiteContentContext'
+import type { SiteContent } from '@/lib/SiteContentContext'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,7 +18,10 @@ async function getKvPosts(): Promise<Post[]> {
 }
 
 export default async function BlogPage() {
-  const kvPosts = await getKvPosts()
+  const [kvPosts, siteContent] = await Promise.all([
+    getKvPosts(),
+    kv.get<SiteContent>('site:content'),
+  ])
 
   // Merge: KV posts first (newest), then static — deduplicate by slug
   const staticSlugs = new Set(POSTS.map(p => p.slug))
@@ -25,6 +30,9 @@ export default async function BlogPage() {
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   )
 
-  console.log('[blog/page] allPosts slugs:', allPosts.map(p => p.slug))
-  return <BlogIndex allPosts={allPosts} />
+  return (
+    <SiteContentProvider content={siteContent ?? {}}>
+      <BlogIndex allPosts={allPosts} />
+    </SiteContentProvider>
+  )
 }

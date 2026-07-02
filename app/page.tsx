@@ -1,5 +1,10 @@
 import type { Metadata } from 'next'
 import App from '@/components/App'
+import { kv } from '@/lib/kv'
+import { SiteContentProvider } from '@/lib/SiteContentContext'
+import type { SiteContent } from '@/lib/SiteContentContext'
+
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Resume Roaster — AI Resume Feedback in 12 Seconds',
@@ -18,6 +23,11 @@ export const metadata: Metadata = {
   },
 }
 
-export default function Home() {
-  return <App />
+export default async function Home() {
+  const siteContent = (await kv.get<SiteContent>('site:content')) ?? {}
+  return (
+    <SiteContentProvider content={siteContent}>
+      <App />
+    </SiteContentProvider>
+  )
 }

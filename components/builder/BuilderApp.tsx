@@ -7,6 +7,7 @@ import Button from '@/components/ui/Button'
 import Icon from '@/components/ui/Icon'
 import Logo from '@/components/ui/Logo'
 import { useLang } from '@/lib/LangContext'
+import { useSiteContent } from '@/lib/SiteContentContext'
 
 /* ── Types ───────────────────────────────────────────── */
 interface Experience {
@@ -479,7 +480,9 @@ function ResumeDoc({ data, t }: { data: ResumeData; t: ReturnType<typeof useLang
 
 /* ── Main Builder ────────────────────────────────────── */
 export default function BuilderApp() {
-  const { t } = useLang()
+  const { t, lang } = useLang()
+  const sc = useSiteContent()
+  const sTitle = sc.builderTitle?.[lang as 'en' | 'fa'] || t.builderTitle
   const [step, setStep] = useState<StepId>('personal')
   const [data, setData] = useState<ResumeData>(EMPTY)
 
@@ -511,7 +514,7 @@ export default function BuilderApp() {
           <Logo size={24} />
         </Link>
         <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 16, color: 'var(--ink-soft)' }}>
-          {t.builderTitle}
+          {sTitle}
         </span>
         <Link href="/" style={{
           textDecoration: 'none', fontSize: 14, color: 'var(--ink-mute)',

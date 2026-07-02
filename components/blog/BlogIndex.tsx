@@ -5,6 +5,7 @@ import type { Post } from '@/lib/posts'
 import Logo from '@/components/ui/Logo'
 import ThemeToggle from '@/components/ui/ThemeToggle'
 import { useLang } from '@/lib/LangContext'
+import { useSiteContent } from '@/lib/SiteContentContext'
 
 const TAG_COLORS: Record<string, string> = {
   ATS:        '#4D9FFF',
@@ -17,7 +18,10 @@ function formatDate(iso: string) {
 }
 
 export default function BlogIndex({ allPosts }: { allPosts: Post[] }) {
-  const { t } = useLang()
+  const { t, lang } = useLang()
+  const sc = useSiteContent()
+  const s = (key: 'blogH1a' | 'blogH1b' | 'blogSubtitle', fallback: string) =>
+    sc[key]?.[lang as 'en' | 'fa'] || fallback
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
@@ -49,13 +53,13 @@ export default function BlogIndex({ allPosts }: { allPosts: Post[] }) {
             letterSpacing: '.12em', color: 'var(--accent)', marginBottom: 14,
           }}>{t.blogEyebrow}</span>
           <h1 style={{ fontSize: 'clamp(34px,5vw,60px)', fontWeight: 700, lineHeight: 1.05 }}>
-            {t.blogH1a}<br />
+            {s('blogH1a', t.blogH1a)}<br />
             <span style={{ background: 'linear-gradient(120deg,var(--accent),var(--accent-2))', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>
-              {t.blogH1b}
+              {s('blogH1b', t.blogH1b)}
             </span>
           </h1>
           <p style={{ fontSize: 18, color: 'var(--ink-soft)', marginTop: 18, maxWidth: 520, lineHeight: 1.6 }}>
-            {t.blogSubtitle}
+            {s('blogSubtitle', t.blogSubtitle)}
           </p>
         </div>
 

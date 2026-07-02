@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 
-export interface SessionUser { userId: string; email: string }
+export interface SessionUser { userId: string; email: string; isAdmin?: boolean }
 
 interface SessionCtx {
   user: SessionUser | null

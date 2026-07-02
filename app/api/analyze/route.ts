@@ -43,9 +43,34 @@ Requirements:
 - All text must match the tone of the "${mode}" mode
 `
 
+async function extractPdfText(file: File): Promise<string> {
+  const buffer = Buffer.from(await file.arrayBuffer())
+  const { PDFParse } = await import('pdf-parse')
+  const parser = new PDFParse({ data: buffer })
+  const result = await parser.getText()
+  return result.text.trim()
+}
+
 export async function POST(req: NextRequest) {
   const formData = await req.formData()
   const mode = ((formData.get('mode') as string) || 'roast') as ModeId
+  const useSample = formData.get('useSampleText') === 'true'
+  const file = formData.get('file') as File | null
+
+  let resumeText = SAMPLE_TEXT
+
+  if (!useSample && file) {
+    try {
+      const extracted = await extractPdfText(file)
+      if (extracted.length > 50) {
+        resumeText = extracted
+      } else {
+        console.warn('PDF text extraction returned too little text — using sample')
+      }
+    } catch (err) {
+      console.error('PDF parse error — using sample text:', err)
+    }
+  }
 
   const apiKey = process.env.OPENROUTER_API_KEY
   if (!apiKey) {
@@ -66,7 +91,7 @@ export async function POST(req: NextRequest) {
         model: 'openrouter/free',
         messages: [
           { role: 'system', content: SYSTEM_PROMPTS[mode] },
-          { role: 'user', content: USER_PROMPT(mode, SAMPLE_TEXT) },
+          { role: 'user', content: USER_PROMPT(mode, resumeText) },
         ],
         temperature: 0.7,
         max_tokens: 1200,
@@ -78,7 +103,8 @@ export async function POST(req: NextRequest) {
     }
 
     const data = await response.json()
-    const raw: string = data.choices?.[0]?.message?.content ?? ''
+    const msg = data.choices?.[0]?.message ?? {}
+    const raw: string = (msg.content ?? msg.reasoning ?? '').trim()
 
     // Strip markdown code fences if the model wrapped the JSON
     const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim()

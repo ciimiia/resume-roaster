@@ -26,7 +26,6 @@ export default async function DashboardPage() {
       email={session.email}
       analyses={analyses ?? []}
       coverLetters={coverLetters ?? []}
-      isAdmin={isAdminEmail(session.email)}
     />
   )
 }

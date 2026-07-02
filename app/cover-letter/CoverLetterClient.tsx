@@ -6,10 +6,14 @@ import Logo from '@/components/ui/Logo'
 import Button from '@/components/ui/Button'
 import Icon from '@/components/ui/Icon'
 import { useLang } from '@/lib/LangContext'
+import { useSiteContent } from '@/lib/SiteContentContext'
 import { cardStyle } from '@/components/Landing'
 
 export default function CoverLetterPage() {
-  const { t } = useLang()
+  const { t, lang } = useLang()
+  const sc = useSiteContent()
+  const s = (key: 'clTitle' | 'clSubtitle', fallback: string) =>
+    sc[key]?.[lang as 'en' | 'fa'] || fallback
 
   const [resumeText, setResumeText]   = useState('')
   const [jobDesc, setJobDesc]         = useState('')
@@ -101,7 +105,7 @@ export default function CoverLetterPage() {
       }}>
         <Link href="/" style={{ textDecoration: 'none' }}><Logo /></Link>
         <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 16, color: 'var(--ink-soft)' }}>
-          {t.clTitle}
+          {s('clTitle', t.clTitle)}
         </span>
         <Link href="/" style={{
           textDecoration: 'none', fontSize: 14, color: 'var(--ink-mute)',
@@ -118,10 +122,10 @@ export default function CoverLetterPage() {
             letterSpacing: '.12em', color: 'var(--accent)', marginBottom: 14,
           }}>{t.clEyebrow}</span>
           <h1 style={{ fontSize: 'clamp(30px,4.5vw,54px)', fontWeight: 700, lineHeight: 1.08 }}>
-            {t.clTitle}
+            {s('clTitle', t.clTitle)}
           </h1>
           <p style={{ fontSize: 17, color: 'var(--ink-soft)', marginTop: 14, maxWidth: 540, lineHeight: 1.6 }}>
-            {t.clSubtitle}
+            {s('clSubtitle', t.clSubtitle)}
           </p>
         </div>
 

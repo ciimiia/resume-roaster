@@ -1,5 +1,10 @@
 import type { Metadata } from 'next'
 import BuilderApp from '@/components/builder/BuilderApp'
+import { kv } from '@/lib/kv'
+import { SiteContentProvider } from '@/lib/SiteContentContext'
+import type { SiteContent } from '@/lib/SiteContentContext'
+
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Free Resume Builder',
@@ -18,6 +23,11 @@ export const metadata: Metadata = {
   },
 }
 
-export default function BuilderPage() {
-  return <BuilderApp />
+export default async function BuilderPage() {
+  const siteContent = (await kv.get<SiteContent>('site:content')) ?? {}
+  return (
+    <SiteContentProvider content={siteContent}>
+      <BuilderApp />
+    </SiteContentProvider>
+  )
 }
