@@ -1,18 +1,13 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useLang } from '@/lib/LangContext'
-import { useSession } from '@/lib/SessionContext'
-import Logo from '@/components/ui/Logo'
 import Icon from '@/components/ui/Icon'
-import ThemeToggle from '@/components/ui/ThemeToggle'
 import { cardStyle } from '@/components/Landing'
 import type { AnalysisSummary } from '@/app/api/save/route'
 import type { CoverLetterSummary } from '@/app/api/cover-letter/route'
 
 interface Props {
-  email: string
   analyses: AnalysisSummary[]
   coverLetters: CoverLetterSummary[]
 }
@@ -170,53 +165,11 @@ function CoverLetterCard({ cl, savedLabel }: { cl: CoverLetterSummary; savedLabe
 /* ── Main component ── */
 import React from 'react'
 
-export default function DashboardClient({ email, analyses, coverLetters }: Props) {
+export default function DashboardClient({ analyses, coverLetters }: Props) {
   const { t } = useLang()
-  const { refresh } = useSession()
-  const router = useRouter()
-
-  const signOut = async () => {
-    await fetch('/api/auth/signout', { method: 'POST' })
-    await refresh()
-    router.push('/')
-  }
 
   return (
     <div style={{ minHeight: '100vh', padding: '0 clamp(20px, 5vw, 60px) 100px' }}>
-
-      {/* ── Sticky header ── */}
-      <header style={{
-        position: 'sticky', top: 0, zIndex: 40,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '16px 0',
-        background: 'color-mix(in srgb, var(--bg) 75%, transparent)',
-        backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid var(--line)',
-      }}>
-        <Link href="/" style={{ textDecoration: 'none' }}><Logo /></Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <ThemeToggle />
-          <span style={{
-            fontSize: 12, fontFamily: 'var(--font-mono)', letterSpacing: '.04em',
-            color: 'var(--ink-faint)', display: 'flex', alignItems: 'center', gap: 6,
-          }}>
-            <span style={{
-              width: 6, height: 6, borderRadius: '50%', background: '#4DCC88',
-              boxShadow: '0 0 6px #4DCC88', flexShrink: 0,
-            }} />
-            {email}
-          </span>
-          <button onClick={signOut} style={{
-            background: 'var(--surface-2)', border: '1px solid var(--line-2)',
-            borderRadius: 'var(--r-md)', padding: '7px 14px',
-            color: 'var(--ink-mute)', fontFamily: 'var(--font-body)', fontSize: 13,
-            cursor: 'pointer', transition: 'color .2s, border-color .2s',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.color = 'var(--ink)'; e.currentTarget.style.borderColor = 'var(--line)' }}
-            onMouseLeave={e => { e.currentTarget.style.color = 'var(--ink-mute)'; e.currentTarget.style.borderColor = 'var(--line-2)' }}
-          >{t.signOut}</button>
-        </div>
-      </header>
 
       {/* ── Hero section ── */}
       <div style={{ maxWidth: 860, margin: '0 auto' }}>
