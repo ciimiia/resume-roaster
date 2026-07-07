@@ -1,19 +1,15 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { MODES, MODE_ORDER, RESULTS } from '@/lib/data'
 import type { ModeId } from '@/lib/types'
 import { useLang } from '@/lib/LangContext'
-import ThemeToggle from './ui/ThemeToggle'
 import { useSiteContent } from '@/lib/SiteContentContext'
 import Button from './ui/Button'
 import Icon from './ui/Icon'
 import Logo from './ui/Logo'
 import Pill from './ui/Pill'
 import ScoreRing from './ui/ScoreRing'
-import { useSession } from '@/lib/SessionContext'
 
 export const cardStyle = (extra: React.CSSProperties = {}): React.CSSProperties => ({
   background: 'var(--surface)',
@@ -23,130 +19,6 @@ export const cardStyle = (extra: React.CSSProperties = {}): React.CSSProperties 
   ...extra,
 })
 
-/* ---- LangToggle ---- */
-function LangToggle() {
-  const { lang, setLang } = useLang()
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 2, background: 'var(--surface-2)', border: '1px solid var(--line-2)', borderRadius: 8, padding: 3 }}>
-      {(['en', 'fa'] as const).map(l => (
-        <button
-          key={l}
-          onClick={() => setLang(l)}
-          style={{
-            background: lang === l ? 'var(--accent)' : 'none',
-            color: lang === l ? 'var(--accent-ink)' : 'var(--ink-mute)',
-            border: 'none', borderRadius: 6,
-            fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700,
-            padding: '4px 9px', cursor: 'pointer', transition: 'all .2s',
-            letterSpacing: '.04em',
-          }}
-        >
-          {l.toUpperCase()}
-        </button>
-      ))}
-    </div>
-  )
-}
-
-/* ---- UserNav ---- */
-function UserNav() {
-  const { t } = useLang()
-  const { user, loading } = useSession()
-  const router = useRouter()
-
-  const signOut = async () => {
-    await fetch('/api/auth/signout', { method: 'POST' })
-    router.refresh()
-    window.location.href = '/'
-  }
-
-  if (loading) return null
-
-  if (!user) {
-    return (
-      <Link href="/signin" style={{
-        fontSize: 13, color: 'var(--ink-mute)', textDecoration: 'none',
-        padding: '7px 14px', borderRadius: 'var(--r-md)',
-        border: '1px solid var(--line-2)', background: 'var(--surface-2)',
-        transition: 'color .2s',
-      }}>{t.signIn}</Link>
-    )
-  }
-
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-      {user.isAdmin && (
-        <Link href="/admin" style={{
-          fontSize: 12, color: 'var(--accent)', textDecoration: 'none',
-          padding: '5px 11px', borderRadius: 'var(--r-md)',
-          border: '1px solid color-mix(in srgb, var(--accent) 35%, transparent)',
-          background: 'color-mix(in srgb, var(--accent) 8%, transparent)',
-          fontFamily: 'var(--font-mono)', letterSpacing: '.04em',
-        }}>{t.adminNav}</Link>
-      )}
-      <Link href="/dashboard" style={{
-        fontSize: 13, color: 'var(--ink-mute)', textDecoration: 'none',
-        padding: '7px 14px', borderRadius: 'var(--r-md)',
-        border: '1px solid var(--line-2)', background: 'var(--surface-2)',
-      }}>
-        {user.email.split('@')[0]}
-      </Link>
-      <button onClick={signOut} style={{
-        background: 'none', border: 'none', cursor: 'pointer',
-        color: 'var(--ink-mute)', fontSize: 12, padding: 0,
-      }}>{t.signOut}</button>
-    </div>
-  )
-}
-
-/* ---- Header ---- */
-function Header({ onStart }: { onStart: () => void }) {
-  const { t } = useLang()
-  const scrollTo = (id: string) =>
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
-
-  const links = [
-    { id: 'how-it-works', label: t.navHowItWorks, onClick: () => scrollTo('how-it-works') },
-    { id: 'modes',        label: t.navModes,       onClick: () => scrollTo('modes') },
-    { id: 'blog',          label: 'Blog',             href: '/blog' },
-    { id: 'builder',      label: 'Builder',         href: '/builder' },
-    { id: 'cover-letter', label: t.clTitle,          href: '/cover-letter' },
-    { id: 'app',          label: t.navTheApp,      onClick: onStart },
-  ]
-
-  return (
-    <header style={{
-      position: 'sticky', top: 0, zIndex: 40,
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      padding: '18px clamp(20px, 5vw, 60px)',
-      background: 'color-mix(in srgb, var(--bg) 72%, transparent)',
-      backdropFilter: 'blur(16px)', borderBottom: '1px solid var(--line)',
-    }}>
-      <Logo />
-      <nav style={{ display: 'flex', alignItems: 'center', gap: 4 }} className="nav-links">
-        {links.map(l => {
-          const btnStyle: React.CSSProperties = { background: 'none', border: 'none', color: 'var(--ink-mute)', fontFamily: 'var(--font-body)', fontSize: 15, padding: '8px 14px', borderRadius: 9, transition: 'color .2s', cursor: 'pointer', textDecoration: 'none', display: 'inline-block' }
-          const hover = (e: React.MouseEvent<HTMLElement>) => (e.currentTarget.style.color = 'var(--ink)')
-          const unhover = (e: React.MouseEvent<HTMLElement>) => (e.currentTarget.style.color = 'var(--ink-mute)')
-          if ('href' in l && l.href) {
-            return <Link key={l.id} href={l.href} style={btnStyle} onMouseEnter={hover} onMouseLeave={unhover}>{l.label}</Link>
-          }
-          return (
-            <button key={l.id} onClick={(l as {onClick:()=>void}).onClick} style={btnStyle} onMouseEnter={hover} onMouseLeave={unhover}>
-              {l.label}
-            </button>
-          )
-        })}
-      </nav>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <ThemeToggle />
-        <LangToggle />
-        <UserNav />
-        <Button size="sm" icon="upload" onClick={onStart}>{t.navUploadBtn}</Button>
-      </div>
-    </header>
-  )
-}
 
 /* ---- StatTicker ---- */
 function StatTicker() {
@@ -271,8 +143,6 @@ export default function Landing({ mode, setMode, onStart }: LandingProps) {
 
   return (
     <div style={{ animation: 'fadeIn .5s both' }}>
-      <Header onStart={onStart} />
-
       {/* HERO */}
       <section style={{ maxWidth: 1240, margin: '0 auto', padding: 'clamp(40px,7vw,84px) clamp(20px,5vw,60px) 40px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.05fr) minmax(0,0.95fr)', gap: 'clamp(28px,4vw,64px)', alignItems: 'center' }} className="hero-grid">

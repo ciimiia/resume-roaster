@@ -1,11 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import '@/app/builder/print.css'
 import Button from '@/components/ui/Button'
 import Icon from '@/components/ui/Icon'
-import Logo from '@/components/ui/Logo'
 import { useLang } from '@/lib/LangContext'
 import { useSiteContent } from '@/lib/SiteContentContext'
 
@@ -502,25 +500,15 @@ export default function BuilderApp() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
-      {/* Top bar */}
+      {/* Sub-header: tool title only */}
       <div style={{
-        position: 'sticky', top: 0, zIndex: 40,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '16px clamp(20px,5vw,60px)',
-        background: 'color-mix(in srgb, var(--bg) 72%, transparent)',
-        backdropFilter: 'blur(16px)', borderBottom: '1px solid var(--line)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '14px clamp(20px,5vw,60px)',
+        borderBottom: '1px solid var(--line)',
       }}>
-        <Link href="/" style={{ textDecoration: 'none' }}>
-          <Logo size={24} />
-        </Link>
         <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 16, color: 'var(--ink-soft)' }}>
           {sTitle}
         </span>
-        <Link href="/" style={{
-          textDecoration: 'none', fontSize: 14, color: 'var(--ink-mute)',
-          fontFamily: 'var(--font-body)', padding: '8px 14px',
-          transition: 'color .2s',
-        }}>{t.blogBackHome}</Link>
       </div>
 
       {/* Print wrapper */}
