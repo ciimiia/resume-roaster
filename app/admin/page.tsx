@@ -23,12 +23,10 @@ export default async function AdminPage() {
   const kvPosts = (await Promise.all(kvSlugs.map(s => kv.get<Post>(`blog:post:${s}`))))
     .filter((p): p is Post => p !== null)
 
-  // Static posts (read-only)
-  const staticSlugs = new Set(POSTS.map(p => p.slug))
   const allPosts = [
     ...kvPosts.map(p => ({ ...p, source: 'ai' as const })),
     ...POSTS.filter(p => !kvPosts.find(k => k.slug === p.slug)).map(p => ({ ...p, source: 'static' as const })),
   ].sort((a, b) => b.date.localeCompare(a.date))
 
-  return <AdminClient email={session.email} posts={allPosts} />
+  return <AdminClient posts={allPosts} />
 }

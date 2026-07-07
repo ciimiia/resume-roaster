@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import Logo from '@/components/ui/Logo'
 import Button from '@/components/ui/Button'
 import Icon from '@/components/ui/Icon'
@@ -93,25 +92,6 @@ export default function CoverLetterPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
-
-      {/* ── Top bar ── */}
-      <header style={{
-        position: 'sticky', top: 0, zIndex: 40,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '18px clamp(20px,5vw,60px)',
-        background: 'color-mix(in srgb, var(--bg) 72%, transparent)',
-        backdropFilter: 'blur(16px)',
-        borderBottom: '1px solid var(--line)',
-      }}>
-        <Link href="/" style={{ textDecoration: 'none' }}><Logo /></Link>
-        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 16, color: 'var(--ink-soft)' }}>
-          {s('clTitle', t.clTitle)}
-        </span>
-        <Link href="/" style={{
-          textDecoration: 'none', fontSize: 14, color: 'var(--ink-mute)',
-          fontFamily: 'var(--font-body)', padding: '8px 14px', transition: 'color .2s',
-        }}>{t.clBackHome}</Link>
-      </header>
 
       <main style={{ maxWidth: 1200, margin: '0 auto', padding: 'clamp(36px,5vw,64px) clamp(20px,5vw,60px) 90px' }}>
 
