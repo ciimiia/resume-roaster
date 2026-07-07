@@ -125,11 +125,11 @@ export default function PostContent({ post, others }: { post: Post; others: Post
           }}>{post.tag}</span>
 
           <h1 style={{ fontSize: 'clamp(28px,5vw,48px)', fontWeight: 700, lineHeight: 1.1, color: 'var(--ink)', marginBottom: 20 }}>
-            {post.title}
+            {lang === 'fa' && post.titleFa ? post.titleFa : post.title}
           </h1>
 
           <p style={{ fontSize: 19, color: 'var(--ink-mute)', lineHeight: 1.6, marginBottom: 28 }}>
-            {post.excerpt}
+            {lang === 'fa' && post.excerptFa ? post.excerptFa : post.excerpt}
           </p>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 20, paddingBottom: 28, borderBottom: '1px solid var(--line)' }}>
@@ -192,7 +192,7 @@ export default function PostContent({ post, others }: { post: Post; others: Post
                   onMouseLeave={e => ((e.currentTarget as HTMLElement).style.borderColor = 'var(--line)')}
                 >
                   <div>
-                    <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 15, color: 'var(--ink)', marginBottom: 4 }}>{p.title}</div>
+                    <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 15, color: 'var(--ink)', marginBottom: 4 }}>{lang === 'fa' && p.titleFa ? p.titleFa : p.title}</div>
                     <div style={{ fontSize: 12, fontFamily: 'var(--font-mono)', color: 'var(--ink-faint)' }}>{p.readTime} {t.blogMinRead}</div>
                   </div>
                   <span style={{ color: 'var(--accent)', flexShrink: 0 }}>→</span>

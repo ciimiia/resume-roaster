@@ -120,10 +120,10 @@ export default function BlogIndex({ allPosts }: { allPosts: Post[] }) {
                     fontFamily: 'var(--font-display)', fontWeight: 700,
                     fontSize: 20, lineHeight: 1.25, color: 'var(--ink)',
                     flex: 1,
-                  }}>{post.title}</h2>
+                  }}>{lang === 'fa' && post.titleFa ? post.titleFa : post.title}</h2>
 
                   <p style={{ fontSize: 14.5, color: 'var(--ink-mute)', lineHeight: 1.6, margin: 0 }}>
-                    {post.excerpt}
+                    {lang === 'fa' && post.excerptFa ? post.excerptFa : post.excerpt}
                   </p>
 
                   <div style={{

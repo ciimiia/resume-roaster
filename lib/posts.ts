@@ -9,7 +9,9 @@ export interface Block {
 export interface Post {
   slug: string
   title: string
+  titleFa?: string
   excerpt: string
+  excerptFa?: string
   date: string
   readTime: number
   tag: string
@@ -21,7 +23,9 @@ export const POSTS: Post[] = [
   {
     slug: 'how-to-write-a-resume-that-passes-ats',
     title: 'How to Write a Resume That Passes ATS',
+    titleFa: 'چطور رزومه‌ای بنویسی که از ATS رد بشه',
     excerpt: 'Most resumes never reach a human eye. Here\'s exactly how ATS systems score your resume — and how to beat them without stuffing keywords.',
+    excerptFa: 'اکثر رزومه‌ها هرگز به چشم انسانی نمی‌رسند. اینجا دقیقاً توضیح می‌دهیم سیستم‌های ATS چگونه رزومه‌ات را امتیاز می‌دهند — و چطور بدون پرکردن کلمات کلیدی از آن‌ها پیشی بگیری.',
     date: '2026-05-20',
     readTime: 7,
     tag: 'ATS',
@@ -59,7 +63,9 @@ export const POSTS: Post[] = [
   {
     slug: 'top-mistakes-on-developer-resumes',
     title: 'Top Mistakes on Developer Resumes',
+    titleFa: 'اشتباهات رایج در رزومه برنامه‌نویس‌ها',
     excerpt: 'Engineers are great at writing code and terrible at writing resumes. These are the most common mistakes — and exactly how to fix them.',
+    excerptFa: 'مهندس‌ها در نوشتن کد عالی‌اند و در نوشتن رزومه افتضاح. اینجا رایج‌ترین اشتباهات — و دقیقاً چطور آن‌ها را برطرف کنی.',
     date: '2026-06-01',
     readTime: 6,
     tag: 'Developers',
@@ -102,7 +108,9 @@ export const POSTS: Post[] = [
   {
     slug: 'how-to-get-a-remote-job-in-2026',
     title: 'How to Get a Remote Job in 2026',
+    titleFa: 'چطور در ۲۰۲۶ شغل دورکاری پیدا کنی',
     excerpt: 'The remote job market has matured — and gotten more competitive. Here\'s what actually works for landing a fully remote role in 2026.',
+    excerptFa: 'بازار کار دورکاری بلوغ یافته — و رقابتی‌تر شده. اینجا چیزی است که واقعاً برای پیدا کردن یک نقش کاملاً دورکاری در ۲۰۲۶ کار می‌کند.',
     date: '2026-06-10',
     readTime: 8,
     tag: 'Remote',
