@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect, useCallback, type CSSProperties } from 'react'
 import Link from 'next/link'
-import Logo from '@/components/ui/Logo'
-import ThemeToggle from '@/components/ui/ThemeToggle'
 import { useLang } from '@/lib/LangContext'
 import { cardStyle } from '@/components/Landing'
 import type { Post } from '@/lib/posts'
@@ -257,7 +255,7 @@ function StatsTab() {
       <div style={cardStyle({ overflow: 'hidden' })}>
         <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--line)' }}>
           <Eyebrow>{t.adminStatsEyebrow}</Eyebrow>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20 }}>Last 7 Days</h2>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20 }}>{t.adminLast7Days}</h2>
         </div>
         {data?.dailyTotals.map((d, i) => {
           const max = Math.max(...(data.dailyTotals.map(x => x.visits)), 1)
@@ -282,7 +280,7 @@ function StatsTab() {
 
 /* ── Users tab ── */
 function UsersTab() {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const [users, setUsers] = useState<UserRow[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -305,7 +303,7 @@ function UsersTab() {
         <Eyebrow>{t.adminUsersEyebrow}</Eyebrow>
         <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20 }}>{t.adminUsersTitle}</h2>
         <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-mute)', marginTop: 4, display: 'block' }}>
-          {users.length} {users.length === 1 ? 'user' : 'users'}
+          {users.length} {users.length === 1 ? t.adminUserSingular : t.adminUserPlural}
         </span>
       </div>
       {users.length === 0 ? (
@@ -325,7 +323,7 @@ function UsersTab() {
             }}>
               <span style={{ fontSize: 14, color: 'var(--ink-soft)', fontFamily: 'var(--font-mono)' }}>{u.email}</span>
               <span style={{ fontSize: 12, color: 'var(--ink-faint)', fontFamily: 'var(--font-mono)' }}>
-                {new Date(u.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                {new Date(u.createdAt).toLocaleDateString(lang === 'fa' ? 'fa-IR' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
               </span>
             </div>
           ))}
@@ -572,37 +570,12 @@ function SiteContentTab() {
 }
 
 /* ── Main ── */
-export default function AdminClient({ email, posts }: { email: string; posts: PostWithSource[] }) {
+export default function AdminClient({ posts }: { posts: PostWithSource[] }) {
   const { t } = useLang()
   const [tab, setTab] = useState<'content' | 'stats' | 'users' | 'site'>('content')
 
   return (
     <div style={{ minHeight: '100vh', padding: '0 clamp(20px, 5vw, 60px) 100px' }}>
-      {/* Header */}
-      <header style={{
-        position: 'sticky', top: 0, zIndex: 40,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '16px 0',
-        background: 'color-mix(in srgb, var(--bg) 80%, transparent)',
-        backdropFilter: 'blur(20px)', borderBottom: '1px solid var(--line)',
-      }}>
-        <Link href="/" style={{ textDecoration: 'none' }}><Logo /></Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <ThemeToggle />
-          <Link href="/dashboard" style={{
-            fontSize: 13, color: 'var(--ink-mute)', textDecoration: 'none',
-            padding: '7px 14px', borderRadius: 'var(--r-md)',
-            border: '1px solid var(--line-2)', background: 'var(--surface-2)',
-          }}>Dashboard</Link>
-          <span style={{
-            fontSize: 12, fontFamily: 'var(--font-mono)', color: 'var(--ink-faint)',
-            display: 'flex', alignItems: 'center', gap: 6,
-          }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent)', boxShadow: '0 0 6px var(--accent)', flexShrink: 0 }} />
-            {email}
-          </span>
-        </div>
-      </header>
 
       <div style={{ maxWidth: 940, margin: '0 auto' }}>
         {/* Page hero */}

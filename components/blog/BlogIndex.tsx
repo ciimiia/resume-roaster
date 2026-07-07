@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import type { Post } from '@/lib/posts'
 import Logo from '@/components/ui/Logo'
-import ThemeToggle from '@/components/ui/ThemeToggle'
 import { useLang } from '@/lib/LangContext'
 import { useSiteContent } from '@/lib/SiteContentContext'
 
@@ -13,8 +12,8 @@ const TAG_COLORS: Record<string, string> = {
   Remote:     '#4DCC88',
 }
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+function formatDate(iso: string, lang: string) {
+  return new Date(iso).toLocaleDateString(lang === 'fa' ? 'fa-IR' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
 export default function BlogIndex({ allPosts }: { allPosts: Post[] }) {
@@ -25,26 +24,6 @@ export default function BlogIndex({ allPosts }: { allPosts: Post[] }) {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
-      {/* Top bar */}
-      <header style={{
-        position: 'sticky', top: 0, zIndex: 40,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '18px clamp(20px,5vw,60px)',
-        background: 'color-mix(in srgb, var(--bg) 72%, transparent)',
-        backdropFilter: 'blur(16px)', borderBottom: '1px solid var(--line)',
-      }}>
-        <Link href="/" style={{ textDecoration: 'none' }}><Logo /></Link>
-        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 16, color: 'var(--ink-soft)' }}>Blog</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <ThemeToggle />
-          <Link href="/" style={{
-            textDecoration: 'none', fontSize: 14, color: 'var(--ink-mute)',
-            fontFamily: 'var(--font-body)', padding: '8px 14px',
-            transition: 'color .2s',
-          }}>{t.blogBackHome}</Link>
-        </div>
-      </header>
-
       <main style={{ maxWidth: 1100, margin: '0 auto', padding: 'clamp(40px,6vw,80px) clamp(20px,5vw,60px)' }}>
         {/* Hero */}
         <div style={{ marginBottom: 56, animation: 'fadeUp .5s both' }}>
@@ -152,7 +131,7 @@ export default function BlogIndex({ allPosts }: { allPosts: Post[] }) {
                     paddingTop: 16, borderTop: '1px solid var(--line)',
                     fontSize: 12, fontFamily: 'var(--font-mono)', color: 'var(--ink-faint)',
                   }}>
-                    <span>{formatDate(post.date)}</span>
+                    <span>{formatDate(post.date, lang)}</span>
                     <span>{post.readTime} {t.blogMinRead}</span>
                   </div>
                   </div>{/* end inner padding div */}

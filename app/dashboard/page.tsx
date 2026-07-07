@@ -23,7 +23,6 @@ export default async function DashboardPage() {
 
   return (
     <DashboardClient
-      email={session.email}
       analyses={analyses ?? []}
       coverLetters={coverLetters ?? []}
     />

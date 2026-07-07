@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import Logo from '@/components/ui/Logo'
-import ThemeToggle from '@/components/ui/ThemeToggle'
 import { useLang } from '@/lib/LangContext'
 import type { Post, Block } from '@/lib/posts'
 
@@ -12,8 +11,8 @@ const TAG_COLORS: Record<string, string> = {
   Remote:     '#4DCC88',
 }
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+function formatDate(iso: string, lang: string) {
+  return new Date(iso).toLocaleDateString(lang === 'fa' ? 'fa-IR' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })
 }
 
 function RenderBlock({ block }: { block: Block }) {
@@ -95,27 +94,11 @@ function RenderBlock({ block }: { block: Block }) {
 }
 
 export default function PostContent({ post, others }: { post: Post; others: Post[] }) {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const accent = TAG_COLORS[post.tag] ?? 'var(--accent)'
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
-      <header style={{
-        position: 'sticky', top: 0, zIndex: 40,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '18px clamp(20px,5vw,60px)',
-        background: 'color-mix(in srgb, var(--bg) 72%, transparent)',
-        backdropFilter: 'blur(16px)', borderBottom: '1px solid var(--line)',
-      }}>
-        <Link href="/" style={{ textDecoration: 'none' }}><Logo /></Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <ThemeToggle />
-          <Link href="/blog" style={{ fontSize: 14, color: 'var(--ink-mute)', fontFamily: 'var(--font-body)', textDecoration: 'none', padding: '8px 14px', transition: 'color .2s' }}>
-            {t.blogAllPosts}
-          </Link>
-        </div>
-      </header>
-
       {post.coverImage && (
         <div style={{
           width: '100%', maxHeight: 420, overflow: 'hidden',
@@ -157,7 +140,7 @@ export default function PostContent({ post, others }: { post: Post; others: Post
             <div>
               <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink)', fontFamily: 'var(--font-display)' }}>{t.blogAuthor}</div>
               <div style={{ fontSize: 12, color: 'var(--ink-faint)', fontFamily: 'var(--font-mono)' }}>
-                {formatDate(post.date)} · {post.readTime} {t.blogMinRead}
+                {formatDate(post.date, lang)} · {post.readTime} {t.blogMinRead}
               </div>
             </div>
           </div>

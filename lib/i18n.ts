@@ -6,6 +6,8 @@ const en = {
   // ── Nav / Header ──────────────────────────────────────
   navHowItWorks: 'How it works',
   navModes: 'Modes',
+  navBlog: 'Blog',
+  navBuilder: 'Builder',
   navTheApp: 'The App',
   navUploadBtn: 'Upload your resume',
 
@@ -281,6 +283,17 @@ const en = {
   builderEduSection: 'Education',
   builderSkillsSection: 'Skills',
 
+  // ── Shared result page ───────────────────────────────
+  sharedTryYourOwn: '🔥 Try your own',
+  sharedViaBadge: 'Shared via Resume Roaster',
+  sharedReadyTitle: 'Ready to roast yours?',
+  sharedReadyBody: 'Upload your resume and get AI feedback in 12 seconds — free.',
+
+  // ── Share link button ─────────────────────────────────
+  shareLinkCopied: 'Link copied!',
+  shareLinkSaving: 'Saving…',
+  shareLinkCopy: 'Copy share link',
+
   // ── Admin panel ───────────────────────────────────────
   adminTitle: 'Admin Panel',
   adminEyebrow: 'ADMIN',
@@ -307,6 +320,9 @@ const en = {
   adminPageCol: 'Page',
   adminVisitsCol: 'Visits',
   adminNoStats: 'No visit data yet.',
+  adminLast7Days: 'Last 7 Days',
+  adminUserSingular: 'user',
+  adminUserPlural: 'users',
   adminUsersTitle: 'Registered Users',
   adminUsersEyebrow: 'USERS',
   adminUserEmail: 'Email',
@@ -353,6 +369,8 @@ const en = {
 const fa: typeof en = {
   navHowItWorks: 'چطور کار می‌کنه',
   navModes: 'حالت‌ها',
+  navBlog: 'وبلاگ',
+  navBuilder: 'سازنده رزومه',
   navTheApp: 'اپلیکیشن',
   navUploadBtn: 'رزومه‌ات رو آپلود کن',
 
@@ -611,6 +629,17 @@ const fa: typeof en = {
   builderEduSection: 'تحصیلات',
   builderSkillsSection: 'مهارت‌ها',
 
+  // ── Shared result page ───────────────────────────────
+  sharedTryYourOwn: '🔥 خودت رو امتحان کن',
+  sharedViaBadge: 'اشتراک‌گذاری از Resume Roaster',
+  sharedReadyTitle: 'آماده‌ای رزومه‌ات رو داغ کنی؟',
+  sharedReadyBody: 'رزومه‌ات رو آپلود کن و در ۱۲ ثانیه بازخورد هوش مصنوعی بگیر — رایگان.',
+
+  // ── Share link button ─────────────────────────────────
+  shareLinkCopied: 'لینک کپی شد!',
+  shareLinkSaving: 'در حال ذخیره…',
+  shareLinkCopy: 'کپی لینک اشتراک',
+
   // ── Admin panel ───────────────────────────────────────
   adminTitle: 'پنل مدیریت',
   adminEyebrow: 'مدیر',
@@ -637,6 +666,9 @@ const fa: typeof en = {
   adminPageCol: 'صفحه',
   adminVisitsCol: 'بازدید',
   adminNoStats: 'هنوز داده بازدیدی نیست.',
+  adminLast7Days: '۷ روز گذشته',
+  adminUserSingular: 'کاربر',
+  adminUserPlural: 'کاربر',
   adminUsersTitle: 'کاربران ثبت‌نام‌شده',
   adminUsersEyebrow: 'کاربران',
   adminUserEmail: 'ایمیل',

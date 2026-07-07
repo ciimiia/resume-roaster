@@ -341,7 +341,7 @@ export default function Results({ mode, setMode, file, result, onReanalyze }: Re
                 }}
               >
                 <Icon name={copied ? 'check' : 'link'} size={15} />
-                {copied ? 'Link copied!' : copying ? 'Saving…' : 'Copy share link'}
+                {copied ? t.shareLinkCopied : copying ? t.shareLinkSaving : t.shareLinkCopy}
               </button>
             </div>
 
