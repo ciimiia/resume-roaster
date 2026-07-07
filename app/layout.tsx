@@ -4,6 +4,7 @@ import { LangProvider } from '@/lib/LangContext'
 import { SessionProvider } from '@/lib/SessionContext'
 import { ThemeProvider } from '@/lib/ThemeContext'
 import Tracker from '@/components/Tracker'
+import Navbar from '@/components/Navbar'
 
 const SITE_URL = 'https://resume-roaster.vercel.app'
 const OG_IMAGE = `${SITE_URL}/opengraph-image`
@@ -46,7 +47,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" data-theme="roast">
       <head>
         {/*
           Load all fonts via a single <link> so the build never needs to reach
@@ -80,7 +81,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <LangProvider>
             <ThemeProvider>
               <Tracker />
-              <div style={{ position: 'relative', zIndex: 1 }}>{children}</div>
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <Navbar />
+                {children}
+              </div>
             </ThemeProvider>
           </LangProvider>
         </SessionProvider>
