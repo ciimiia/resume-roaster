@@ -20,23 +20,28 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const today = dateStr(0)
+  try {
+    const today = dateStr(0)
 
-  // Fetch last 7 days totals
-  const dates = Array.from({ length: 7 }, (_, i) => dateStr(i))
-  const dailyTotals = await Promise.all(
-    dates.map(async d => ({ date: d, visits: (await kv.get<number>(`stats:visits:${d}`)) ?? 0 }))
-  )
+    // Fetch last 7 days totals
+    const dates = Array.from({ length: 7 }, (_, i) => dateStr(i))
+    const dailyTotals = await Promise.all(
+      dates.map(async d => ({ date: d, visits: (await kv.get<number>(`stats:visits:${d}`)) ?? 0 }))
+    )
 
-  const todayVisits = dailyTotals[0].visits
-  const weekVisits = dailyTotals.reduce((s, d) => s + d.visits, 0)
+    const todayVisits = dailyTotals[0].visits
+    const weekVisits = dailyTotals.reduce((s, d) => s + d.visits, 0)
 
-  // Top pages for today
-  const pagesList = (await kv.get<string[]>(`stats:pages-list:${today}`)) ?? []
-  const pageCounts = await Promise.all(
-    pagesList.map(async p => ({ path: p, visits: (await kv.get<number>(`stats:page:${p}:${today}`)) ?? 0 }))
-  )
-  const topPages = pageCounts.sort((a, b) => b.visits - a.visits).slice(0, 5)
+    // Top pages for today
+    const pagesList = (await kv.get<string[]>(`stats:pages-list:${today}`)) ?? []
+    const pageCounts = await Promise.all(
+      pagesList.map(async p => ({ path: p, visits: (await kv.get<number>(`stats:page:${p}:${today}`)) ?? 0 }))
+    )
+    const topPages = pageCounts.sort((a, b) => b.visits - a.visits).slice(0, 5)
 
-  return NextResponse.json({ todayVisits, weekVisits, dailyTotals: dailyTotals.reverse(), topPages })
+    return NextResponse.json({ todayVisits, weekVisits, dailyTotals: dailyTotals.reverse(), topPages })
+  } catch (err) {
+    console.error('[admin/stats] GET failed:', err)
+    return NextResponse.json({ error: 'SERVER_ERROR' }, { status: 500 })
+  }
 }

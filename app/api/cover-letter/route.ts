@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     headers: {
       Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://resume-roaster.vercel.app',
+      'HTTP-Referer': 'https://resume-roaster-tan-six.vercel.app',
       'X-Title': 'Resume Roaster',
     },
     body: JSON.stringify({
@@ -61,7 +61,10 @@ export async function POST(req: NextRequest) {
         { role: 'user', content: buildPrompt(resumeText, jobDescription) },
       ],
       temperature: 0.75,
-      max_tokens: 1000,
+      max_tokens: 1200,
+      // Some free models behind "openrouter/free" spend the whole token
+      // budget on hidden chain-of-thought and never emit real content.
+      reasoning: { enabled: false },
     }),
   })
 
@@ -87,15 +90,20 @@ export async function POST(req: NextRequest) {
   let savedId: string | undefined
 
   if (session) {
-    savedId = crypto.randomUUID().slice(0, 8)
-    const summary: CoverLetterSummary = {
-      id: savedId,
-      preview: letter.slice(0, 120),
-      savedAt: new Date().toISOString(),
+    try {
+      savedId = crypto.randomUUID().slice(0, 8)
+      const summary: CoverLetterSummary = {
+        id: savedId,
+        preview: letter.slice(0, 120),
+        savedAt: new Date().toISOString(),
+      }
+      await kv.set(`coverletter:${savedId}`, { id: savedId, letter, userId: session.userId, savedAt: summary.savedAt })
+      const existing = await kv.get<CoverLetterSummary[]>(`user:coverletters:${session.userId}`) ?? []
+      await kv.set(`user:coverletters:${session.userId}`, [summary, ...existing].slice(0, 50))
+    } catch (err) {
+      console.error('[cover-letter] failed to persist to KV, returning letter unsaved:', err)
+      savedId = undefined
     }
-    await kv.set(`coverletter:${savedId}`, { id: savedId, letter, userId: session.userId, savedAt: summary.savedAt })
-    const existing = await kv.get<CoverLetterSummary[]>(`user:coverletters:${session.userId}`) ?? []
-    await kv.set(`user:coverletters:${session.userId}`, [summary, ...existing].slice(0, 50))
   }
 
   return NextResponse.json({ letter, savedId })

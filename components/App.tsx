@@ -10,11 +10,12 @@ import { useLang } from '@/lib/LangContext'
 
 function AppInner() {
   const { t } = useLang()
-  const [view, setView]     = useState<View>('landing')
-  const [mode, setMode]     = useState<ModeId>('roast')
-  const [step, setStep]     = useState<Step>('mode')
-  const [file, setFile]     = useState<File | null>(null)
-  const [result, setResult] = useState<AnalysisResult | null>(null)
+  const [view, setView]             = useState<View>('landing')
+  const [mode, setMode]             = useState<ModeId>('roast')
+  const [step, setStep]             = useState<Step>('mode')
+  const [file, setFile]             = useState<File | null>(null)
+  const [usingSample, setUsingSample] = useState(false)
+  const [result, setResult]         = useState<AnalysisResult | null>(null)
 
   useEffect(() => {
     document.documentElement.dataset.theme = mode
@@ -29,6 +30,7 @@ function AppInner() {
   const reanalyze = (toStep?: string) => {
     setStep((toStep as Step) || 'mode')
     setFile(null)
+    setUsingSample(false)
     setResult(null)
     setView('workspace')
     window.scrollTo({ top: 0 })
@@ -38,6 +40,13 @@ function AppInner() {
     setResult(res)
     setView('results')
     window.scrollTo({ top: 0 })
+  }
+
+  // Switching lenses on the results screen re-analyzes the same resume
+  // under the new mode, instead of just relabeling the old result.
+  const switchMode = (m: ModeId, res: AnalysisResult) => {
+    setMode(m)
+    setResult(res)
   }
 
   return (
@@ -60,6 +69,7 @@ function AppInner() {
             mode={mode} setMode={setMode}
             step={step} setStep={setStep}
             file={file} setFile={setFile}
+            usingSample={usingSample} setUsingSample={setUsingSample}
             onAnalyze={handleAnalyze}
           />
         </div>
@@ -67,9 +77,9 @@ function AppInner() {
 
       {view === 'results' && result && (
         <Results
-          mode={mode} setMode={setMode}
-          file={file} result={result}
+          mode={mode} file={file} usingSample={usingSample} result={result}
           onReanalyze={reanalyze}
+          onSwitchMode={switchMode}
         />
       )}
     </>

@@ -227,13 +227,14 @@ function ListBlock({ icon, title, items, tone, run }: { icon: string; title: str
 /* ---- Results ---- */
 interface ResultsProps {
   mode: ModeId
-  setMode: (m: ModeId) => void
   file: File | null
+  usingSample: boolean
   result: AnalysisResult
   onReanalyze: (toStep?: string) => void
+  onSwitchMode: (mode: ModeId, result: AnalysisResult) => void
 }
 
-export default function Results({ mode, setMode, file, result, onReanalyze }: ResultsProps) {
+export default function Results({ mode, file, usingSample, result, onReanalyze, onSwitchMode }: ResultsProps) {
   const { t } = useLang()
   const m = MODES[mode]
   const tm = t.modes[mode]
@@ -242,8 +243,35 @@ export default function Results({ mode, setMode, file, result, onReanalyze }: Re
   const [shareId, setShareId] = useState<string | null>(null)
   const [copying, setCopying] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [switchingTo, setSwitchingTo] = useState<ModeId | null>(null)
 
   useEffect(() => { setTyped(false); setShareId(null); setCopied(false) }, [mode])
+
+  const switchLens = async (id: ModeId) => {
+    if (id === mode || switchingTo) return
+    setSwitchingTo(id)
+    try {
+      const formData = new FormData()
+      if (usingSample || !file) {
+        formData.append('useSampleText', 'true')
+      } else {
+        formData.append('file', file)
+      }
+      formData.append('mode', id)
+
+      const res = await fetch('/api/analyze', { method: 'POST', body: formData })
+      if (!res.ok) throw new Error('API error')
+      const next = await res.json()
+      if (next.error) throw new Error(next.error)
+      onSwitchMode(id, next)
+    } catch (err) {
+      console.error('Mode switch re-analysis failed, using preview data:', err)
+      onSwitchMode(id, CANNED[id])
+    } finally {
+      setSwitchingTo(null)
+      window.scrollTo({ top: 0 })
+    }
+  }
 
   const copyShareLink = async () => {
     setCopying(true)
@@ -352,18 +380,22 @@ export default function Results({ mode, setMode, file, result, onReanalyze }: Re
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {MODE_ORDER.map(id => {
                   const mm = MODES[id]; const active = id === mode
-                  const modeResult = CANNED[id]
+                  const modeResult = active ? result : CANNED[id]
                   const mml = t.modes[id]
+                  const loading = switchingTo === id
                   return (
                     <button key={id}
-                      onClick={() => { if (!active) { setMode(id); window.scrollTo({ top: 0 }) } }}
-                      style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 12, textAlign: 'left', background: active ? `color-mix(in srgb, ${mm.accent} 14%, var(--surface-2))` : 'var(--surface-2)', border: `1px solid ${active ? mm.accent : 'var(--line)'}`, cursor: active ? 'default' : 'pointer', transition: 'all .2s' }}>
+                      disabled={!!switchingTo}
+                      onClick={() => switchLens(id)}
+                      style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 12, textAlign: 'left', background: active ? `color-mix(in srgb, ${mm.accent} 14%, var(--surface-2))` : 'var(--surface-2)', border: `1px solid ${active ? mm.accent : 'var(--line)'}`, cursor: active ? 'default' : switchingTo ? 'wait' : 'pointer', opacity: switchingTo && !loading ? 0.5 : 1, transition: 'all .2s' }}>
                       <span style={{ fontSize: 22 }}>{mm.glyph}</span>
                       <span style={{ flex: 1 }}>
                         <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 15, display: 'block' }}>{mml.name}</span>
                         <span className="mono" style={{ fontSize: 11, color: 'var(--ink-mute)' }}>{t.scoreLabel} {modeResult.score} · {modeResult.grade}</span>
                       </span>
-                      {active
+                      {loading
+                        ? <span style={{ width: 17, height: 17, border: '2px solid var(--line-2)', borderTopColor: mm.accent, borderRadius: '50%', animation: 'spin .7s linear infinite', display: 'inline-block' }} />
+                        : active
                         ? <Pill tone="accent" style={{ padding: '4px 9px', fontSize: 10 }}>{t.viewing}</Pill>
                         : <span style={{ color: mm.accent }}><Icon name="refresh" size={17} /></span>}
                     </button>

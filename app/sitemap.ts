@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 import { POSTS } from '@/lib/posts'
 
-const SITE_URL = 'https://resume-roaster.vercel.app'
+const SITE_URL = 'https://resume-roaster-tan-six.vercel.app'
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const staticRoutes: MetadataRoute.Sitemap = [

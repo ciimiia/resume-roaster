@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { verifySession, SESSION_COOKIE } from '@/lib/session'
-import { kv } from '@/lib/kv'
+import { kv, safeGet } from '@/lib/kv'
 import { POSTS } from '@/lib/posts'
 import type { Post } from '@/lib/posts'
 import AdminClient from './AdminClient'
@@ -18,10 +18,15 @@ export default async function AdminPage() {
   if (!session) redirect('/signin')
   if (!isAdminEmail(session.email)) redirect('/')
 
-  // Fetch KV posts
-  const kvSlugs = (await kv.get<string[]>('blog:posts:all')) ?? []
-  const kvPosts = (await Promise.all(kvSlugs.map(s => kv.get<Post>(`blog:post:${s}`))))
-    .filter((p): p is Post => p !== null)
+  // Fetch KV posts (fail safe — admin page should still render if KV is down)
+  let kvPosts: Post[] = []
+  try {
+    const kvSlugs = await safeGet<string[]>('blog:posts:all', [])
+    kvPosts = (await Promise.all(kvSlugs.map(s => kv.get<Post>(`blog:post:${s}`))))
+      .filter((p): p is Post => p !== null)
+  } catch (err) {
+    console.error('[admin/page] failed to load KV posts:', err)
+  }
 
   const allPosts = [
     ...kvPosts.map(p => ({ ...p, source: 'ai' as const })),

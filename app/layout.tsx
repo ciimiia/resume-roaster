@@ -6,7 +6,7 @@ import { ThemeProvider } from '@/lib/ThemeContext'
 import Tracker from '@/components/Tracker'
 import Navbar from '@/components/Navbar'
 
-const SITE_URL = 'https://resume-roaster.vercel.app'
+const SITE_URL = 'https://resume-roaster-tan-six.vercel.app'
 const OG_IMAGE = `${SITE_URL}/opengraph-image`
 
 export const metadata: Metadata = {

@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import Logo from './ui/Logo'
@@ -88,6 +89,7 @@ function UserNav() {
 
 export default function Navbar() {
   const { t } = useLang()
+  const [menuOpen, setMenuOpen] = useState(false)
 
   const linkStyle: React.CSSProperties = {
     background: 'none', border: 'none', color: 'var(--ink-mute)',
@@ -134,7 +136,46 @@ export default function Navbar() {
         <ThemeToggle />
         <LangToggle />
         <UserNav />
+        <button
+          className="nav-burger"
+          aria-label="Toggle menu"
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen(o => !o)}
+          style={{
+            display: 'none',
+            background: 'var(--surface-2)', border: '1px solid var(--line-2)',
+            borderRadius: 8, width: 36, height: 36, cursor: 'pointer',
+            alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 4,
+          }}
+        >
+          <span style={{ width: 16, height: 2, background: 'var(--ink-mute)', borderRadius: 2 }} />
+          <span style={{ width: 16, height: 2, background: 'var(--ink-mute)', borderRadius: 2 }} />
+          <span style={{ width: 16, height: 2, background: 'var(--ink-mute)', borderRadius: 2 }} />
+        </button>
       </div>
+
+      {menuOpen && (
+        <nav
+          className="nav-links-mobile"
+          style={{
+            position: 'absolute', top: '100%', left: 0, right: 0,
+            display: 'flex', flexDirection: 'column', gap: 2,
+            padding: '10px clamp(20px, 5vw, 60px) 16px',
+            background: 'var(--bg)', borderBottom: '1px solid var(--line)',
+          }}
+        >
+          {links.map(link => (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={() => setMenuOpen(false)}
+              style={{ ...linkStyle, display: 'block', padding: '10px 14px' }}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+      )}
     </header>
   )
 }

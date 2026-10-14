@@ -173,14 +173,15 @@ interface WorkspaceProps {
   setStep: (s: Step) => void
   file: File | null
   setFile: (f: File | null) => void
+  usingSample: boolean
+  setUsingSample: (v: boolean) => void
   onAnalyze: (result: AnalysisResult) => void
 }
 
-export default function Workspace({ mode, setMode, step, setStep, file, setFile, onAnalyze }: WorkspaceProps) {
+export default function Workspace({ mode, setMode, step, setStep, file, setFile, usingSample, setUsingSample, onAnalyze }: WorkspaceProps) {
   const { t } = useLang()
   const [lineIdx, setLineIdx] = useState(0)
   const [analyzeError, setAnalyzeError] = useState('')
-  const usingSample = useRef(false)
 
   useEffect(() => {
     if (step !== 'analyzing') return
@@ -194,7 +195,7 @@ export default function Workspace({ mode, setMode, step, setStep, file, setFile,
     const run = async () => {
       try {
         const formData = new FormData()
-        if (usingSample.current || !file) {
+        if (usingSample || !file) {
           formData.append('useSampleText', 'true')
         } else {
           formData.append('file', file)
@@ -257,13 +258,13 @@ export default function Workspace({ mode, setMode, step, setStep, file, setFile,
           </div>
           <UploadZone
             file={file}
-            onFile={f => { usingSample.current = false; setFile(f) }}
-            onSample={() => { usingSample.current = true; setStep('analyzing') }}
+            onFile={f => { setUsingSample(false); setFile(f) }}
+            onSample={() => { setUsingSample(true); setStep('analyzing') }}
           />
           {file && (
             <div style={{ marginTop: 24, display: 'flex', justifyContent: 'flex-end' }}>
               <Button size="lg" icon="spark"
-                onClick={() => { usingSample.current = false; setStep('analyzing') }}>
+                onClick={() => { setUsingSample(false); setStep('analyzing') }}>
                 {tm.cta} →
               </Button>
             </div>

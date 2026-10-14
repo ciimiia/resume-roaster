@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://resume-roaster.vercel.app',
+        'HTTP-Referer': 'https://resume-roaster-tan-six.vercel.app',
         'X-Title': 'Resume Roaster',
       },
       body: JSON.stringify({
@@ -94,7 +94,11 @@ export async function POST(req: NextRequest) {
           { role: 'user', content: USER_PROMPT(mode, resumeText) },
         ],
         temperature: 0.7,
-        max_tokens: 1200,
+        max_tokens: 2200,
+        // Some free models behind "openrouter/free" spend the whole token
+        // budget on hidden chain-of-thought and never emit the actual JSON
+        // answer. Disabling reasoning routes to a model that returns content.
+        reasoning: { enabled: false },
       }),
     })
 

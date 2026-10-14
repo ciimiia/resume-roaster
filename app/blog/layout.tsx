@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     description: 'ATS optimization, developer resume mistakes, remote job strategies, and career advice that actually works.',
     type: 'website',
   },
-  alternates: { canonical: 'https://resume-roaster.vercel.app/blog' },
+  alternates: { canonical: 'https://resume-roaster-tan-six.vercel.app/blog' },
 }
 
 export default function BlogLayout({ children }: { children: React.ReactNode }) {

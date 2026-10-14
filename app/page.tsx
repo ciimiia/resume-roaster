@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import App from '@/components/App'
-import { kv } from '@/lib/kv'
+import { safeGet } from '@/lib/kv'
 import { SiteContentProvider } from '@/lib/SiteContentContext'
 import type { SiteContent } from '@/lib/SiteContentContext'
 
@@ -14,17 +14,17 @@ export const metadata: Metadata = {
     'AI resume feedback', 'resume checker', 'ATS resume score', 'resume roaster',
     'free resume review', 'resume feedback tool', 'resume AI',
   ],
-  alternates: { canonical: 'https://resume-roaster.vercel.app' },
+  alternates: { canonical: 'https://resume-roaster-tan-six.vercel.app' },
   openGraph: {
     title: 'Resume Roaster — AI Resume Feedback in 12 Seconds',
     description: 'Upload your PDF and get brutal, honest, AI-powered resume feedback in 12 seconds. Free.',
-    url: 'https://resume-roaster.vercel.app',
+    url: 'https://resume-roaster-tan-six.vercel.app',
     type: 'website',
   },
 }
 
 export default async function Home() {
-  const siteContent = (await kv.get<SiteContent>('site:content')) ?? {}
+  const siteContent = await safeGet<SiteContent>('site:content', {})
   return (
     <SiteContentProvider content={siteContent}>
       <App />

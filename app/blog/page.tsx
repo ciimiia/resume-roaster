@@ -1,6 +1,6 @@
 import { POSTS } from '@/lib/posts'
 import type { Post } from '@/lib/posts'
-import { kv } from '@/lib/kv'
+import { kv, safeGet } from '@/lib/kv'
 import BlogIndex from '@/components/blog/BlogIndex'
 import { SiteContentProvider } from '@/lib/SiteContentContext'
 import type { SiteContent } from '@/lib/SiteContentContext'
@@ -8,19 +8,21 @@ import type { SiteContent } from '@/lib/SiteContentContext'
 export const dynamic = 'force-dynamic'
 
 async function getKvPosts(): Promise<Post[]> {
-  const slugs = await kv.get<string[]>('blog:posts:all')
-  console.log('[blog/page] blog:posts:all =', slugs)
-  if (!slugs || slugs.length === 0) return []
-  const posts = await Promise.all(slugs.map(s => kv.get<Post>(`blog:post:${s}`)))
-  const valid = posts.filter((p): p is Post => p !== null)
-  console.log('[blog/page] fetched', valid.length, 'KV posts:', valid.map(p => p.slug))
-  return valid
+  try {
+    const slugs = await kv.get<string[]>('blog:posts:all')
+    if (!slugs || slugs.length === 0) return []
+    const posts = await Promise.all(slugs.map(s => kv.get<Post>(`blog:post:${s}`)))
+    return posts.filter((p): p is Post => p !== null)
+  } catch (err) {
+    console.error('[blog/page] failed to load KV posts, using static only:', err)
+    return []
+  }
 }
 
 export default async function BlogPage() {
   const [kvPosts, siteContent] = await Promise.all([
     getKvPosts(),
-    kv.get<SiteContent>('site:content'),
+    safeGet<SiteContent>('site:content', {}),
   ])
 
   // Merge: KV posts first (newest), then static — deduplicate by slug
@@ -31,7 +33,7 @@ export default async function BlogPage() {
   )
 
   return (
-    <SiteContentProvider content={siteContent ?? {}}>
+    <SiteContentProvider content={siteContent}>
       <BlogIndex allPosts={allPosts} />
     </SiteContentProvider>
   )

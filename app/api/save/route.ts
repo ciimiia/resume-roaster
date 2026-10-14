@@ -37,20 +37,25 @@ export async function POST(req: NextRequest) {
     ...(session ? { userId: session.userId } : {}),
   }
 
-  await kv.set(`result:${id}`, payload, { ex: TTL })
+  try {
+    await kv.set(`result:${id}`, payload, { ex: TTL })
 
-  // Add summary to user's list
-  if (session) {
-    const summary: AnalysisSummary = {
-      id, mode,
-      score: result.score,
-      grade: result.grade,
-      verdict: result.verdict,
-      savedAt: payload.savedAt,
+    // Add summary to user's list
+    if (session) {
+      const summary: AnalysisSummary = {
+        id, mode,
+        score: result.score,
+        grade: result.grade,
+        verdict: result.verdict,
+        savedAt: payload.savedAt,
+      }
+      const existing = await kv.get<AnalysisSummary[]>(`user:analyses:${session.userId}`) ?? []
+      await kv.set(`user:analyses:${session.userId}`, [summary, ...existing].slice(0, 50))
     }
-    const existing = await kv.get<AnalysisSummary[]>(`user:analyses:${session.userId}`) ?? []
-    await kv.set(`user:analyses:${session.userId}`, [summary, ...existing].slice(0, 50))
-  }
 
-  return NextResponse.json({ id })
+    return NextResponse.json({ id })
+  } catch (err) {
+    console.error('[save] failed:', err)
+    return NextResponse.json({ error: 'SERVER_ERROR' }, { status: 500 })
+  }
 }

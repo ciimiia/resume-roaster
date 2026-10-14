@@ -20,11 +20,16 @@ export async function DELETE(req: NextRequest) {
   const { slug } = await req.json() as { slug: string }
   if (!slug) return NextResponse.json({ error: 'slug required' }, { status: 400 })
 
-  await kv.set('blog:posts:all',
-    ((await kv.get<string[]>('blog:posts:all')) ?? []).filter(s => s !== slug)
-  )
-  // Overwrite with null marker — KV has no delete, so we set empty tombstone
-  await kv.set(`blog:post:${slug}`, null)
+  try {
+    await kv.set('blog:posts:all',
+      ((await kv.get<string[]>('blog:posts:all')) ?? []).filter(s => s !== slug)
+    )
+    // Overwrite with null marker — KV has no delete, so we set empty tombstone
+    await kv.set(`blog:post:${slug}`, null)
 
-  return NextResponse.json({ ok: true })
+    return NextResponse.json({ ok: true })
+  } catch (err) {
+    console.error('[admin/posts] DELETE failed:', err)
+    return NextResponse.json({ error: 'SERVER_ERROR' }, { status: 500 })
+  }
 }

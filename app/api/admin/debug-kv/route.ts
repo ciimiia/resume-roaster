@@ -9,18 +9,23 @@ export async function GET() {
   const session = token ? await verifySession(token) : null
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const slugList = await kv.get<string[]>('blog:posts:all')
+  try {
+    const slugList = await kv.get<string[]>('blog:posts:all')
 
-  const posts: Record<string, Post | null> = {}
-  if (slugList && slugList.length > 0) {
-    for (const slug of slugList) {
-      posts[slug] = await kv.get<Post>(`blog:post:${slug}`)
+    const posts: Record<string, Post | null> = {}
+    if (slugList && slugList.length > 0) {
+      for (const slug of slugList) {
+        posts[slug] = await kv.get<Post>(`blog:post:${slug}`)
+      }
     }
-  }
 
-  return NextResponse.json({
-    'blog:posts:all': slugList,
-    posts,
-    postCount: slugList?.length ?? 0,
-  })
+    return NextResponse.json({
+      'blog:posts:all': slugList,
+      posts,
+      postCount: slugList?.length ?? 0,
+    })
+  } catch (err) {
+    console.error('[admin/debug-kv] GET failed:', err)
+    return NextResponse.json({ error: 'SERVER_ERROR', detail: String(err) }, { status: 500 })
+  }
 }

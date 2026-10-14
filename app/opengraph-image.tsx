@@ -117,7 +117,7 @@ export default function OgImage() {
           fontSize: 13, color: 'rgba(255,255,255,0.15)',
           display: 'flex',
         }}>
-          resume-roaster.vercel.app
+          resume-roaster-tan-six.vercel.app
         </div>
       </div>
     ),

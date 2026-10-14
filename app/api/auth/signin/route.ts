@@ -15,24 +15,29 @@ export async function POST(req: NextRequest) {
 
   const normalizedEmail = email.trim().toLowerCase()
 
-  const user = await kv.get<StoredUser>(`user:email:${normalizedEmail}`)
-  if (!user) {
-    return NextResponse.json({ error: 'INVALID_CREDENTIALS' }, { status: 401 })
+  try {
+    const user = await kv.get<StoredUser>(`user:email:${normalizedEmail}`)
+    if (!user) {
+      return NextResponse.json({ error: 'INVALID_CREDENTIALS' }, { status: 401 })
+    }
+
+    const ok = await verifyPassword(password, user.passwordHash)
+    if (!ok) {
+      return NextResponse.json({ error: 'INVALID_CREDENTIALS' }, { status: 401 })
+    }
+
+    const token = await createSession(user.id, normalizedEmail)
+    cookies().set(SESSION_COOKIE, token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60,
+      path: '/',
+    })
+
+    return NextResponse.json({ ok: true, email: normalizedEmail })
+  } catch (err) {
+    console.error('[auth/signin] failed:', err)
+    return NextResponse.json({ error: 'SERVER_ERROR' }, { status: 500 })
   }
-
-  const ok = await verifyPassword(password, user.passwordHash)
-  if (!ok) {
-    return NextResponse.json({ error: 'INVALID_CREDENTIALS' }, { status: 401 })
-  }
-
-  const token = await createSession(user.id, normalizedEmail)
-  cookies().set(SESSION_COOKIE, token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 7 * 24 * 60 * 60,
-    path: '/',
-  })
-
-  return NextResponse.json({ ok: true, email: normalizedEmail })
 }

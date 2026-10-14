@@ -124,12 +124,17 @@ export async function GET(req: NextRequest) {
   }
 
   // Pick a topic that hasn't been used recently
-  const usedSlugs = (await kv.get<string[]>('blog:posts:all')) ?? []
-  const usedTopics = new Set(
-    (await Promise.all(
-      usedSlugs.slice(0, 30).map(s => kv.get<Post>(`blog:post:${s}`))
-    )).filter(Boolean).map(p => p!.title.toLowerCase().slice(0, 30))
-  )
+  let usedTopics = new Set<string>()
+  try {
+    const usedSlugs = (await kv.get<string[]>('blog:posts:all')) ?? []
+    usedTopics = new Set(
+      (await Promise.all(
+        usedSlugs.slice(0, 30).map(s => kv.get<Post>(`blog:post:${s}`))
+      )).filter(Boolean).map(p => p!.title.toLowerCase().slice(0, 30))
+    )
+  } catch (err) {
+    console.error('[generate-post] failed to read existing posts from KV, proceeding with full topic pool:', err)
+  }
 
   const available = TOPICS.filter(t => !usedTopics.has(t.topic.toLowerCase().slice(0, 30)))
   const pool = available.length > 0 ? available : TOPICS
@@ -172,7 +177,7 @@ Requirements:
     headers: {
       Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://resume-roaster.vercel.app',
+      'HTTP-Referer': 'https://resume-roaster-tan-six.vercel.app',
       'X-Title': 'Resume Roaster Blog Generator',
     },
     body: JSON.stringify({
@@ -180,6 +185,9 @@ Requirements:
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.85,
       max_tokens: 3000,
+      // Some free models behind "openrouter/free" spend the whole token
+      // budget on hidden chain-of-thought and never emit real content.
+      reasoning: { enabled: false },
     }),
   })
 
@@ -234,10 +242,15 @@ Requirements:
   }
 
   // ── Save to KV ────────────────────────────────────────────────────────────
-  await kv.set(`blog:post:${slug}`, post)
-  const existingSlugs = (await kv.get<string[]>('blog:posts:all')) ?? []
-  if (!existingSlugs.includes(slug)) {
-    await kv.set('blog:posts:all', [slug, ...existingSlugs].slice(0, 100))
+  try {
+    await kv.set(`blog:post:${slug}`, post)
+    const existingSlugs = (await kv.get<string[]>('blog:posts:all')) ?? []
+    if (!existingSlugs.includes(slug)) {
+      await kv.set('blog:posts:all', [slug, ...existingSlugs].slice(0, 100))
+    }
+  } catch (err) {
+    console.error('[generate-post] failed to save post to KV:', err)
+    return NextResponse.json({ error: 'SERVER_ERROR', detail: String(err) }, { status: 500 })
   }
 
   console.log('[generate-post] Created post:', slug)

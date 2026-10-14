@@ -16,12 +16,17 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const emails = (await kv.get<string[]>('users:all')) ?? []
-  const users = (await Promise.all(
-    emails.map(e => kv.get<StoredUser>(`user:email:${e}`))
-  )).filter((u): u is StoredUser => u !== null)
-    .map(u => ({ email: u.email, createdAt: u.createdAt }))
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+  try {
+    const emails = (await kv.get<string[]>('users:all')) ?? []
+    const users = (await Promise.all(
+      emails.map(e => kv.get<StoredUser>(`user:email:${e}`))
+    )).filter((u): u is StoredUser => u !== null)
+      .map(u => ({ email: u.email, createdAt: u.createdAt }))
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
 
-  return NextResponse.json({ users })
+    return NextResponse.json({ users })
+  } catch (err) {
+    console.error('[admin/users] GET failed:', err)
+    return NextResponse.json({ error: 'SERVER_ERROR' }, { status: 500 })
+  }
 }

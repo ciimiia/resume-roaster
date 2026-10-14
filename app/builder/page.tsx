@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import BuilderApp from '@/components/builder/BuilderApp'
-import { kv } from '@/lib/kv'
+import { safeGet } from '@/lib/kv'
 import { SiteContentProvider } from '@/lib/SiteContentContext'
 import type { SiteContent } from '@/lib/SiteContentContext'
 
@@ -14,17 +14,17 @@ export const metadata: Metadata = {
     'free resume builder', 'ATS resume builder', 'resume maker', 'resume template',
     'CV builder', 'resume creator online', 'PDF resume builder',
   ],
-  alternates: { canonical: 'https://resume-roaster.vercel.app/builder' },
+  alternates: { canonical: 'https://resume-roaster-tan-six.vercel.app/builder' },
   openGraph: {
     title: 'Free Resume Builder — Resume Roaster',
     description: 'Build a clean, ATS-ready resume in minutes and export as PDF — free.',
-    url: 'https://resume-roaster.vercel.app/builder',
+    url: 'https://resume-roaster-tan-six.vercel.app/builder',
     type: 'website',
   },
 }
 
 export default async function BuilderPage() {
-  const siteContent = (await kv.get<SiteContent>('site:content')) ?? {}
+  const siteContent = await safeGet<SiteContent>('site:content', {})
   return (
     <SiteContentProvider content={siteContent}>
       <BuilderApp />

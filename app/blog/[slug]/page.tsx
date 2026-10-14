@@ -5,7 +5,7 @@ import type { Post } from '@/lib/posts'
 import { kv } from '@/lib/kv'
 import PostContent from '@/components/blog/PostContent'
 
-const SITE_URL = 'https://resume-roaster.vercel.app'
+const SITE_URL = 'https://resume-roaster-tan-six.vercel.app'
 const OG_IMAGE = `${SITE_URL}/opengraph-image`
 
 const POST_KEYWORDS: Record<string, string[]> = {
