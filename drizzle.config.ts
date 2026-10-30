@@ -1,11 +1,15 @@
 import type { Config } from 'drizzle-kit'
+import { config as loadEnv } from 'dotenv'
 
-// Read directly from process.env here, not lib/env.ts: drizzle-kit runs as a
-// standalone CLI (via `npm run db:generate` / `db:migrate`), not inside
-// Next.js, so it doesn't load .env.local the way Next does — drizzle-kit
-// itself handles that via dotenv when `dbCredentials.url` is read at config
-// time.
-//
+// drizzle-kit runs as a standalone CLI (via `npm run db:generate` /
+// `db:migrate`), not inside Next.js, so it does NOT load .env.local the way
+// Next does on its own — load it explicitly here, or DATABASE_URL silently
+// reads as undefined even when .env.local has it (learned this the hard
+// way: `migrate` hung forever trying to connect to a placeholder URL
+// instead of failing loudly, because the warning below printed but nothing
+// stopped the command).
+loadEnv({ path: '.env.local' })
+
 // `generate` (diff the schema, write migration SQL) needs no live DB and
 // works today with no DATABASE_URL set. `migrate` / `studio` / `push` do
 // need a real connection — if DATABASE_URL is missing, drizzle-kit itself
