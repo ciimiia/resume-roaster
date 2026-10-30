@@ -4,6 +4,8 @@
  * Token format: base64url(JSON payload) + "." + base64url(HMAC signature)
  */
 
+import { env } from './env'
+
 const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000 // 7 days
 export const SESSION_COOKIE = 'rr-session'
 
@@ -14,9 +16,7 @@ export interface SessionPayload {
 }
 
 function secret() {
-  const s = process.env.SESSION_SECRET
-  if (!s) throw new Error('SESSION_SECRET env var is not set')
-  return s
+  return env.sessionSecret
 }
 
 async function getKey(): Promise<CryptoKey> {

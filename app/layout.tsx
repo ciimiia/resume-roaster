@@ -5,15 +5,17 @@ import { SessionProvider } from '@/lib/SessionContext'
 import { ThemeProvider } from '@/lib/ThemeContext'
 import Tracker from '@/components/Tracker'
 import Navbar from '@/components/Navbar'
+import { env } from '@/lib/env'
+import { PRODUCT } from '@/lib/config'
 
-const SITE_URL = 'https://resume-roaster-tan-six.vercel.app'
+const SITE_URL = env.siteUrl
 const OG_IMAGE = `${SITE_URL}/opengraph-image`
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Resume Roaster — AI Resume Feedback in 12 Seconds',
-    template: '%s — Resume Roaster',
+    default: `${PRODUCT.name} — ${PRODUCT.tagline}`,
+    template: `%s — ${PRODUCT.name}`,
   },
   description:
     'Upload your PDF and get brutal, honest, AI-powered resume feedback in 12 seconds. ATS score, red flags, and actionable fixes — free.',
@@ -22,20 +24,20 @@ export const metadata: Metadata = {
     'resume roaster', 'free resume checker', 'ATS optimization', 'resume tips',
     'job search', 'career advice',
   ],
-  authors: [{ name: 'Resume Roaster' }],
-  creator: 'Resume Roaster',
+  authors: [{ name: PRODUCT.name }],
+  creator: PRODUCT.name,
   openGraph: {
     type: 'website',
-    siteName: 'Resume Roaster',
-    title: 'Resume Roaster — AI Resume Feedback in 12 Seconds',
+    siteName: PRODUCT.name,
+    title: `${PRODUCT.name} — ${PRODUCT.tagline}`,
     description:
       'Upload your PDF and get brutal, honest, AI-powered resume feedback in 12 seconds. ATS score, red flags, and actionable fixes — free.',
     url: SITE_URL,
-    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: 'Resume Roaster — AI Resume Feedback' }],
+    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: `${PRODUCT.name} — AI Resume Feedback` }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Resume Roaster — AI Resume Feedback in 12 Seconds',
+    title: `${PRODUCT.name} — ${PRODUCT.tagline}`,
     description:
       'Upload your PDF and get brutal, honest, AI-powered resume feedback in 12 seconds. Free.',
     images: [OG_IMAGE],

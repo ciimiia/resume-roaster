@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { RESULTS, SAMPLE_TEXT } from '@/lib/data'
 import type { ModeId } from '@/lib/types'
+import { env } from '@/lib/env'
+import { PRODUCT } from '@/lib/config'
 
 const SYSTEM_PROMPTS: Record<ModeId, string> = {
   roast: `You are a brutally honest, witty resume critic. Roast this resume mercilessly but helpfully.
@@ -72,7 +74,7 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const apiKey = process.env.OPENROUTER_API_KEY
+  const apiKey = env.openRouterApiKey
   if (!apiKey) {
     console.warn('OPENROUTER_API_KEY not set — falling back to static data')
     return NextResponse.json(RESULTS[mode] ?? RESULTS.roast)
@@ -84,8 +86,8 @@ export async function POST(req: NextRequest) {
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://resume-roaster-tan-six.vercel.app',
-        'X-Title': 'Resume Roaster',
+        'HTTP-Referer': env.siteUrl,
+        'X-Title': PRODUCT.name,
       },
       body: JSON.stringify({
         model: 'openrouter/free',

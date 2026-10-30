@@ -2,16 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { verifySession, SESSION_COOKIE } from '@/lib/session'
 import { kv } from '@/lib/kv'
+import { env } from '@/lib/env'
 import type { SiteContent } from '@/lib/SiteContentContext'
-
-function isAdmin(email: string) {
-  return (process.env.ADMIN_EMAILS ?? '').split(',').map(e => e.trim().toLowerCase()).includes(email.toLowerCase())
-}
 
 async function guard() {
   const token = cookies().get(SESSION_COOKIE)?.value
   const session = token ? await verifySession(token) : null
-  if (!session || !isAdmin(session.email)) return null
+  if (!session || !env.isAdminEmail(session.email)) return null
   return session
 }
 

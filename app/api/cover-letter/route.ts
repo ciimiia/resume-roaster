@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { kv } from '@/lib/kv'
 import { verifySession, SESSION_COOKIE } from '@/lib/session'
+import { env } from '@/lib/env'
+import { PRODUCT } from '@/lib/config'
 
 export interface CoverLetterSummary {
   id: string
@@ -41,7 +43,7 @@ export async function POST(req: NextRequest) {
     jobDescription: string
   }
 
-  const apiKey = process.env.OPENROUTER_API_KEY
+  const apiKey = env.openRouterApiKey
   if (!apiKey) {
     return NextResponse.json({ error: 'API key not configured' }, { status: 500 })
   }
@@ -51,8 +53,8 @@ export async function POST(req: NextRequest) {
     headers: {
       Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://resume-roaster-tan-six.vercel.app',
-      'X-Title': 'Resume Roaster',
+      'HTTP-Referer': env.siteUrl,
+      'X-Title': PRODUCT.name,
     },
     body: JSON.stringify({
       model: 'openrouter/free',

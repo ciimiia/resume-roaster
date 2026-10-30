@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { kv } from '@/lib/kv'
 import type { Post, Block } from '@/lib/posts'
+import { env } from '@/lib/env'
+import { PRODUCT } from '@/lib/config'
 
 // ── Topic pool ──────────────────────────────────────────────────────────────
 const TOPICS: { topic: string; tag: Post['tag'] }[] = [
@@ -106,7 +108,7 @@ function buildCoverSvg(title: string, tag: string): string {
 
 // ── Auth guard ───────────────────────────────────────────────────────────────
 function authorized(req: NextRequest): boolean {
-  const secret = process.env.CRON_SECRET
+  const secret = env.cronSecret
   if (!secret) return false
   const auth = req.headers.get('authorization') ?? ''
   return auth === `Bearer ${secret}`
@@ -118,7 +120,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const apiKey = process.env.OPENROUTER_API_KEY
+  const apiKey = env.openRouterApiKey
   if (!apiKey) {
     return NextResponse.json({ error: 'OPENROUTER_API_KEY not set' }, { status: 500 })
   }
@@ -177,8 +179,8 @@ Requirements:
     headers: {
       Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://resume-roaster-tan-six.vercel.app',
-      'X-Title': 'Resume Roaster Blog Generator',
+      'HTTP-Referer': env.siteUrl,
+      'X-Title': `${PRODUCT.name} Blog Generator`,
     },
     body: JSON.stringify({
       model: 'openrouter/free',

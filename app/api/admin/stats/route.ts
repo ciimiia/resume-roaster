@@ -2,10 +2,7 @@ import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { verifySession, SESSION_COOKIE } from '@/lib/session'
 import { kv } from '@/lib/kv'
-
-function isAdmin(email: string) {
-  return (process.env.ADMIN_EMAILS ?? '').split(',').map(e => e.trim().toLowerCase()).includes(email.toLowerCase())
-}
+import { env } from '@/lib/env'
 
 function dateStr(daysAgo: number) {
   const d = new Date()
@@ -16,7 +13,7 @@ function dateStr(daysAgo: number) {
 export async function GET() {
   const token = cookies().get(SESSION_COOKIE)?.value
   const session = token ? await verifySession(token) : null
-  if (!session || !isAdmin(session.email)) {
+  if (!session || !env.isAdminEmail(session.email)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

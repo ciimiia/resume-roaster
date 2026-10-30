@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { verifySession, SESSION_COOKIE } from '@/lib/session'
+import { env } from '@/lib/env'
 
 export async function GET() {
   const token = cookies().get(SESSION_COOKIE)?.value
@@ -9,7 +10,6 @@ export async function GET() {
   const session = await verifySession(token)
   if (!session) return NextResponse.json({ user: null })
 
-  const adminList = (process.env.ADMIN_EMAILS ?? '').split(',').map(e => e.trim().toLowerCase())
-  const isAdmin = adminList.includes(session.email.toLowerCase())
+  const isAdmin = env.isAdminEmail(session.email)
   return NextResponse.json({ user: { userId: session.userId, email: session.email, isAdmin } })
 }

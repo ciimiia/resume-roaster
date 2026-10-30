@@ -3,6 +3,8 @@ import BuilderApp from '@/components/builder/BuilderApp'
 import { safeGet } from '@/lib/kv'
 import { SiteContentProvider } from '@/lib/SiteContentContext'
 import type { SiteContent } from '@/lib/SiteContentContext'
+import { env } from '@/lib/env'
+import { PRODUCT } from '@/lib/config'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,11 +16,11 @@ export const metadata: Metadata = {
     'free resume builder', 'ATS resume builder', 'resume maker', 'resume template',
     'CV builder', 'resume creator online', 'PDF resume builder',
   ],
-  alternates: { canonical: 'https://resume-roaster-tan-six.vercel.app/builder' },
+  alternates: { canonical: `${env.siteUrl}/builder` },
   openGraph: {
-    title: 'Free Resume Builder — Resume Roaster',
+    title: `Free Resume Builder — ${PRODUCT.name}`,
     description: 'Build a clean, ATS-ready resume in minutes and export as PDF — free.',
-    url: 'https://resume-roaster-tan-six.vercel.app/builder',
+    url: `${env.siteUrl}/builder`,
     type: 'website',
   },
 }

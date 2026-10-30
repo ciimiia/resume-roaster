@@ -1,10 +1,9 @@
 import { MetadataRoute } from 'next'
-
-const SITE_URL = 'https://resume-roaster-tan-six.vercel.app'
+import { env } from '@/lib/env'
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: { userAgent: '*', allow: '/', disallow: ['/dashboard', '/api/'] },
-    sitemap: `${SITE_URL}/sitemap.xml`,
+    rules: { userAgent: '*', allow: '/', disallow: ['/dashboard', '/admin', '/api/'] },
+    sitemap: `${env.siteUrl}/sitemap.xml`,
   }
 }
