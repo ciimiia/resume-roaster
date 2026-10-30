@@ -11,7 +11,7 @@ import Pill from './ui/Pill'
 import ScoreBar from './ui/ScoreBar'
 import ScoreRing from './ui/ScoreRing'
 import Typewriter from './ui/Typewriter'
-import { cardStyle } from './Landing'
+import { cardStyle } from '@/lib/styles'
 
 /* ---- Canvas share card helpers ---- */
 const CARD_THEME = {
@@ -187,15 +187,15 @@ function ShareModal({ mode, result, onClose }: { mode: ModeId; result: AnalysisR
 /* ---- SectionRow ---- */
 function SectionRow({ s, run, i }: { s: AnalysisResult['sections'][0]; run: boolean; i: number }) {
   return (
-    <div style={{ padding: '18px 0', borderBottom: '1px solid var(--line)', animation: run ? `fadeUp .5s ${0.1 + i * 0.07}s both` : 'none' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 16, marginBottom: 10 }}>
-        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 17 }}>{s.label}</span>
-        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 17, color: s.score >= 75 ? 'var(--intl)' : s.score >= 55 ? 'var(--accent)' : 'var(--roast)' }}>
+    <div style={{ padding: 'var(--sp-4) 0', borderBottom: '1px solid var(--line)', animation: run ? `fadeUp .5s ${0.1 + i * 0.07}s both` : 'none' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 'var(--sp-4)', marginBottom: 'var(--sp-2)' }}>
+        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 'var(--fs-md)' }}>{s.label}</span>
+        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'var(--fs-md)', color: s.score >= 75 ? 'var(--intl)' : s.score >= 55 ? 'var(--accent)' : 'var(--roast)' }}>
           {s.score}<span style={{ color: 'var(--ink-faint)', fontSize: 13 }}>/100</span>
         </span>
       </div>
       <ScoreBar score={s.score} run={run} delay={i * 70} />
-      <p style={{ fontSize: 14.5, color: 'var(--ink-mute)', marginTop: 11, lineHeight: 1.55 }}>{s.note}</p>
+      <p style={{ fontSize: 14.5, color: 'var(--ink-mute)', marginTop: 'var(--sp-3)', lineHeight: 1.55 }}>{s.note}</p>
     </div>
   )
 }
@@ -204,17 +204,17 @@ function SectionRow({ s, run, i }: { s: AnalysisResult['sections'][0]; run: bool
 function ListBlock({ icon, title, items, tone, run }: { icon: string; title: string; items: string[]; tone: 'win'|'fix'|'flag'; run: boolean }) {
   const color = tone === 'win' ? 'var(--intl)' : tone === 'fix' ? 'var(--accent)' : 'var(--roast)'
   return (
-    <div style={cardStyle({ padding: 24 })}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+    <div style={cardStyle({ padding: 'var(--sp-6)' })}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-3)', marginBottom: 'var(--sp-4)' }}>
         <span style={{ width: 32, height: 32, borderRadius: 9, display: 'grid', placeItems: 'center', background: `color-mix(in srgb, ${color} 16%, transparent)`, color }}>
           <Icon name={icon} size={17} />
         </span>
-        <h3 style={{ fontSize: 18 }}>{title}</h3>
+        <h3 style={{ fontSize: 'var(--fs-md)' }}>{title}</h3>
         <span className="mono" style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--ink-faint)' }}>{items.length}</span>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-4)' }}>
         {items.map((it, i) => (
-          <div key={i} style={{ display: 'flex', gap: 12, animation: run ? `fadeUp .5s ${0.15 + i * 0.06}s both` : 'none' }}>
+          <div key={i} style={{ display: 'flex', gap: 'var(--sp-3)', animation: run ? `fadeUp .5s ${0.15 + i * 0.06}s both` : 'none' }}>
             <span style={{ flexShrink: 0, marginTop: 6, width: 7, height: 7, borderRadius: '50%', background: color, boxShadow: `0 0 8px ${color}` }} />
             <p style={{ fontSize: 15, color: 'var(--ink-soft)', lineHeight: 1.55 }}>{it}</p>
           </div>
@@ -302,14 +302,14 @@ export default function Results({ mode, file, usingSample, result, onReanalyze, 
   return (
     <div style={{ animation: 'fadeIn .4s both', minHeight: '100vh' }}>
       {/* Sticky top bar */}
-      <div style={{ position: 'sticky', top: 0, zIndex: 40, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px clamp(20px,5vw,60px)', background: 'color-mix(in srgb, var(--bg) 72%, transparent)', backdropFilter: 'blur(16px)', borderBottom: '1px solid var(--line)' }}>
+      <div style={{ position: 'sticky', top: 0, zIndex: 40, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'var(--sp-4) var(--gutter)', background: 'color-mix(in srgb, var(--bg) 72%, transparent)', backdropFilter: 'blur(16px)', borderBottom: '1px solid var(--line)' }}>
         <Button variant="quiet" size="sm" icon="back" onClick={() => onReanalyze('upload')}>{t.newAnalysis}</Button>
         <Logo size={24} />
         <Button size="sm" icon="share" onClick={() => setShare(true)}>{t.shareYourRoast}</Button>
       </div>
 
-      <div style={{ maxWidth: 1180, margin: '0 auto', padding: 'clamp(28px,4vw,52px) clamp(20px,5vw,60px) 90px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 18 }}>
+      <div style={{ maxWidth: 1180, margin: '0 auto', padding: 'clamp(28px,4vw,52px) var(--gutter) 90px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-3)', marginBottom: 'var(--sp-4)' }}>
           <Pill tone="accent">{m.glyph} {tm.name}</Pill>
           {file && (
             <span className="mono" style={{ fontSize: 12.5, color: 'var(--ink-faint)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -317,41 +317,41 @@ export default function Results({ mode, file, usingSample, result, onReanalyze, 
             </span>
           )}
         </div>
-        <h1 style={{ fontSize: 'clamp(30px,5vw,58px)', maxWidth: 900, minHeight: '1.1em' }}>
+        <h1 style={{ fontSize: 'var(--fs-3xl)', maxWidth: 900, minHeight: '1.1em' }}>
           &quot;<Typewriter text={result.verdict} run={!typed} onDone={() => setTyped(true)} />&quot;
         </h1>
-        <p style={{ fontSize: 'clamp(16px,2vw,19px)', color: 'var(--ink-soft)', maxWidth: 780, marginTop: 20, lineHeight: 1.6 }}>
+        <p style={{ fontSize: 'var(--fs-md)', color: 'var(--ink-soft)', maxWidth: 780, marginTop: 'var(--sp-5)', lineHeight: 1.6 }}>
           {result.summary}
         </p>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.55fr) minmax(0,1fr)', gap: 22, marginTop: 40, alignItems: 'start' }} className="results-grid">
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.55fr) minmax(0,1fr)', gap: 'var(--sp-5)', marginTop: 'var(--sp-8)', alignItems: 'start' }} className="results-grid">
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
-            <div style={cardStyle({ padding: 26 })}>
-              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 4 }}>
-                <h3 style={{ fontSize: 19 }}>{t.theBreakdown}</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-5)' }}>
+            <div style={cardStyle({ padding: 'var(--sp-6)' })}>
+              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 'var(--sp-1)' }}>
+                <h3 style={{ fontSize: 'var(--fs-md)' }}>{t.theBreakdown}</h3>
                 <span className="eyebrow">{result.sections.length} {t.sectionsSuffix}</span>
               </div>
               {result.sections.map((s, i) => <SectionRow key={s.label} s={s} i={i} run />)}
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 22 }} className="lists-grid">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-5)' }} className="lists-grid">
               <ListBlock icon="star" title={t.whatsWorking} items={result.wins}  tone="win"  run />
               <ListBlock icon="flag" title={t.redFlags}     items={result.flags} tone="flag" run />
             </div>
             <ListBlock icon="bolt" title={t.fixTheseFirst} items={result.fixes} tone="fix" run />
           </div>
 
-          <div style={{ position: 'sticky', top: 90, display: 'flex', flexDirection: 'column', gap: 18 }} className="results-aside">
-            <div style={cardStyle({ padding: 28, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', position: 'relative', overflow: 'hidden' })}>
+          <div style={{ position: 'sticky', top: 90, display: 'flex', flexDirection: 'column', gap: 'var(--sp-4)' }} className="results-aside">
+            <div style={cardStyle({ padding: 'var(--sp-7)', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', position: 'relative', overflow: 'hidden' })}>
               <div style={{ position: 'absolute', top: -50, left: '50%', transform: 'translateX(-50%)', width: 240, height: 160, background: 'radial-gradient(circle, var(--glow), transparent 70%)', pointerEvents: 'none' }} />
               <span className="eyebrow" style={{ position: 'relative' }}>{t.overallAtsScore}</span>
-              <div style={{ position: 'relative', margin: '18px 0 8px' }}>
+              <div style={{ position: 'relative', margin: 'var(--sp-5) 0 var(--sp-2)' }}>
                 <ScoreRing score={result.score} size={200} grade={result.grade} />
               </div>
               <p style={{ position: 'relative', fontSize: 14.5, color: 'var(--ink-mute)', maxWidth: 240 }}>
                 {scoreDesc}
               </p>
-              <Button full icon="share" onClick={() => setShare(true)} style={{ position: 'relative', marginTop: 22 }}>
+              <Button full icon="share" onClick={() => setShare(true)} style={{ position: 'relative', marginTop: 'var(--sp-5)' }}>
                 {t.shareYourRoast}
               </Button>
               <button
@@ -374,20 +374,30 @@ export default function Results({ mode, file, usingSample, result, onReanalyze, 
             </div>
 
             {/* Mode switcher */}
-            <div style={cardStyle({ padding: 22 })}>
-              <h3 style={{ fontSize: 16, marginBottom: 4 }}>{t.sameLens}</h3>
-              <p style={{ fontSize: 13.5, color: 'var(--ink-mute)', marginBottom: 16 }}>{t.reRunInstantly}</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={cardStyle({ padding: 'var(--sp-5)' })}>
+              <h3 style={{ fontSize: 16, marginBottom: 'var(--sp-1)' }}>{t.sameLens}</h3>
+              <p style={{ fontSize: 13.5, color: 'var(--ink-mute)', marginBottom: 'var(--sp-4)' }}>{t.reRunInstantly}</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-2)' }}>
                 {MODE_ORDER.map(id => {
                   const mm = MODES[id]; const active = id === mode
                   const modeResult = active ? result : CANNED[id]
                   const mml = t.modes[id]
                   const loading = switchingTo === id
+                  const disabled = active || !!switchingTo
                   return (
                     <button key={id}
-                      disabled={!!switchingTo}
+                      disabled={disabled}
                       onClick={() => switchLens(id)}
-                      style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 12, textAlign: 'left', background: active ? `color-mix(in srgb, ${mm.accent} 14%, var(--surface-2))` : 'var(--surface-2)', border: `1px solid ${active ? mm.accent : 'var(--line)'}`, cursor: active ? 'default' : switchingTo ? 'wait' : 'pointer', opacity: switchingTo && !loading ? 0.5 : 1, transition: 'all .2s' }}>
+                      onMouseEnter={e => { if (!disabled) e.currentTarget.style.borderColor = mm.accent }}
+                      onMouseLeave={e => { if (!disabled) e.currentTarget.style.borderColor = 'var(--line)' }}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 'var(--sp-3)', padding: '12px 14px', borderRadius: 12, textAlign: 'left',
+                        background: active ? `color-mix(in srgb, ${mm.accent} 14%, var(--surface-2))` : 'var(--surface-2)',
+                        border: `1px solid ${active ? mm.accent : 'var(--line)'}`,
+                        cursor: active ? 'default' : switchingTo ? 'wait' : 'pointer',
+                        opacity: switchingTo && !loading ? 0.5 : 1,
+                        transition: 'all .2s var(--ease-out)',
+                      }}>
                       <span style={{ fontSize: 22 }}>{mm.glyph}</span>
                       <span style={{ flex: 1 }}>
                         <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 15, display: 'block' }}>{mml.name}</span>

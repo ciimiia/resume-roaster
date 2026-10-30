@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import Logo from './ui/Logo'
 import ThemeToggle from './ui/ThemeToggle'
 import { useLang } from '@/lib/LangContext'
@@ -89,47 +89,55 @@ function UserNav() {
 
 export default function Navbar() {
   const { t } = useLang()
+  const pathname = usePathname()
   const [menuOpen, setMenuOpen] = useState(false)
 
-  const linkStyle: React.CSSProperties = {
-    background: 'none', border: 'none', color: 'var(--ink-mute)',
-    fontFamily: 'var(--font-body)', fontSize: 15,
+  const linkStyle = (isActive: boolean): React.CSSProperties => ({
+    background: isActive ? 'color-mix(in srgb, var(--accent) 10%, transparent)' : 'none',
+    border: 'none', color: isActive ? 'var(--ink)' : 'var(--ink-mute)',
+    fontFamily: 'var(--font-body)', fontSize: 15, fontWeight: isActive ? 600 : 400,
     padding: '8px 14px', borderRadius: 9, cursor: 'pointer',
     textDecoration: 'none', display: 'inline-block',
-    transition: 'color .2s', whiteSpace: 'nowrap',
-  }
+    transition: 'color .2s var(--ease-out), background .2s var(--ease-out)',
+    whiteSpace: 'nowrap',
+  })
 
   const links = [
-    { label: t.navHowItWorks, href: '/#how-it-works' },
-    { label: t.navModes,       href: '/#modes' },
-    { label: t.navBlog,        href: '/blog' },
-    { label: t.navBuilder,     href: '/builder' },
-    { label: t.clTitle,        href: '/cover-letter' },
-    { label: t.navTheApp,      href: '/' },
+    { label: t.navHowItWorks, href: '/#how-it-works', trackActive: false },
+    { label: t.navModes,       href: '/#modes', trackActive: false },
+    { label: t.navBlog,        href: '/blog', trackActive: true },
+    { label: t.navBuilder,     href: '/builder', trackActive: true },
+    { label: t.clTitle,        href: '/cover-letter', trackActive: true },
+    { label: t.navTheApp,      href: '/', trackActive: true },
   ]
+  const isLinkActive = (href: string, trackActive: boolean) =>
+    trackActive && (href === '/' ? pathname === '/' : pathname.startsWith(href))
 
   return (
     <header style={{
       position: 'sticky', top: 0, zIndex: 40,
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      padding: '18px clamp(20px, 5vw, 60px)',
+      padding: 'var(--sp-4) var(--gutter)',
       background: 'color-mix(in srgb, var(--bg) 72%, transparent)',
       backdropFilter: 'blur(16px)', borderBottom: '1px solid var(--line)',
     }}>
       <Logo />
 
       <nav style={{ display: 'flex', alignItems: 'center', gap: 4 }} className="nav-links">
-        {links.map(link => (
-          <Link
-            key={link.href}
-            href={link.href}
-            style={linkStyle}
-            onMouseEnter={e => (e.currentTarget.style.color = 'var(--ink)')}
-            onMouseLeave={e => (e.currentTarget.style.color = 'var(--ink-mute)')}
-          >
-            {link.label}
-          </Link>
-        ))}
+        {links.map(link => {
+          const isActive = isLinkActive(link.href, link.trackActive)
+          return (
+            <Link
+              key={link.href}
+              href={link.href}
+              style={linkStyle(isActive)}
+              onMouseEnter={e => { if (!isActive) e.currentTarget.style.color = 'var(--ink)' }}
+              onMouseLeave={e => { if (!isActive) e.currentTarget.style.color = 'var(--ink-mute)' }}
+            >
+              {link.label}
+            </Link>
+          )
+        })}
       </nav>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -160,8 +168,9 @@ export default function Navbar() {
           style={{
             position: 'absolute', top: '100%', left: 0, right: 0,
             display: 'flex', flexDirection: 'column', gap: 2,
-            padding: '10px clamp(20px, 5vw, 60px) 16px',
+            padding: '10px var(--gutter) 16px',
             background: 'var(--bg)', borderBottom: '1px solid var(--line)',
+            animation: 'fadeUp .25s var(--ease-out) both',
           }}
         >
           {links.map(link => (
@@ -169,7 +178,7 @@ export default function Navbar() {
               key={link.href}
               href={link.href}
               onClick={() => setMenuOpen(false)}
-              style={{ ...linkStyle, display: 'block', padding: '10px 14px' }}
+              style={{ ...linkStyle(isLinkActive(link.href, link.trackActive)), display: 'block', padding: '10px 14px' }}
             >
               {link.label}
             </Link>

@@ -1,12 +1,1 @@
-{
-  "version": "0.0.1",
-  "configurations": [
-    {
-      "name": "resume-roaster",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
-      "port": 3000,
-      "cwd": "../resume-roaster"
-    }
-  ]
-}
+{"version":"0.0.1","configurations":[{"name":"resume-roaster-dev","runtimeExecutable":"npm","runtimeArgs":["run","dev"],"port":3000}]}

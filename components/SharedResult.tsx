@@ -8,7 +8,7 @@ import Pill from './ui/Pill'
 import ScoreBar from './ui/ScoreBar'
 import ScoreRing from './ui/ScoreRing'
 import Icon from './ui/Icon'
-import { cardStyle } from './Landing'
+import { cardStyle } from '@/lib/styles'
 import { useLang } from '@/lib/LangContext'
 
 function SectionRow({ s, i }: { s: AnalysisResult['sections'][0]; i: number }) {

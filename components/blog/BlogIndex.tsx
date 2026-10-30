@@ -24,20 +24,20 @@ export default function BlogIndex({ allPosts }: { allPosts: Post[] }) {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
-      <main style={{ maxWidth: 1100, margin: '0 auto', padding: 'clamp(40px,6vw,80px) clamp(20px,5vw,60px)' }}>
+      <main style={{ maxWidth: 1100, margin: '0 auto', padding: 'clamp(40px,6vw,80px) var(--gutter)' }}>
         {/* Hero */}
-        <div style={{ marginBottom: 56, animation: 'fadeUp .5s both' }}>
+        <div style={{ marginBottom: 'var(--sp-9)', animation: 'fadeUp .5s both' }}>
           <span style={{
             display: 'inline-block', fontFamily: 'var(--font-mono)', fontSize: 11,
-            letterSpacing: '.12em', color: 'var(--accent)', marginBottom: 14,
+            letterSpacing: '.12em', color: 'var(--accent)', marginBottom: 'var(--sp-3)',
           }}>{t.blogEyebrow}</span>
-          <h1 style={{ fontSize: 'clamp(34px,5vw,60px)', fontWeight: 700, lineHeight: 1.05 }}>
+          <h1 style={{ fontSize: 'var(--fs-3xl)', fontWeight: 700, lineHeight: 1.05 }}>
             {s('blogH1a', t.blogH1a)}<br />
             <span style={{ background: 'linear-gradient(120deg,var(--accent),var(--accent-2))', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>
               {s('blogH1b', t.blogH1b)}
             </span>
           </h1>
-          <p style={{ fontSize: 18, color: 'var(--ink-soft)', marginTop: 18, maxWidth: 520, lineHeight: 1.6 }}>
+          <p style={{ fontSize: 'var(--fs-lg)', color: 'var(--ink-soft)', marginTop: 'var(--sp-4)', maxWidth: 520, lineHeight: 1.6 }}>
             {s('blogSubtitle', t.blogSubtitle)}
           </p>
         </div>
@@ -46,7 +46,7 @@ export default function BlogIndex({ allPosts }: { allPosts: Post[] }) {
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-          gap: 24,
+          gap: 'var(--sp-5)',
         }}>
           {allPosts.map((post, i) => {
             const accent = TAG_COLORS[post.tag] ?? 'var(--accent)'
@@ -60,7 +60,7 @@ export default function BlogIndex({ allPosts }: { allPosts: Post[] }) {
                   boxShadow: '0 1px 0 rgba(255,255,255,0.04) inset, 0 8px 24px rgba(0,0,0,0.35)',
                   overflow: 'hidden',
                   display: 'flex', flexDirection: 'column',
-                  transition: 'transform .25s cubic-bezier(.34,1.4,.64,1), border-color .2s, box-shadow .2s',
+                  transition: 'transform .25s var(--ease-spring), border-color .2s, box-shadow .2s',
                   animation: `fadeUp .5s ${i * 0.08}s both`,
                   cursor: 'pointer',
                 }}
@@ -142,7 +142,7 @@ export default function BlogIndex({ allPosts }: { allPosts: Post[] }) {
         </div>
       </main>
 
-      <footer style={{ borderTop: '1px solid var(--line)', padding: '26px clamp(20px,5vw,60px)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14 }}>
+      <footer style={{ borderTop: '1px solid var(--line)', padding: 'var(--sp-6) var(--gutter)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--sp-3)' }}>
         <Logo size={24} />
         <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--ink-faint)' }}>
           {t.footer}

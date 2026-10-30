@@ -6,6 +6,7 @@ import Button from '@/components/ui/Button'
 import Icon from '@/components/ui/Icon'
 import { useLang } from '@/lib/LangContext'
 import { useSiteContent } from '@/lib/SiteContentContext'
+import { cardStyle } from '@/lib/styles'
 
 /* ── Types ───────────────────────────────────────────── */
 interface Experience {
@@ -64,7 +65,7 @@ const inp: React.CSSProperties = {
   fontFamily: 'var(--font-body)',
   fontSize: 15,
   outline: 'none',
-  transition: 'border-color .2s',
+  transition: 'border-color .2s var(--ease-out)',
   boxSizing: 'border-box',
 }
 
@@ -112,7 +113,7 @@ function FocusTA({ style: extra, ...props }: React.TextareaHTMLAttributes<HTMLTe
 function StepRail({ step, setStep, labels }: { step: StepId; setStep: (s: StepId) => void; labels: string[] }) {
   const idx = STEP_IDS.findIndex(s => s === step)
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: 36, flexWrap: 'wrap', rowGap: 10 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: 'var(--sp-7)', flexWrap: 'wrap', rowGap: 'var(--sp-2)' }}>
       {STEP_IDS.map((id, i) => (
         <div key={id} style={{ display: 'flex', alignItems: 'center' }}>
           <button
@@ -491,19 +492,12 @@ export default function BuilderApp() {
   const next = () => !isLast && setStep(STEP_IDS[stepIdx + 1])
   const prev = () => !isFirst && setStep(STEP_IDS[stepIdx - 1])
 
-  const card: React.CSSProperties = {
-    background: 'var(--surface)',
-    border: '1px solid var(--line)',
-    borderRadius: 'var(--r-lg)',
-    boxShadow: '0 1px 0 rgba(255,255,255,0.04) inset, 0 8px 24px rgba(0,0,0,0.4)',
-  }
-
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
       {/* Sub-header: tool title only */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: '14px clamp(20px,5vw,60px)',
+        padding: 'var(--sp-3) var(--gutter)',
         borderBottom: '1px solid var(--line)',
       }}>
         <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 16, color: 'var(--ink-soft)' }}>
@@ -519,15 +513,15 @@ export default function BuilderApp() {
       {/* Main two-column layout */}
       <div style={{
         maxWidth: 1300, margin: '0 auto',
-        padding: 'clamp(28px,4vw,48px) clamp(20px,5vw,60px)',
+        padding: 'clamp(28px,4vw,48px) var(--gutter)',
         display: 'grid',
         gridTemplateColumns: 'minmax(0,1fr) minmax(0,0.85fr)',
-        gap: 28, alignItems: 'start',
+        gap: 'var(--sp-5)', alignItems: 'start',
       }}
         className="hero-grid"
       >
         {/* Left: form */}
-        <div style={{ ...card, padding: 'clamp(24px,3vw,36px)' }}>
+        <div style={cardStyle({ padding: 'clamp(24px,3vw,36px)' })}>
           <StepRail step={step} setStep={setStep} labels={t.builderSteps} />
 
           {step === 'personal'   && <StepPersonal   data={data.personal}   onChange={p  => setData({ ...data, personal:   p  })} />}
@@ -536,8 +530,8 @@ export default function BuilderApp() {
           {step === 'skills'     && <StepSkills     data={data.skills}     onChange={sk => setData({ ...data, skills:     sk })} />}
           {step === 'preview'    && (
             <div style={{ animation: 'fadeUp .4s both' }}>
-              <h2 style={{ fontSize: 'clamp(22px,3vw,30px)', marginBottom: 8 }}>{t.builderLookingGood}</h2>
-              <p style={{ fontSize: 15, color: 'var(--ink-mute)', marginBottom: 24 }}>
+              <h2 style={{ fontSize: 'var(--fs-xl)', marginBottom: 'var(--sp-2)' }}>{t.builderLookingGood}</h2>
+              <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-mute)', marginBottom: 'var(--sp-6)' }}>
                 {t.builderPreviewDesc}
               </p>
               <Button size="lg" icon="download" onClick={() => window.print()}>{t.builderExportPdf}</Button>
@@ -545,7 +539,7 @@ export default function BuilderApp() {
           )}
 
           {/* Nav buttons */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 32, paddingTop: 24, borderTop: '1px solid var(--line)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 'var(--sp-7)', paddingTop: 'var(--sp-6)', borderTop: '1px solid var(--line)' }}>
             <Button variant="quiet" size="sm" icon="back" onClick={prev} style={{ visibility: isFirst ? 'hidden' : 'visible' }}>{t.builderBack}</Button>
             {!isLast && <Button size="md" iconRight="arrow" onClick={next}>{t.builderNextPrefix} {t.builderSteps[stepIdx + 1]}</Button>}
             {isLast  && <Button size="md" icon="download" onClick={() => window.print()}>{t.builderExportPdf}</Button>}

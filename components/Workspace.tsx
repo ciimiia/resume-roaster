@@ -19,22 +19,22 @@ function StepRail({ step }: { step: Step }) {
   ]
   const idx = steps.findIndex(s => s.id === step)
   return (
-    <div style={{ display: 'flex', alignItems: 'center', marginBottom: 40, flexWrap: 'wrap', gap: 8 }}>
+    <div style={{ display: 'flex', alignItems: 'center', marginBottom: 'var(--sp-8)', flexWrap: 'wrap', gap: 'var(--sp-2)' }}>
       {steps.map((s, i) => (
         <div key={s.id} style={{ display: 'flex', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-3)' }}>
             <div style={{
               width: 32, height: 32, borderRadius: '50%',
               display: 'grid', placeItems: 'center',
               fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 13,
               background: i <= idx ? 'linear-gradient(140deg, var(--accent), var(--accent-2))' : 'var(--surface-3)',
               color: i <= idx ? 'var(--accent-ink)' : 'var(--ink-faint)',
-              transition: 'all .3s',
+              transition: 'all .3s var(--ease-out)',
             }}>
               {i < idx ? <Icon name="check" size={14} stroke={2.4} /> : i + 1}
             </div>
             <span style={{
-              fontSize: 14, fontFamily: 'var(--font-display)', fontWeight: 600,
+              fontSize: 'var(--fs-sm)', fontFamily: 'var(--font-display)', fontWeight: 600,
               color: i === idx ? 'var(--ink)' : i < idx ? 'var(--ink-mute)' : 'var(--ink-faint)',
               transition: 'color .3s',
             }}>
@@ -45,7 +45,7 @@ function StepRail({ step }: { step: Step }) {
             <div style={{
               width: 40, height: 1,
               background: i < idx ? 'var(--accent)' : 'var(--line-2)',
-              margin: '0 12px', transition: 'background .3s',
+              margin: '0 var(--sp-3)', transition: 'background .3s',
             }} />
           )}
         </div>
@@ -64,6 +64,7 @@ function UploadZone({
 }) {
   const { t } = useLang()
   const [drag, setDrag] = useState(false)
+  const [hover, setHover] = useState(false)
   const [error, setError] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -81,13 +82,16 @@ function UploadZone({
         onDragLeave={() => setDrag(false)}
         onDrop={e => { e.preventDefault(); setDrag(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f) }}
         onClick={() => inputRef.current?.click()}
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
         style={{
-          border: `2px dashed ${drag ? 'var(--accent)' : file ? 'var(--accent)' : 'var(--line-2)'}`,
+          border: `2px dashed ${drag || file ? 'var(--accent)' : hover ? 'var(--line-2)' : 'var(--line)'}`,
           borderRadius: 'var(--r-lg)',
           background: drag ? 'color-mix(in srgb, var(--accent) 6%, var(--surface))' : file ? 'color-mix(in srgb, var(--accent) 4%, var(--surface))' : 'var(--surface)',
           padding: 'clamp(40px, 6vw, 80px) 40px',
           textAlign: 'center', cursor: 'pointer',
-          transition: 'all .2s', position: 'relative', overflow: 'hidden',
+          transform: hover && !file ? 'translateY(-2px)' : 'none',
+          transition: 'all .2s var(--ease-out)', position: 'relative', overflow: 'hidden',
         }}
       >
         <input ref={inputRef} type="file" accept=".pdf" style={{ display: 'none' }}
@@ -222,22 +226,22 @@ export default function Workspace({ mode, setMode, step, setStep, file, setFile,
   const analysisSteps = [t.parseStructure, t.scanKeywords, t.scoreSections, t.generateVerdict]
 
   return (
-    <div style={{ maxWidth: 860, margin: '0 auto', padding: 'clamp(32px,5vw,64px) clamp(20px,5vw,60px)' }}>
+    <div style={{ maxWidth: 860, margin: '0 auto', padding: 'clamp(32px,5vw,64px) var(--gutter)' }}>
       <StepRail step={step} />
 
       {/* ── STEP: mode ── */}
       {step === 'mode' && (
         <div style={{ animation: 'fadeUp .5s both' }}>
-          <div style={{ marginBottom: 28 }}>
-            <h2 style={{ fontSize: 'clamp(26px,4vw,38px)' }}>{t.chooseYourMode}</h2>
-            <p style={{ fontSize: 16, color: 'var(--ink-mute)', marginTop: 8 }}>{t.chooseYourModeDesc}</p>
+          <div style={{ marginBottom: 'var(--sp-7)' }}>
+            <h2 style={{ fontSize: 'var(--fs-2xl)' }}>{t.chooseYourMode}</h2>
+            <p style={{ fontSize: 'var(--fs-base)', color: 'var(--ink-mute)', marginTop: 'var(--sp-2)' }}>{t.chooseYourModeDesc}</p>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16 }} className="modes-grid">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 'var(--sp-4)' }} className="modes-grid">
             {MODE_ORDER.map(id => (
               <ModeSelectorCard key={id} mode={MODES[id]} active={mode === id} onPick={() => setMode(id)} />
             ))}
           </div>
-          <div style={{ marginTop: 32, display: 'flex', justifyContent: 'flex-end' }}>
+          <div style={{ marginTop: 'var(--sp-7)', display: 'flex', justifyContent: 'flex-end' }}>
             <Button size="lg" iconRight="arrow" onClick={() => setStep('upload')}>
               {t.continueWith} {MODES[mode].glyph} {tm.name}
             </Button>
@@ -248,13 +252,13 @@ export default function Workspace({ mode, setMode, step, setStep, file, setFile,
       {/* ── STEP: upload ── */}
       {step === 'upload' && (
         <div style={{ animation: 'fadeUp .5s both' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 28 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-3)', marginBottom: 'var(--sp-7)' }}>
             <Button variant="quiet" size="sm" icon="back" onClick={() => setStep('mode')}>{t.back}</Button>
             <Pill tone="accent">{MODES[mode].glyph} {tm.name}</Pill>
           </div>
-          <div style={{ marginBottom: 28 }}>
-            <h2 style={{ fontSize: 'clamp(26px,4vw,38px)' }}>{t.uploadYourResume}</h2>
-            <p style={{ fontSize: 16, color: 'var(--ink-mute)', marginTop: 8 }}>{t.uploadDesc}</p>
+          <div style={{ marginBottom: 'var(--sp-7)' }}>
+            <h2 style={{ fontSize: 'var(--fs-2xl)' }}>{t.uploadYourResume}</h2>
+            <p style={{ fontSize: 'var(--fs-base)', color: 'var(--ink-mute)', marginTop: 'var(--sp-2)' }}>{t.uploadDesc}</p>
           </div>
           <UploadZone
             file={file}
@@ -262,7 +266,7 @@ export default function Workspace({ mode, setMode, step, setStep, file, setFile,
             onSample={() => { setUsingSample(true); setStep('analyzing') }}
           />
           {file && (
-            <div style={{ marginTop: 24, display: 'flex', justifyContent: 'flex-end' }}>
+            <div style={{ marginTop: 'var(--sp-6)', display: 'flex', justifyContent: 'flex-end' }}>
               <Button size="lg" icon="spark"
                 onClick={() => { setUsingSample(false); setStep('analyzing') }}>
                 {tm.cta} →
@@ -275,28 +279,28 @@ export default function Workspace({ mode, setMode, step, setStep, file, setFile,
       {/* ── STEP: analyzing ── */}
       {step === 'analyzing' && (
         <div style={{ animation: 'fadeUp .5s both' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 32 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-3)', marginBottom: 'var(--sp-8)' }}>
             <Pill tone="accent">{MODES[mode].glyph} {tm.name}</Pill>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40, alignItems: 'center' }} className="hero-grid">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--sp-8)', alignItems: 'center' }} className="hero-grid">
             <FauxResume />
             <div>
-              <div style={{ width: 52, height: 52, borderRadius: '50%', border: '3px solid var(--surface-3)', borderTopColor: 'var(--accent)', animation: 'spin 1s linear infinite', marginBottom: 28 }} />
-              <h2 style={{ fontSize: 'clamp(22px,3vw,32px)', lineHeight: 1.2 }}>{t.analyzingH2}</h2>
-              <p key={lineIdx} style={{ fontSize: 16, color: 'var(--accent)', marginTop: 14, fontFamily: 'var(--font-mono)', animation: 'fadeUp .4s both' }}>
+              <div style={{ width: 52, height: 52, borderRadius: '50%', border: '3px solid var(--surface-3)', borderTopColor: 'var(--accent)', animation: 'spin 1s linear infinite', marginBottom: 'var(--sp-7)' }} />
+              <h2 style={{ fontSize: 'var(--fs-xl)', lineHeight: 1.2 }}>{t.analyzingH2}</h2>
+              <p key={lineIdx} style={{ fontSize: 'var(--fs-base)', color: 'var(--accent)', marginTop: 'var(--sp-4)', fontFamily: 'var(--font-mono)', animation: 'fadeUp .4s both' }}>
                 {t.loadingLines[mode][lineIdx]}
               </p>
-              <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div style={{ marginTop: 'var(--sp-7)', display: 'flex', flexDirection: 'column', gap: 'var(--sp-3)' }}>
                 {analysisSteps.map((label) => (
-                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-3)' }}>
                     <div style={{ width: 18, height: 18, borderRadius: '50%', background: 'color-mix(in srgb, var(--accent) 20%, transparent)', border: '1.5px solid var(--accent)', display: 'grid', placeItems: 'center', color: 'var(--accent)' }}>
                       <Icon name="check" size={10} stroke={2.5} />
                     </div>
-                    <span style={{ fontSize: 14, color: 'var(--ink-mute)' }}>{label}</span>
+                    <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-mute)' }}>{label}</span>
                   </div>
                 ))}
               </div>
-              {analyzeError && <p style={{ fontSize: 13, color: 'var(--ink-faint)', marginTop: 16 }}>{analyzeError}</p>}
+              {analyzeError && <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-faint)', marginTop: 'var(--sp-4)' }}>{analyzeError}</p>}
             </div>
           </div>
         </div>

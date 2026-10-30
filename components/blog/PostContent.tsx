@@ -114,7 +114,7 @@ export default function PostContent({ post, others }: { post: Post; others: Post
         </div>
       )}
 
-      <main style={{ maxWidth: 760, margin: '0 auto', padding: 'clamp(40px,6vw,72px) clamp(20px,5vw,40px) 80px' }}>
+      <main style={{ maxWidth: 760, margin: '0 auto', padding: 'clamp(40px,6vw,72px) var(--gutter) 80px' }}>
         <div style={{ marginBottom: 40, animation: 'fadeUp .5s both' }}>
           <span style={{
             display: 'inline-block', padding: '5px 13px', borderRadius: 999, marginBottom: 20,
@@ -170,8 +170,11 @@ export default function PostContent({ post, others }: { post: Post; others: Post
             padding: '12px 26px', borderRadius: 'var(--r-md)', textDecoration: 'none',
             background: 'linear-gradient(140deg, var(--accent), var(--accent-2))',
             color: 'var(--accent-ink)', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15,
-            transition: 'opacity .2s',
-          }}>
+            transition: 'transform .2s var(--ease-out)',
+          }}
+            onMouseEnter={e => (e.currentTarget.style.transform = 'translateY(-2px)')}
+            onMouseLeave={e => (e.currentTarget.style.transform = 'none')}
+          >
             {t.blogCTABtn}
           </Link>
         </div>
@@ -203,7 +206,7 @@ export default function PostContent({ post, others }: { post: Post; others: Post
         )}
       </main>
 
-      <footer style={{ borderTop: '1px solid var(--line)', padding: '26px clamp(20px,5vw,60px)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14 }}>
+      <footer style={{ borderTop: '1px solid var(--line)', padding: 'var(--sp-6) var(--gutter)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--sp-3)' }}>
         <Logo size={24} />
         <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--ink-faint)' }}>
           {t.footer}

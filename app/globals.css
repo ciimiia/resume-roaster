@@ -34,6 +34,29 @@
   --shadow-1: 0 1px 0 rgba(255,255,255,0.04) inset, 0 8px 24px rgba(0,0,0,0.4);
   --shadow-2: 0 24px 80px rgba(0,0,0,0.6);
   --r-sm: 10px; --r-md: 16px; --r-lg: 24px; --r-xl: 32px;
+
+  /* Spacing scale (4px base) — use for gap/padding/margin instead of
+     one-off pixel values, so rhythm stays consistent across pages. */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 20px; --sp-6: 24px; --sp-7: 32px; --sp-8: 40px;
+  --sp-9: 56px; --sp-10: 72px; --sp-11: 96px;
+
+  /* Type scale — fluid where it reads better on narrow screens */
+  --fs-xs: 12px;
+  --fs-sm: 14px;
+  --fs-base: 16px;
+  --fs-md: 18px;
+  --fs-lg: 21px;
+  --fs-xl: clamp(24px, 3vw, 28px);
+  --fs-2xl: clamp(30px, 4.5vw, 40px);
+  --fs-3xl: clamp(40px, 6vw, 64px);
+
+  /* Shared motion easing — consistent "springy" feel across interactions */
+  --ease-out: cubic-bezier(.16,1,.3,1);
+  --ease-spring: cubic-bezier(.34,1.4,.64,1);
+
+  /* Page gutter, used by Container/Section primitives */
+  --gutter: clamp(20px, 5vw, 60px);
 }
 
 /* ── Light mode ─────────────────────────────────────────────────────────── */

@@ -6,7 +6,7 @@ import Button from '@/components/ui/Button'
 import Icon from '@/components/ui/Icon'
 import { useLang } from '@/lib/LangContext'
 import { useSiteContent } from '@/lib/SiteContentContext'
-import { cardStyle } from '@/components/Landing'
+import { cardStyle } from '@/lib/styles'
 
 export default function CoverLetterPage() {
   const { t, lang } = useLang()
@@ -93,18 +93,18 @@ export default function CoverLetterPage() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
 
-      <main style={{ maxWidth: 1200, margin: '0 auto', padding: 'clamp(36px,5vw,64px) clamp(20px,5vw,60px) 90px' }}>
+      <main style={{ maxWidth: 1200, margin: '0 auto', padding: 'clamp(36px,5vw,64px) var(--gutter) 90px' }}>
 
         {/* ── Hero ── */}
-        <div style={{ marginBottom: 40, animation: 'fadeUp .45s both' }}>
+        <div style={{ marginBottom: 'var(--sp-8)', animation: 'fadeUp .45s both' }}>
           <span style={{
             display: 'inline-block', fontFamily: 'var(--font-mono)', fontSize: 11,
-            letterSpacing: '.12em', color: 'var(--accent)', marginBottom: 14,
+            letterSpacing: '.12em', color: 'var(--accent)', marginBottom: 'var(--sp-3)',
           }}>{t.clEyebrow}</span>
-          <h1 style={{ fontSize: 'clamp(30px,4.5vw,54px)', fontWeight: 700, lineHeight: 1.08 }}>
+          <h1 style={{ fontSize: 'var(--fs-3xl)', fontWeight: 700, lineHeight: 1.08 }}>
             {s('clTitle', t.clTitle)}
           </h1>
-          <p style={{ fontSize: 17, color: 'var(--ink-soft)', marginTop: 14, maxWidth: 540, lineHeight: 1.6 }}>
+          <p style={{ fontSize: 'var(--fs-md)', color: 'var(--ink-soft)', marginTop: 'var(--sp-3)', maxWidth: 540, lineHeight: 1.6 }}>
             {s('clSubtitle', t.clSubtitle)}
           </p>
         </div>
@@ -113,12 +113,12 @@ export default function CoverLetterPage() {
         <div style={{
           display: 'grid',
           gridTemplateColumns: letter ? 'minmax(0,1fr) minmax(0,1fr)' : 'minmax(0,1fr)',
-          gap: 24,
+          gap: 'var(--sp-5)',
           alignItems: 'start',
         }} className="hero-grid">
 
           {/* ── LEFT: inputs ── */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-5)' }}>
 
             {/* Resume textarea */}
             <div style={cardStyle({ padding: 'clamp(20px,3vw,28px)' })}>
@@ -220,8 +220,10 @@ export default function CoverLetterPage() {
                       border: copied ? '1px solid var(--intl)' : 'none',
                       color: copied ? 'var(--intl)' : 'var(--accent-ink)',
                       fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14,
-                      cursor: 'pointer', transition: 'all .2s',
+                      cursor: 'pointer', transition: 'all .2s var(--ease-out)',
                     }}
+                    onMouseEnter={e => { if (!copied) e.currentTarget.style.transform = 'translateY(-1px)' }}
+                    onMouseLeave={e => { e.currentTarget.style.transform = 'none' }}
                   >
                     <Icon name={copied ? 'check' : 'link'} size={15} />
                     {copied ? t.clCopied : t.clCopy}
@@ -251,7 +253,7 @@ export default function CoverLetterPage() {
         </div>
       </main>
 
-      <footer style={{ borderTop: '1px solid var(--line)', padding: '26px clamp(20px,5vw,60px)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14 }}>
+      <footer style={{ borderTop: '1px solid var(--line)', padding: 'var(--sp-6) var(--gutter)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--sp-3)' }}>
         <Logo size={24} />
         <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--ink-faint)' }}>
           {t.footer}

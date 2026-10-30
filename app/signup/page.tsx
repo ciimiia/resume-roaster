@@ -4,9 +4,10 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import Icon from '@/components/ui/Icon'
+import Logo from '@/components/ui/Logo'
 import { useLang } from '@/lib/LangContext'
 import { useSession } from '@/lib/SessionContext'
-import { cardStyle } from '@/components/Landing'
+import { cardStyle } from '@/lib/styles'
 
 const ERROR_MAP: Record<string, keyof ReturnType<typeof useLang>['t']> = {
   EMAIL_EXISTS:    'authErrorExists',
@@ -64,15 +65,18 @@ export default function SignUpPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: '40px 20px', position: 'relative' }}>
+    <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: 'var(--sp-8) var(--sp-5)', position: 'relative' }}>
       <div style={{ width: '100%', maxWidth: 420 }}>
-        <div style={{ textAlign: 'center', marginBottom: 36 }}>
-          <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 10 }}>{t.authSignUpTitle}</h1>
-          <p style={{ fontSize: 15, color: 'var(--ink-mute)', lineHeight: 1.55 }}>{t.authSignUpSubtitle}</p>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 'var(--sp-6)' }}>
+          <Logo size={28} />
+        </div>
+        <div style={{ textAlign: 'center', marginBottom: 'var(--sp-7)' }}>
+          <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 'var(--sp-2)' }}>{t.authSignUpTitle}</h1>
+          <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-mute)', lineHeight: 1.55 }}>{t.authSignUpSubtitle}</p>
         </div>
 
-        <div style={cardStyle({ padding: 32 })}>
-          <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div style={cardStyle({ padding: 'var(--sp-7)' })}>
+          <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-5)' }}>
             <div>
               <label style={lbl}>{t.authEmail}</label>
               <input type="email" required value={email} onChange={e => setEmail(e.target.value)}
@@ -118,8 +122,11 @@ export default function SignUpPage() {
           </form>
         </div>
 
-        <p style={{ textAlign: 'center', marginTop: 20, fontSize: 14, color: 'var(--ink-mute)' }}>
-          <Link href="/signin" style={{ color: 'var(--accent)', textDecoration: 'none' }}>{t.authSignInLink}</Link>
+        <p style={{ textAlign: 'center', marginTop: 'var(--sp-5)', fontSize: 14, color: 'var(--ink-mute)' }}>
+          <Link href="/signin" style={{ color: 'var(--accent)', textDecoration: 'none', transition: 'opacity .2s' }}
+            onMouseEnter={e => (e.currentTarget.style.opacity = '0.75')}
+            onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+          >{t.authSignInLink}</Link>
         </p>
       </div>
     </div>

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { useLang } from '@/lib/LangContext'
-import { cardStyle } from '@/components/Landing'
+import { cardStyle } from '@/lib/styles'
 import type { Post } from '@/lib/posts'
 import type { SiteContent, LocaleString } from '@/lib/SiteContentContext'
 
@@ -33,7 +33,7 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
       style={{
         padding: '8px 20px', borderRadius: 8, border: 'none', cursor: 'pointer',
         fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 700, letterSpacing: '.06em',
-        transition: 'all .2s',
+        transition: 'all .2s var(--ease-out)',
         background: active ? 'var(--accent)' : 'var(--surface-2)',
         color: active ? 'var(--accent-ink)' : 'var(--ink-mute)',
         boxShadow: active ? '0 2px 12px color-mix(in srgb, var(--accent) 30%, transparent)' : 'none',
@@ -575,19 +575,19 @@ export default function AdminClient({ posts }: { posts: PostWithSource[] }) {
   const [tab, setTab] = useState<'content' | 'stats' | 'users' | 'site'>('content')
 
   return (
-    <div style={{ minHeight: '100vh', padding: '0 clamp(20px, 5vw, 60px) 100px' }}>
+    <div style={{ minHeight: '100vh', padding: '0 var(--gutter) 100px' }}>
 
       <div style={{ maxWidth: 940, margin: '0 auto' }}>
         {/* Page hero */}
-        <div style={{ padding: '48px 0 36px' }}>
+        <div style={{ padding: 'var(--sp-8) 0 var(--sp-6)' }}>
           <Eyebrow>{t.adminEyebrow}</Eyebrow>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 'clamp(28px,4vw,42px)', lineHeight: 1.1 }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 'var(--fs-2xl)', lineHeight: 1.1 }}>
             {t.adminTitle}
           </h1>
         </div>
 
         {/* Tab bar */}
-        <div style={{ display: 'flex', gap: 8, marginBottom: 32, padding: '4px', background: 'var(--surface-2)', borderRadius: 12, border: '1px solid var(--line)', width: 'fit-content' }}>
+        <div style={{ display: 'flex', gap: 'var(--sp-2)', marginBottom: 'var(--sp-7)', padding: '4px', background: 'var(--surface-2)', borderRadius: 12, border: '1px solid var(--line)', width: 'fit-content' }}>
           <TabButton active={tab === 'content'} onClick={() => setTab('content')}>{t.adminTabContent}</TabButton>
           <TabButton active={tab === 'stats'} onClick={() => setTab('stats')}>{t.adminTabStats}</TabButton>
           <TabButton active={tab === 'users'} onClick={() => setTab('users')}>{t.adminTabUsers}</TabButton>

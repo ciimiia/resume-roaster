@@ -1,23 +1,17 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { MODES, MODE_ORDER, RESULTS } from '@/lib/data'
 import type { ModeId } from '@/lib/types'
 import { useLang } from '@/lib/LangContext'
 import { useSiteContent } from '@/lib/SiteContentContext'
+import { cardStyle } from '@/lib/styles'
 import Button from './ui/Button'
 import Icon from './ui/Icon'
 import Logo from './ui/Logo'
 import Pill from './ui/Pill'
 import ScoreRing from './ui/ScoreRing'
-
-export const cardStyle = (extra: React.CSSProperties = {}): React.CSSProperties => ({
-  background: 'var(--surface)',
-  border: '1px solid var(--line)',
-  borderRadius: 'var(--r-lg)',
-  boxShadow: 'var(--shadow-1)',
-  ...extra,
-})
 
 
 /* ---- StatTicker ---- */
@@ -87,7 +81,7 @@ export function ModeSelectorCard({
         border: `1.5px solid ${active ? mode.accent : 'var(--line)'}`,
         boxShadow: active ? `0 14px 40px color-mix(in srgb, ${mode.accent} 22%, transparent)` : 'var(--shadow-1)',
         transform: on ? 'translateY(-3px)' : 'none',
-        transition: 'all .25s cubic-bezier(.34,1.4,.64,1)', flex: 1, minWidth: 0,
+        transition: 'all .25s var(--ease-spring)', flex: 1, minWidth: 0,
       }}
     >
       <div style={{
@@ -144,48 +138,48 @@ export default function Landing({ mode, setMode, onStart }: LandingProps) {
   return (
     <div style={{ animation: 'fadeIn .5s both' }}>
       {/* HERO */}
-      <section style={{ maxWidth: 1240, margin: '0 auto', padding: 'clamp(40px,7vw,84px) clamp(20px,5vw,60px) 40px' }}>
+      <section style={{ maxWidth: 1240, margin: '0 auto', padding: 'clamp(40px,7vw,84px) var(--gutter) var(--sp-8)' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.05fr) minmax(0,0.95fr)', gap: 'clamp(28px,4vw,64px)', alignItems: 'center' }} className="hero-grid">
 
           {/* Left */}
           <div style={{ animation: 'fadeUp .6s both' }}>
-            <Pill tone="accent" style={{ marginBottom: 22 }}>
+            <Pill tone="accent" style={{ marginBottom: 'var(--sp-5)' }}>
               <Icon name="spark" size={13} /> {t.heroPill}
             </Pill>
-            <h1 style={{ fontSize: 'clamp(40px, 6vw, 72px)', fontWeight: 700, lineHeight: 0.98 }}>
+            <h1 style={{ fontSize: 'var(--fs-3xl)', fontWeight: 700, lineHeight: 0.98 }}>
               {s('heroH1a', t.heroH1a)}<br />{s('heroH1b', t.heroH1b)}<br />
               <span style={{ background: 'linear-gradient(120deg, var(--accent), var(--accent-2))', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>
                 {s('heroH1c', t.heroH1c)}
               </span>
             </h1>
-            <p style={{ fontSize: 'clamp(17px,2vw,20px)', color: 'var(--ink-soft)', maxWidth: 520, marginTop: 22, lineHeight: 1.55 }}>
+            <p style={{ fontSize: 'var(--fs-md)', color: 'var(--ink-soft)', maxWidth: 520, marginTop: 'var(--sp-5)', lineHeight: 1.55 }}>
               {s('heroBody', t.heroBody)}
             </p>
-            <div style={{ display: 'flex', gap: 14, marginTop: 30, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: 'var(--sp-3)', marginTop: 'var(--sp-7)', flexWrap: 'wrap' }}>
               <Button size="lg" icon="upload" onClick={onStart}>{s('heroCta1', t.heroCta1)}</Button>
               <Button size="lg" variant="ghost" iconRight="arrow" onClick={onStart}>{s('heroCta2', t.heroCta2)} {m.glyph}</Button>
             </div>
-            <div style={{ marginTop: 34 }}><StatTicker /></div>
+            <div style={{ marginTop: 'var(--sp-8)' }}><StatTicker /></div>
           </div>
 
           {/* Right — live preview */}
           <div style={{ animation: 'fadeUp .7s .1s both' }}>
-            <div style={cardStyle({ padding: 24, position: 'relative', overflow: 'hidden' })}>
+            <div style={cardStyle({ padding: 'var(--sp-6)', position: 'relative', overflow: 'hidden' })}>
               <div style={{ position: 'absolute', top: -40, right: -40, width: 180, height: 180, borderRadius: '50%', background: 'radial-gradient(circle, var(--glow), transparent 70%)', pointerEvents: 'none' }} />
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--sp-4)' }}>
                 <span className="eyebrow">{t.livePreview} {tm.name}</span>
                 <span style={{ display: 'flex', gap: 6 }}>
                   {['#ff5f57','#febc2e','#28c840'].map(c => <span key={c} style={{ width: 11, height: 11, borderRadius: '50%', background: c }} />)}
                 </span>
               </div>
-              <div style={{ display: 'flex', gap: 18, alignItems: 'center' }}>
-                <ScoreRing key={mode} score={RESULTS[mode].score} size={132} grade={RESULTS[mode].grade} />
-                <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', gap: 'var(--sp-5)', alignItems: 'center' }}>
+                <ScoreRing key={mode} score={RESULTS[mode].score} size={168} grade={RESULTS[mode].grade} />
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 26 }}>{m.glyph}</div>
-                  <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 19, lineHeight: 1.2, marginTop: 8 }}>
+                  <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 19, lineHeight: 1.3, marginTop: 'var(--sp-2)' }}>
                     &quot;{RESULTS[mode].verdict}&quot;
                   </p>
-                  <p style={{ fontSize: 13.5, color: 'var(--ink-mute)', marginTop: 10 }}>
+                  <p style={{ fontSize: 13.5, color: 'var(--ink-mute)', marginTop: 'var(--sp-2)' }}>
                     {RESULTS[mode].sections.length} {t.sectionsAnalyzed} · {RESULTS[mode].fixes.length} {t.fixes}
                   </p>
                 </div>
@@ -193,9 +187,9 @@ export default function Landing({ mode, setMode, onStart }: LandingProps) {
             </div>
 
             {/* Mode selector */}
-            <div id="modes" style={{ marginTop: 14, scrollMarginTop: 80 }}>
-              <div className="eyebrow" style={{ marginBottom: 10 }}>{t.pickMode}</div>
-              <div style={{ display: 'flex', gap: 10 }}>
+            <div id="modes" style={{ marginTop: 'var(--sp-4)', scrollMarginTop: 80 }}>
+              <div className="eyebrow" style={{ marginBottom: 'var(--sp-3)' }}>{t.pickMode}</div>
+              <div style={{ display: 'flex', gap: 'var(--sp-3)' }}>
                 {MODE_ORDER.map(id => (
                   <ModeSelectorCard key={id} compact mode={MODES[id]} active={mode === id} onPick={() => setMode(id)} />
                 ))}
@@ -206,43 +200,70 @@ export default function Landing({ mode, setMode, onStart }: LandingProps) {
       </section>
 
       {/* HOW IT WORKS */}
-      <section id="how-it-works" style={{ maxWidth: 1240, margin: '0 auto', padding: '40px clamp(20px,5vw,60px) 90px', scrollMarginTop: 80 }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 28 }}>
-          <h2 style={{ fontSize: 'clamp(26px,3vw,38px)' }}>{t.howH2}</h2>
+      <section id="how-it-works" style={{ maxWidth: 1240, margin: '0 auto', padding: 'var(--sp-7) var(--gutter) var(--sp-11)', scrollMarginTop: 80 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: 'var(--sp-3)', marginBottom: 'var(--sp-7)' }}>
+          <h2 style={{ fontSize: 'var(--fs-2xl)' }}>{t.howH2}</h2>
           <span className="eyebrow">{t.howEyebrow}</span>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }} className="steps-grid">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--sp-4)' }} className="steps-grid">
           {t.steps.map(s => (
-            <div key={s.n} style={cardStyle({ padding: 26 })}>
-              <div className="mono" style={{ fontSize: 13, color: 'var(--accent)', letterSpacing: '.1em' }}>{s.n}</div>
-              <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 21, marginTop: 14 }}>{s.t}</div>
-              <p style={{ fontSize: 15, color: 'var(--ink-mute)', marginTop: 10, lineHeight: 1.55 }}>{s.d}</p>
+            <div key={s.n} style={cardStyle({ padding: 'var(--sp-6)', transition: 'transform .25s var(--ease-spring), border-color .25s' })}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = 'var(--line-2)' }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderColor = 'var(--line)' }}
+            >
+              <div className="mono" style={{
+                width: 34, height: 34, borderRadius: '50%', display: 'grid', placeItems: 'center',
+                fontSize: 13, color: 'var(--accent)', letterSpacing: '.02em',
+                background: 'color-mix(in srgb, var(--accent) 12%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--accent) 30%, transparent)',
+              }}>{s.n}</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 'var(--fs-lg)', marginTop: 'var(--sp-4)' }}>{s.t}</div>
+              <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-mute)', marginTop: 'var(--sp-2)', lineHeight: 1.55 }}>{s.d}</p>
             </div>
           ))}
         </div>
 
         {/* CTA band */}
-        <div style={cardStyle({ marginTop: 48, padding: 'clamp(28px,4vw,52px)', textAlign: 'center', position: 'relative', overflow: 'hidden', background: 'linear-gradient(140deg, var(--surface-2), var(--surface))' })}>
+        <div style={cardStyle({ marginTop: 'var(--sp-9)', padding: 'clamp(28px,4vw,52px)', textAlign: 'center', position: 'relative', overflow: 'hidden', background: 'linear-gradient(140deg, var(--surface-2), var(--surface))' })}>
           <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(600px 200px at 50% 0%, var(--glow), transparent 70%)', pointerEvents: 'none' }} />
-          <h2 style={{ position: 'relative', fontSize: 'clamp(28px,4vw,46px)', maxWidth: 720, margin: '0 auto' }}>
+          <h2 style={{ position: 'relative', fontSize: 'var(--fs-2xl)', maxWidth: 720, margin: '0 auto' }}>
             {s('ctaH2', t.ctaH2)}
           </h2>
-          <p style={{ position: 'relative', color: 'var(--ink-soft)', fontSize: 18, marginTop: 14 }}>
+          <p style={{ position: 'relative', color: 'var(--ink-soft)', fontSize: 'var(--fs-md)', marginTop: 'var(--sp-3)' }}>
             {s('ctaBody', t.ctaBody)}
           </p>
-          <div style={{ position: 'relative', marginTop: 26, display: 'flex', justifyContent: 'center' }}>
+          <div style={{ position: 'relative', marginTop: 'var(--sp-6)', display: 'flex', justifyContent: 'center' }}>
             <Button size="lg" icon="upload" onClick={onStart}>{t.ctaBtn}</Button>
           </div>
         </div>
       </section>
 
-      <footer style={{ borderTop: '1px solid var(--line)', padding: '26px clamp(20px,5vw,60px)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14 }}>
+      <footer style={{
+        borderTop: '1px solid var(--line)', padding: 'var(--sp-6) var(--gutter)',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--sp-3)',
+      }}>
         <Logo size={24} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-5)', flexWrap: 'wrap' }}>
+          {[
+            { label: t.navBlog, href: '/blog' },
+            { label: t.navBuilder, href: '/builder' },
+            { label: t.clTitle, href: '/cover-letter' },
+          ].map(l => (
+            <Link key={l.href} href={l.href} style={footerLinkStyle}
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--ink)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--ink-mute)')}
+            >{l.label}</Link>
+          ))}
+        </div>
         <span className="mono" style={{ fontSize: 12, color: 'var(--ink-faint)' }}>
           {s('footerTagline', t.footer)}
         </span>
       </footer>
     </div>
   )
+}
+
+const footerLinkStyle: React.CSSProperties = {
+  fontSize: 13.5, color: 'var(--ink-mute)', transition: 'color .2s var(--ease-out)',
 }
