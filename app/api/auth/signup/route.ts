@@ -4,8 +4,14 @@ import { findUserByEmail, createUser } from '@/lib/db/users'
 import { hashPassword } from '@/lib/password'
 import { createSession, SESSION_COOKIE } from '@/lib/session'
 import { checkRateLimit } from '@/lib/rateLimit'
+import { getClientIp } from '@/lib/requestIp'
 
-const RATE_LIMIT = { max: 5, windowSeconds: 15 * 60 }
+// Volumetric throttling, not credential-guessing protection — every call
+// counts, success or failure. Email-scoped stops spamming one address with
+// signup attempts; IP-scoped catches one source hammering the endpoint
+// (e.g. with many different emails) that the email-scoped limit wouldn't.
+const EMAIL_LIMIT = { max: 5, windowSeconds: 15 * 60 }
+const IP_LIMIT = { max: 20, windowSeconds: 15 * 60 }
 
 export async function POST(req: NextRequest) {
   const { email, password } = await req.json() as { email: string; password: string }
@@ -20,8 +26,12 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const rate = await checkRateLimit(`signup:email:${normalizedEmail}`, RATE_LIMIT.max, RATE_LIMIT.windowSeconds)
-    if (!rate.allowed) {
+    const ip = getClientIp(req)
+    const [emailRate, ipRate] = await Promise.all([
+      checkRateLimit(`signup:email:${normalizedEmail}`, EMAIL_LIMIT.max, EMAIL_LIMIT.windowSeconds),
+      checkRateLimit(`signup:ip:${ip}`, IP_LIMIT.max, IP_LIMIT.windowSeconds),
+    ])
+    if (!emailRate.allowed || !ipRate.allowed) {
       return NextResponse.json({ error: 'RATE_LIMITED' }, { status: 429 })
     }
 
