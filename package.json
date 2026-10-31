@@ -9,12 +9,13 @@
     "lint": "next lint",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "test:password": "tsx scripts/test-password.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",
+    "@node-rs/argon2": "^2.2.2",
     "@vercel/blob": "^2.8.2",
-    "argon2": "^0.45.1",
     "drizzle-orm": "^0.45.4",
     "next": "14.2.35",
     "pdf-parse": "^2.4.5",
