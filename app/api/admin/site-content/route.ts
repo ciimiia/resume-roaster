@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { verifySession, SESSION_COOKIE } from '@/lib/session'
-import { kv } from '@/lib/kv'
+import { getSiteContent, setSiteContent } from '@/lib/db/siteSettings'
 import { env } from '@/lib/env'
 import type { SiteContent } from '@/lib/SiteContentContext'
 
@@ -15,8 +15,8 @@ async function guard() {
 export async function GET() {
   if (!await guard()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   try {
-    const content = await kv.get<SiteContent>('site:content')
-    return NextResponse.json({ content: content ?? {} })
+    const content = await getSiteContent()
+    return NextResponse.json({ content })
   } catch (err) {
     console.error('[admin/site-content] GET failed:', err)
     return NextResponse.json({ error: 'SERVER_ERROR' }, { status: 500 })
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
   if (!await guard()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const body = await req.json() as SiteContent
   try {
-    await kv.set('site:content', body)
+    await setSiteContent(body)
     return NextResponse.json({ ok: true })
   } catch (err) {
     console.error('[admin/site-content] POST failed:', err)
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
 export async function DELETE() {
   if (!await guard()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   try {
-    await kv.set('site:content', {})
+    await setSiteContent({})
     return NextResponse.json({ ok: true })
   } catch (err) {
     console.error('[admin/site-content] DELETE failed:', err)

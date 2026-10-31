@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { kv } from '@/lib/kv'
+import { listRecentPostTitles, createAiPost } from '@/lib/db/blog'
 import type { Post, Block } from '@/lib/posts'
 import { env } from '@/lib/env'
 import { PRODUCT } from '@/lib/config'
@@ -100,7 +100,7 @@ function buildCoverSvg(title: string, tag: string): string {
   <text x="${108 + (tag.length * 11 + 28) / 2}" y="${textStartY + displayLines.length * lineHeight + 47}" font-family="monospace" font-size="13" font-weight="700" fill="${accent}" text-anchor="middle" letter-spacing="1">${tag}</text>
   <!-- Flame + brand -->
   <text x="1110" y="590" font-size="32" text-anchor="middle">🔥</text>
-  <text x="1110" y="614" font-family="Georgia,serif" font-size="13" fill="rgba(255,255,255,0.35)" text-anchor="middle">Resume Roaster</text>
+  <text x="1110" y="614" font-family="Georgia,serif" font-size="13" fill="rgba(255,255,255,0.35)" text-anchor="middle">${PRODUCT.name}</text>
 </svg>`
 
   return `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`
@@ -128,14 +128,10 @@ export async function GET(req: NextRequest) {
   // Pick a topic that hasn't been used recently
   let usedTopics = new Set<string>()
   try {
-    const usedSlugs = (await kv.get<string[]>('blog:posts:all')) ?? []
-    usedTopics = new Set(
-      (await Promise.all(
-        usedSlugs.slice(0, 30).map(s => kv.get<Post>(`blog:post:${s}`))
-      )).filter(Boolean).map(p => p!.title.toLowerCase().slice(0, 30))
-    )
+    const recentTitles = await listRecentPostTitles(30)
+    usedTopics = new Set(recentTitles.map(t => t.toLowerCase().slice(0, 30)))
   } catch (err) {
-    console.error('[generate-post] failed to read existing posts from KV, proceeding with full topic pool:', err)
+    console.error('[generate-post] failed to read existing posts, proceeding with full topic pool:', err)
   }
 
   const available = TOPICS.filter(t => !usedTopics.has(t.topic.toLowerCase().slice(0, 30)))
@@ -243,15 +239,11 @@ Requirements:
     coverImage,
   }
 
-  // ── Save to KV ────────────────────────────────────────────────────────────
+  // ── Save ──────────────────────────────────────────────────────────────────
   try {
-    await kv.set(`blog:post:${slug}`, post)
-    const existingSlugs = (await kv.get<string[]>('blog:posts:all')) ?? []
-    if (!existingSlugs.includes(slug)) {
-      await kv.set('blog:posts:all', [slug, ...existingSlugs].slice(0, 100))
-    }
+    await createAiPost(post)
   } catch (err) {
-    console.error('[generate-post] failed to save post to KV:', err)
+    console.error('[generate-post] failed to save post:', err)
     return NextResponse.json({ error: 'SERVER_ERROR', detail: String(err) }, { status: 500 })
   }
 

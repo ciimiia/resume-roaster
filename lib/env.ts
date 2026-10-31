@@ -65,15 +65,7 @@ export const env = {
     return readOptional('OPENROUTER_API_KEY')
   },
 
-  // ── KV (Upstash) — existing store, still used until migrated to Postgres ──
-  get kvRestApiUrl(): string | undefined {
-    return readOptional('KV_REST_API_URL')
-  },
-  get kvRestApiToken(): string | undefined {
-    return readOptional('KV_REST_API_TOKEN')
-  },
-
-  // ── Postgres (Neon) — Phase 0 scaffold; not required until a route uses db ──
+  // ── Postgres (Neon) — primary data store as of Phase 1 ─────────────────────
   get databaseUrl(): string {
     return requireVar(
       'DATABASE_URL',

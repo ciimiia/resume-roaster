@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { verifySession, SESSION_COOKIE } from '@/lib/session'
-import { kv, safeGet } from '@/lib/kv'
+import { listAiPosts } from '@/lib/db/blog'
 import { env } from '@/lib/env'
 import { POSTS } from '@/lib/posts'
 import type { Post } from '@/lib/posts'
@@ -15,19 +15,17 @@ export default async function AdminPage() {
   if (!session) redirect('/signin')
   if (!env.isAdminEmail(session.email)) redirect('/')
 
-  // Fetch KV posts (fail safe — admin page should still render if KV is down)
-  let kvPosts: Post[] = []
+  // Fail safe — admin page should still render if the DB has a hiccup
+  let aiPosts: Post[] = []
   try {
-    const kvSlugs = await safeGet<string[]>('blog:posts:all', [])
-    kvPosts = (await Promise.all(kvSlugs.map(s => kv.get<Post>(`blog:post:${s}`))))
-      .filter((p): p is Post => p !== null)
+    aiPosts = await listAiPosts()
   } catch (err) {
-    console.error('[admin/page] failed to load KV posts:', err)
+    console.error('[admin/page] failed to load AI posts:', err)
   }
 
   const allPosts = [
-    ...kvPosts.map(p => ({ ...p, source: 'ai' as const })),
-    ...POSTS.filter(p => !kvPosts.find(k => k.slug === p.slug)).map(p => ({ ...p, source: 'static' as const })),
+    ...aiPosts.map(p => ({ ...p, source: 'ai' as const })),
+    ...POSTS.filter(p => !aiPosts.find(k => k.slug === p.slug)).map(p => ({ ...p, source: 'static' as const })),
   ].sort((a, b) => b.date.localeCompare(a.date))
 
   return <AdminClient posts={allPosts} />

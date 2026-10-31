@@ -1,15 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { kv } from '@/lib/kv'
+import { saveCoverLetter } from '@/lib/db/coverLetters'
 import { verifySession, SESSION_COOKIE } from '@/lib/session'
 import { env } from '@/lib/env'
 import { PRODUCT } from '@/lib/config'
 
-export interface CoverLetterSummary {
-  id: string
-  preview: string  // first 120 chars of the letter
-  savedAt: string
-}
+export type { CoverLetterSummary } from '@/lib/db/coverLetters'
 
 const SYSTEM = `You are an expert cover letter writer with 15+ years of experience in recruiting and career coaching.
 You write concise, compelling, highly personalized cover letters that match candidates to specific roles.`
@@ -93,17 +89,9 @@ export async function POST(req: NextRequest) {
 
   if (session) {
     try {
-      savedId = crypto.randomUUID().slice(0, 8)
-      const summary: CoverLetterSummary = {
-        id: savedId,
-        preview: letter.slice(0, 120),
-        savedAt: new Date().toISOString(),
-      }
-      await kv.set(`coverletter:${savedId}`, { id: savedId, letter, userId: session.userId, savedAt: summary.savedAt })
-      const existing = await kv.get<CoverLetterSummary[]>(`user:coverletters:${session.userId}`) ?? []
-      await kv.set(`user:coverletters:${session.userId}`, [summary, ...existing].slice(0, 50))
+      savedId = await saveCoverLetter(session.userId, letter)
     } catch (err) {
-      console.error('[cover-letter] failed to persist to KV, returning letter unsaved:', err)
+      console.error('[cover-letter] failed to persist, returning letter unsaved:', err)
       savedId = undefined
     }
   }
