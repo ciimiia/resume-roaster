@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { POSTS, getPost } from '@/lib/posts'
 import type { Post } from '@/lib/posts'
-import { kv } from '@/lib/kv'
+import { getAiPostBySlug } from '@/lib/db/blog'
 import { env } from '@/lib/env'
 import { PRODUCT } from '@/lib/config'
 import PostContent from '@/components/blog/PostContent'
@@ -33,8 +33,9 @@ async function resolvePost(slug: string): Promise<Post | null> {
   const staticPost = getPost(slug)
   if (staticPost) return staticPost
   try {
-    return await kv.get<Post>(`blog:post:${slug}`)
-  } catch {
+    return await getAiPostBySlug(slug)
+  } catch (err) {
+    console.error('[blog/[slug]] failed to load post:', err)
     return null
   }
 }

@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
 import CoverLetterClient from './CoverLetterClient'
-import { safeGet } from '@/lib/kv'
+import { getSiteContentSafe } from '@/lib/db/siteSettings'
 import { SiteContentProvider } from '@/lib/SiteContentContext'
-import type { SiteContent } from '@/lib/SiteContentContext'
 import { env } from '@/lib/env'
 import { PRODUCT } from '@/lib/config'
 
@@ -26,7 +25,7 @@ export const metadata: Metadata = {
 }
 
 export default async function CoverLetterPage() {
-  const siteContent = await safeGet<SiteContent>('site:content', {})
+  const siteContent = await getSiteContentSafe()
   return (
     <SiteContentProvider content={siteContent}>
       <CoverLetterClient />

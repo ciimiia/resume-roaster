@@ -1,25 +1,26 @@
 import { notFound } from 'next/navigation'
-import { kv } from '@/lib/kv'
+import { getResult } from '@/lib/db/results'
 import type { Metadata } from 'next'
-import type { SavedResult } from '@/app/api/save/route'
 import SharedResult from '@/components/SharedResult'
 import { MODES } from '@/lib/data'
+import { PRODUCT } from '@/lib/config'
 
-async function load(id: string): Promise<SavedResult | null> {
+async function load(id: string) {
   try {
-    return await kv.get<SavedResult>(`result:${id}`)
-  } catch {
+    return await getResult(id)
+  } catch (err) {
+    console.error('[r/[id]] failed to load result:', err)
     return null
   }
 }
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const saved = await load(params.id)
-  if (!saved) return { title: 'Resume Roaster' }
+  if (!saved) return { title: PRODUCT.name }
 
   const { result, mode } = saved
   const m = MODES[mode]
-  const title = `"${result.verdict}" — Resume Roaster`
+  const title = `"${result.verdict}" — ${PRODUCT.name}`
   const description = `${m.glyph} ${m.name} · Score: ${result.score}/100 (${result.grade}) — ${result.summary.slice(0, 140)}…`
 
   return {
@@ -28,7 +29,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
     openGraph: {
       title,
       description,
-      siteName: 'Resume Roaster',
+      siteName: PRODUCT.name,
       type: 'website',
     },
     twitter: {

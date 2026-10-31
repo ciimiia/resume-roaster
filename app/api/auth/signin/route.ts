@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { kv } from '@/lib/kv'
+import { findUserByEmail } from '@/lib/db/users'
 import { verifyPassword } from '@/lib/password'
 import { createSession, SESSION_COOKIE } from '@/lib/session'
+import { checkRateLimit } from '@/lib/rateLimit'
 
-interface StoredUser {
-  id: string
-  email: string
-  passwordHash: string
-}
+// Higher than signup's limit — a legitimate user mistyping their password a
+// few times shouldn't get locked out, but this still bounds brute-force
+// attempts against one account.
+const RATE_LIMIT = { max: 10, windowSeconds: 15 * 60 }
 
 export async function POST(req: NextRequest) {
   const { email, password } = await req.json() as { email: string; password: string }
@@ -16,7 +16,12 @@ export async function POST(req: NextRequest) {
   const normalizedEmail = email.trim().toLowerCase()
 
   try {
-    const user = await kv.get<StoredUser>(`user:email:${normalizedEmail}`)
+    const rate = await checkRateLimit(`signin:email:${normalizedEmail}`, RATE_LIMIT.max, RATE_LIMIT.windowSeconds)
+    if (!rate.allowed) {
+      return NextResponse.json({ error: 'RATE_LIMITED' }, { status: 429 })
+    }
+
+    const user = await findUserByEmail(normalizedEmail)
     if (!user) {
       return NextResponse.json({ error: 'INVALID_CREDENTIALS' }, { status: 401 })
     }
