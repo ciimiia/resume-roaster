@@ -3,6 +3,8 @@ import CoverLetterClient from './CoverLetterClient'
 import { safeGet } from '@/lib/kv'
 import { SiteContentProvider } from '@/lib/SiteContentContext'
 import type { SiteContent } from '@/lib/SiteContentContext'
+import { env } from '@/lib/env'
+import { PRODUCT } from '@/lib/config'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,11 +16,11 @@ export const metadata: Metadata = {
     'AI cover letter generator', 'cover letter writer', 'cover letter AI',
     'free cover letter generator', 'job application letter', 'tailored cover letter',
   ],
-  alternates: { canonical: 'https://resume-roaster-tan-six.vercel.app/cover-letter' },
+  alternates: { canonical: `${env.siteUrl}/cover-letter` },
   openGraph: {
-    title: 'AI Cover Letter Generator — Resume Roaster',
+    title: `AI Cover Letter Generator — ${PRODUCT.name}`,
     description: 'Generate a tailored cover letter in seconds. Paste your resume + job description and get a compelling letter matched to the role.',
-    url: 'https://resume-roaster-tan-six.vercel.app/cover-letter',
+    url: `${env.siteUrl}/cover-letter`,
     type: 'website',
   },
 }

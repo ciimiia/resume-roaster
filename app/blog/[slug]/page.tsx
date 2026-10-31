@@ -3,9 +3,11 @@ import { notFound } from 'next/navigation'
 import { POSTS, getPost } from '@/lib/posts'
 import type { Post } from '@/lib/posts'
 import { kv } from '@/lib/kv'
+import { env } from '@/lib/env'
+import { PRODUCT } from '@/lib/config'
 import PostContent from '@/components/blog/PostContent'
 
-const SITE_URL = 'https://resume-roaster-tan-six.vercel.app'
+const SITE_URL = env.siteUrl
 const OG_IMAGE = `${SITE_URL}/opengraph-image`
 
 const POST_KEYWORDS: Record<string, string[]> = {
@@ -45,14 +47,14 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     title: post.title,
     description: post.excerpt,
     keywords: POST_KEYWORDS[post.slug] ?? [],
-    authors: [{ name: 'Resume Roaster' }],
+    authors: [{ name: PRODUCT.name }],
     openGraph: {
       type: 'article',
       title: post.title,
       description: post.excerpt,
       url,
       publishedTime: post.date,
-      authors: ['Resume Roaster'],
+      authors: [PRODUCT.name],
       images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: post.title }],
     },
     twitter: {
@@ -79,10 +81,10 @@ export default async function PostPage({ params }: { params: { slug: string } })
     description: post.excerpt,
     datePublished: post.date,
     dateModified: post.date,
-    author: { '@type': 'Organization', name: 'Resume Roaster', url: SITE_URL },
+    author: { '@type': 'Organization', name: PRODUCT.name, url: SITE_URL },
     publisher: {
       '@type': 'Organization',
-      name: 'Resume Roaster',
+      name: PRODUCT.name,
       url: SITE_URL,
       logo: { '@type': 'ImageObject', url: `${SITE_URL}/og-image.png` },
     },

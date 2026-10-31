@@ -2,21 +2,18 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { verifySession, SESSION_COOKIE } from '@/lib/session'
 import { kv, safeGet } from '@/lib/kv'
+import { env } from '@/lib/env'
 import { POSTS } from '@/lib/posts'
 import type { Post } from '@/lib/posts'
 import AdminClient from './AdminClient'
 
 export const dynamic = 'force-dynamic'
 
-function isAdminEmail(email: string): boolean {
-  return (process.env.ADMIN_EMAILS ?? '').split(',').map(e => e.trim().toLowerCase()).includes(email.toLowerCase())
-}
-
 export default async function AdminPage() {
   const token = cookies().get(SESSION_COOKIE)?.value
   const session = token ? await verifySession(token) : null
   if (!session) redirect('/signin')
-  if (!isAdminEmail(session.email)) redirect('/')
+  if (!env.isAdminEmail(session.email)) redirect('/')
 
   // Fetch KV posts (fail safe — admin page should still render if KV is down)
   let kvPosts: Post[] = []

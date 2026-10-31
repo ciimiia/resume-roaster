@@ -3,22 +3,24 @@ import App from '@/components/App'
 import { safeGet } from '@/lib/kv'
 import { SiteContentProvider } from '@/lib/SiteContentContext'
 import type { SiteContent } from '@/lib/SiteContentContext'
+import { env } from '@/lib/env'
+import { PRODUCT } from '@/lib/config'
 
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'Resume Roaster — AI Resume Feedback in 12 Seconds',
+  title: `${PRODUCT.name} — ${PRODUCT.tagline}`,
   description:
     'Upload your PDF and get brutal, honest, AI-powered resume feedback in 12 seconds. ATS score, red flags, and actionable fixes — free.',
   keywords: [
     'AI resume feedback', 'resume checker', 'ATS resume score', 'resume roaster',
     'free resume review', 'resume feedback tool', 'resume AI',
   ],
-  alternates: { canonical: 'https://resume-roaster-tan-six.vercel.app' },
+  alternates: { canonical: env.siteUrl },
   openGraph: {
-    title: 'Resume Roaster — AI Resume Feedback in 12 Seconds',
+    title: `${PRODUCT.name} — ${PRODUCT.tagline}`,
     description: 'Upload your PDF and get brutal, honest, AI-powered resume feedback in 12 seconds. Free.',
-    url: 'https://resume-roaster-tan-six.vercel.app',
+    url: env.siteUrl,
     type: 'website',
   },
 }

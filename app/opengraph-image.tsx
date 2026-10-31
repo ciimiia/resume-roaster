@@ -1,7 +1,9 @@
 import { ImageResponse } from 'next/og'
+import { env } from '@/lib/env'
+import { PRODUCT } from '@/lib/config'
 
 export const runtime = 'edge'
-export const alt = 'Resume Roaster — AI Resume Feedback in 12 Seconds'
+export const alt = `${PRODUCT.name} — ${PRODUCT.tagline}`
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -73,7 +75,7 @@ export default function OgImage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
             <div style={{ fontSize: 56, display: 'flex' }}>🔥</div>
             <div style={{ fontSize: 52, fontWeight: 900, color: '#F5F5F7', letterSpacing: '-1px', display: 'flex' }}>
-              Resume Roaster
+              {PRODUCT.name}
             </div>
           </div>
 
@@ -117,7 +119,7 @@ export default function OgImage() {
           fontSize: 13, color: 'rgba(255,255,255,0.15)',
           display: 'flex',
         }}>
-          resume-roaster-tan-six.vercel.app
+          {env.siteUrl.replace(/^https?:\/\//, '')}
         </div>
       </div>
     ),

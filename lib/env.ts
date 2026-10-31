@@ -1,0 +1,98 @@
+/**
+ * Centralized, validated environment access.
+ *
+ * Import `env` instead of reading `process.env.X` directly. Each getter
+ * validates lazily (on first access, not at module load) so that an
+ * unconfigured optional feature doesn't crash routes that never touch it —
+ * but the moment something *does* need it, the error names exactly which
+ * var is missing and how to set it, instead of a vague downstream crash.
+ *
+ * Required-at-boot vars (ones the whole app needs, like SESSION_SECRET) are
+ * still validated lazily here rather than eagerly at import time, because
+ * this module is imported from both Node and Edge runtimes (middleware) and
+ * eager `process.env` reads can behave inconsistently across them in Next.js.
+ */
+
+import { z } from 'zod'
+
+function readOptional(name: string): string | undefined {
+  const v = process.env[name]
+  return v && v.length > 0 ? v : undefined
+}
+
+function requireVar(name: string, hint: string): string {
+  const v = readOptional(name)
+  if (!v) {
+    throw new Error(
+      `[env] Missing required environment variable "${name}". ${hint}\n` +
+      `Set it in .env.local for development, or in your Vercel project's Environment Variables for deploys.`
+    )
+  }
+  return v
+}
+
+const urlSchema = z.string().url()
+
+export const env = {
+  /** Base URL of this deployment, e.g. https://resume-roaster-tan-six.vercel.app */
+  get siteUrl(): string {
+    const raw = readOptional('NEXT_PUBLIC_SITE_URL') ?? 'http://localhost:3000'
+    const parsed = urlSchema.safeParse(raw)
+    if (!parsed.success) {
+      throw new Error(`[env] NEXT_PUBLIC_SITE_URL is set but not a valid URL: "${raw}"`)
+    }
+    return parsed.data.replace(/\/$/, '')
+  },
+
+  get sessionSecret(): string {
+    return requireVar('SESSION_SECRET', 'Used to sign session cookies. Generate one with `openssl rand -hex 32`.')
+  },
+
+  get adminEmails(): string[] {
+    return (readOptional('ADMIN_EMAILS') ?? '').split(',').map(e => e.trim().toLowerCase()).filter(Boolean)
+  },
+
+  /** True if the given email is listed in ADMIN_EMAILS (case-insensitive). */
+  isAdminEmail(email: string): boolean {
+    return this.adminEmails.includes(email.trim().toLowerCase())
+  },
+
+  get cronSecret(): string | undefined {
+    return readOptional('CRON_SECRET')
+  },
+
+  get openRouterApiKey(): string | undefined {
+    return readOptional('OPENROUTER_API_KEY')
+  },
+
+  // ── KV (Upstash) — existing store, still used until migrated to Postgres ──
+  get kvRestApiUrl(): string | undefined {
+    return readOptional('KV_REST_API_URL')
+  },
+  get kvRestApiToken(): string | undefined {
+    return readOptional('KV_REST_API_TOKEN')
+  },
+
+  // ── Postgres (Neon) — Phase 0 scaffold; not required until a route uses db ──
+  get databaseUrl(): string {
+    return requireVar(
+      'DATABASE_URL',
+      'Create the Neon database from the Vercel dashboard (Storage → Neon), then run `vercel env pull` ' +
+      'to populate .env.local, or set it manually to the Neon connection string.'
+    )
+  },
+  get hasDatabase(): boolean {
+    return readOptional('DATABASE_URL') !== undefined
+  },
+
+  // ── Vercel Blob — Phase 0 scaffold; not required until a route uses storage ──
+  get blobReadWriteToken(): string {
+    return requireVar(
+      'BLOB_READ_WRITE_TOKEN',
+      'Create a Vercel Blob store from the Vercel dashboard (Storage → Blob), then run `vercel env pull`.'
+    )
+  },
+  get hasBlobStorage(): boolean {
+    return readOptional('BLOB_READ_WRITE_TOKEN') !== undefined
+  },
+}

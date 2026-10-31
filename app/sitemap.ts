@@ -1,9 +1,9 @@
 import { MetadataRoute } from 'next'
 import { POSTS } from '@/lib/posts'
-
-const SITE_URL = 'https://resume-roaster-tan-six.vercel.app'
+import { env } from '@/lib/env'
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  const SITE_URL = env.siteUrl
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: SITE_URL,                    lastModified: new Date(), changeFrequency: 'weekly',  priority: 1.0 },
     { url: `${SITE_URL}/blog`,          lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.8 },

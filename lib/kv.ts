@@ -3,8 +3,10 @@
  * Uses KV_REST_API_URL and KV_REST_API_TOKEN (Vercel KV env vars).
  */
 
-const url   = () => process.env.KV_REST_API_URL
-const token = () => process.env.KV_REST_API_TOKEN
+import { env } from './env'
+
+const url   = () => env.kvRestApiUrl
+const token = () => env.kvRestApiToken
 
 // Keep this well under typical page-load patience — if the KV host is down
 // or unreachable (bad DNS, network block), fail fast instead of hanging on
