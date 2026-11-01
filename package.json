@@ -19,6 +19,7 @@
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",
     "@node-rs/argon2": "^2.2.2",
+    "@thednp/dommatrix": "^3.1.2",
     "@vercel/blob": "^2.8.2",
     "drizzle-orm": "^0.45.4",
     "mammoth": "^1.13.0",

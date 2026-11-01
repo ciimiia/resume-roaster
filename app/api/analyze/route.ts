@@ -3,6 +3,7 @@ import { RESULTS, SAMPLE_TEXT } from '@/lib/data'
 import type { ModeId } from '@/lib/types'
 import { env } from '@/lib/env'
 import { PRODUCT } from '@/lib/config'
+import { ensureDomMatrixPolyfill } from '@/lib/pdfPolyfill'
 
 const SYSTEM_PROMPTS: Record<ModeId, string> = {
   roast: `You are a brutally honest, witty resume critic. Roast this resume mercilessly but helpfully.
@@ -47,6 +48,7 @@ Requirements:
 
 async function extractPdfText(file: File): Promise<string> {
   const buffer = Buffer.from(await file.arrayBuffer())
+  ensureDomMatrixPolyfill() // see lib/pdfPolyfill.ts — pdfjs-dist needs this on Vercel's runtime, not just locally
   const { PDFParse } = await import('pdf-parse')
   const parser = new PDFParse({ data: buffer })
   const result = await parser.getText()

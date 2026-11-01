@@ -6,6 +6,7 @@ import { parseResumeToProfile } from '@/lib/resumeParsing'
 import { vercelBlobStorage } from '@/lib/storage'
 import { createResume, setParsedProfile, listResumesForUser } from '@/lib/db/resumes'
 import { checkRateLimit } from '@/lib/rateLimit'
+import { ensureDomMatrixPolyfill } from '@/lib/pdfPolyfill'
 
 // Upload is comparatively expensive (file storage + an LLM call) — throttle
 // harder than auth endpoints. Per-user (requires a session anyway).
@@ -23,6 +24,7 @@ async function requireSession() {
 // successfully). See lib/resumeParsing.ts's top comment before moving this.
 async function extractResumeText(buffer: Buffer, type: DetectedFileType): Promise<string> {
   if (type === 'pdf') {
+    ensureDomMatrixPolyfill()
     const { PDFParse } = await import('pdf-parse')
     const parser = new PDFParse({ data: buffer })
     const result = await parser.getText()
