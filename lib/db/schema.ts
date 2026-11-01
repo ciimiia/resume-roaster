@@ -10,7 +10,7 @@
  * nothing to migrate there; no sessions table.
  */
 
-import { pgTable, text, timestamp, integer, jsonb, uuid, date, primaryKey, index } from 'drizzle-orm/pg-core'
+import { pgTable, text, timestamp, integer, jsonb, uuid, date, boolean, primaryKey, index } from 'drizzle-orm/pg-core'
 import { sql } from 'drizzle-orm'
 
 // ── Phase 0 placeholder — kept until something in Phase 1+ needs the
@@ -54,6 +54,14 @@ export const sharedResults = pgTable('shared_results', {
   mode: text('mode').notNull(),
   result: jsonb('result').notNull(), // full AnalysisResult
   userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  // Phase 1b: which uploaded resume (if any) this roast was run against.
+  // Nullable — the anonymous ad-hoc "upload a PDF and roast it" flow never
+  // creates a `resumes` row, so most roasts will have no link here; this is
+  // populated only when a signed-in user roasts a resume they uploaded
+  // through the candidate-profile flow. onDelete 'set null' (not cascade):
+  // deleting a resume shouldn't delete roasts that referenced it, just
+  // un-link them.
+  resumeId: uuid('resume_id').references(() => resumes.id, { onDelete: 'set null' }),
   savedAt: timestamp('saved_at', { withTimezone: true }).defaultNow().notNull(),
   expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
 }, (t) => ({
@@ -131,4 +139,70 @@ export const rateLimits = pgTable('rate_limits', {
   key: text('key').primaryKey(),
   count: integer('count').notNull().default(1),
   windowStart: timestamp('window_start', { withTimezone: true }).notNull().default(sql`now()`),
+})
+
+// ── Phase 1b: candidate profile ─────────────────────────────────────────
+
+// Upload history — one row per uploaded file. `parsedProfile` is the raw
+// LLM extraction output for THIS version (zod-validated ParsedProfile
+// shape, see lib/resumeProfile.ts), kept even after the user edits things
+// in the review screen — `profiles` below holds the current edited/
+// approved version; this table is the immutable upload+parse history.
+// `filePathname` is a Vercel Blob pathname (private access), never a URL —
+// see lib/storage.ts. The file itself is NOT deleted when a newer version
+// is uploaded; "delete my data" removes all of a user's resume rows and
+// their files together.
+export const resumes = pgTable('resumes', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  filePathname: text('file_pathname').notNull(),
+  originalFilename: text('original_filename').notNull(),
+  fileSize: integer('file_size').notNull(),
+  contentType: text('content_type').notNull(),
+  // Null until parsing completes (or if it failed) — upload and parse are
+  // two steps, not guaranteed atomic (the LLM call can fail independently
+  // of the upload succeeding).
+  parsedProfile: jsonb('parsed_profile'),
+  version: integer('version').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  userIdx: index('resumes_user_idx').on(t.userId),
+}))
+
+// The user's current, approved structured profile — the single source of
+// truth for later tailoring (Phase 4). One row per user (userId is the
+// primary key, not a separate uuid): there's only ever one "current"
+// profile, even though `resumes` keeps full upload history. Starts
+// unapproved (approved=false) the moment parsing produces a profile;
+// becomes approved only when the user explicitly confirms it on the
+// review screen, per "the approved profile is the single source of truth".
+export const profiles = pgTable('profiles', {
+  userId: uuid('user_id').primaryKey().references(() => users.id, { onDelete: 'cascade' }),
+  sourceResumeId: uuid('source_resume_id').references(() => resumes.id, { onDelete: 'set null' }),
+  contact: jsonb('contact').notNull(),
+  summary: text('summary').notNull().default(''),
+  experience: jsonb('experience').notNull().default([]),
+  education: jsonb('education').notNull().default([]),
+  skills: jsonb('skills').notNull().default([]),
+  projects: jsonb('projects').notNull().default([]),
+  languages: jsonb('languages').notNull().default([]),
+  certifications: jsonb('certifications').notNull().default([]),
+  approved: boolean('approved').notNull().default(false),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+})
+
+// One row per user — target roles, locations, remote preference, etc.
+export const jobPreferences = pgTable('job_preferences', {
+  userId: uuid('user_id').primaryKey().references(() => users.id, { onDelete: 'cascade' }),
+  targetTitles: jsonb('target_titles').notNull().default([]),
+  seniority: text('seniority'),
+  locations: jsonb('locations').notNull().default([]),
+  remoteType: jsonb('remote_type').notNull().default([]), // string[] subset of ('remote'|'hybrid'|'onsite')
+  countries: jsonb('countries').notNull().default([]),
+  salaryMin: integer('salary_min'),
+  salaryMax: integer('salary_max'),
+  salaryCurrency: text('salary_currency'),
+  visaNeeds: text('visa_needs'),
+  languages: jsonb('languages').notNull().default([]),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 })

@@ -11,7 +11,15 @@ const nextConfig = {
     // of bundling it, which is also what lets the correct per-platform
     // binary (Linux on Vercel, whatever's installed locally otherwise)
     // resolve correctly instead of baking in one platform's binary.
-    serverComponentsExternalPackages: ['@node-rs/argon2'],
+    // pdf-parse (via pdfjs-dist) ships a separate worker file
+    // (pdf.worker.mjs) that it dynamically imports by relative path at
+    // runtime. Webpack relocates it into .next/server/chunks/ without
+    // actually copying the physical file there, so the dynamic import
+    // fails ("Cannot find module '.../pdf.worker.mjs'") in both dev and a
+    // production build. Marking both packages external makes Next resolve
+    // them via plain require() from node_modules at runtime instead, where
+    // the worker file genuinely exists next to the rest of the package.
+    serverComponentsExternalPackages: ['@node-rs/argon2', 'pdf-parse', 'pdfjs-dist'],
   },
 }
 
