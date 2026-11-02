@@ -5,20 +5,21 @@ import { getResumeForUser, deleteResumeForUser } from '@/lib/db/resumes'
 import { vercelBlobStorage } from '@/lib/storage'
 
 async function requireSession() {
-  const token = cookies().get(SESSION_COOKIE)?.value
+  const token = (await cookies()).get(SESSION_COOKIE)?.value
   return token ? await verifySession(token) : null
 }
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await requireSession()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
+    const { id } = await params
     // Ownership check is the query itself — getResumeForUser only returns a
     // row if BOTH the id matches AND it belongs to this user. A resume that
     // exists but belongs to someone else returns null here, same as one
     // that doesn't exist at all — never leaks "it exists but isn't yours".
-    const resume = await getResumeForUser(params.id, session.userId)
+    const resume = await getResumeForUser(id, session.userId)
     if (!resume) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
 
     return NextResponse.json({ resume })
@@ -28,12 +29,13 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await requireSession()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
-    const filePathname = await deleteResumeForUser(params.id, session.userId)
+    const { id } = await params
+    const filePathname = await deleteResumeForUser(id, session.userId)
     if (!filePathname) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
 
     try {

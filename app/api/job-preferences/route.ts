@@ -5,7 +5,7 @@ import { getJobPreferencesForUser, saveJobPreferencesForUser } from '@/lib/db/jo
 import { JobPreferencesSchema } from '@/lib/resumeProfile'
 
 async function requireSession() {
-  const token = cookies().get(SESSION_COOKIE)?.value
+  const token = (await cookies()).get(SESSION_COOKIE)?.value
   return token ? await verifySession(token) : null
 }
 

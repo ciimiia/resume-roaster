@@ -29,7 +29,7 @@ async function extractResumeText(buffer: Buffer, type: DetectedFileType): Promis
 }
 
 async function requireSession() {
-  const token = cookies().get(SESSION_COOKIE)?.value
+  const token = (await cookies()).get(SESSION_COOKIE)?.value
   return token ? await verifySession(token) : null
 }
 
@@ -38,12 +38,13 @@ async function requireSession() {
  * stored file — no re-upload needed. For the case where upload succeeded
  * but parsing failed (bad text extraction, LLM/API error, etc).
  */
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await requireSession()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
-    const resume = await getResumeForUser(params.id, session.userId)
+    const { id } = await params
+    const resume = await getResumeForUser(id, session.userId)
     if (!resume) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
 
     const rate = await checkRateLimit(`resume-retry-parse:user:${session.userId}`, RETRY_LIMIT.max, RETRY_LIMIT.windowSeconds)

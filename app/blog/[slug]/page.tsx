@@ -40,8 +40,9 @@ async function resolvePost(slug: string): Promise<Post | null> {
   }
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const post = await resolvePost(params.slug)
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
+  const post = await resolvePost(slug)
   if (!post) return {}
   const url = `${SITE_URL}/blog/${post.slug}`
   return {
@@ -68,8 +69,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
-export default async function PostPage({ params }: { params: { slug: string } }) {
-  const post = await resolvePost(params.slug)
+export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  const post = await resolvePost(slug)
   if (!post) notFound()
 
   const others = POSTS.filter(p => p.slug !== post.slug).slice(0, 2)

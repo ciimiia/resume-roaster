@@ -5,7 +5,7 @@ import { env } from '@/lib/env'
 
 // Proxy for admin users — calls the cron endpoint with the real CRON_SECRET server-side
 export async function POST(req: NextRequest) {
-  const token = cookies().get(SESSION_COOKIE)?.value
+  const token = (await cookies()).get(SESSION_COOKIE)?.value
   const session = token ? await verifySession(token) : null
   if (!session || !env.isAdminEmail(session.email)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
