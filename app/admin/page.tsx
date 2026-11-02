@@ -10,7 +10,7 @@ import AdminClient from './AdminClient'
 export const dynamic = 'force-dynamic'
 
 export default async function AdminPage() {
-  const token = cookies().get(SESSION_COOKIE)?.value
+  const token = (await cookies()).get(SESSION_COOKIE)?.value
   const session = token ? await verifySession(token) : null
   if (!session) redirect('/signin')
   if (!env.isAdminEmail(session.email)) redirect('/')

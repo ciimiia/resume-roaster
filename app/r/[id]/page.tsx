@@ -14,8 +14,9 @@ async function load(id: string) {
   }
 }
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  const saved = await load(params.id)
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const saved = await load(id)
   if (!saved) return { title: PRODUCT.name }
 
   const { result, mode } = saved
@@ -40,8 +41,9 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   }
 }
 
-export default async function SharedPage({ params }: { params: { id: string } }) {
-  const saved = await load(params.id)
+export default async function SharedPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const saved = await load(id)
   if (!saved) notFound()
 
   return <SharedResult mode={saved.mode} result={saved.result} />

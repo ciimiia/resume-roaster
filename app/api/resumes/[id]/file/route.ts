@@ -10,13 +10,14 @@ import { vercelBlobStorage } from '@/lib/storage'
  * the client. Ownership is checked here (via getResumeForUser) on every
  * request, not cached, not assumed from a prior check.
  */
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  const token = cookies().get(SESSION_COOKIE)?.value
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const token = (await cookies()).get(SESSION_COOKIE)?.value
   const session = token ? await verifySession(token) : null
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
-    const resume = await getResumeForUser(params.id, session.userId)
+    const { id } = await params
+    const resume = await getResumeForUser(id, session.userId)
     if (!resume) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
 
     const file = await vercelBlobStorage.download(resume.filePathname)

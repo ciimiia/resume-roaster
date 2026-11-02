@@ -13,7 +13,7 @@ import { ensureDomMatrixPolyfill } from '@/lib/pdfPolyfill'
 const UPLOAD_LIMIT = { max: 10, windowSeconds: 60 * 60 }
 
 async function requireSession() {
-  const token = cookies().get(SESSION_COOKIE)?.value
+  const token = (await cookies()).get(SESSION_COOKIE)?.value
   return token ? await verifySession(token) : null
 }
 

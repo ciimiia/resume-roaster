@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   const { mode, result } = await req.json() as { mode: ModeId; result: AnalysisResult }
 
   // Resolve logged-in user (optional)
-  const token = cookies().get(SESSION_COOKIE)?.value
+  const token = (await cookies()).get(SESSION_COOKIE)?.value
   const session = token ? await verifySession(token) : null
 
   try {

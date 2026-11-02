@@ -16,7 +16,7 @@ import { vercelBlobStorage } from '@/lib/storage'
  * profile and preferences"), not full account deletion.
  */
 export async function DELETE() {
-  const token = cookies().get(SESSION_COOKIE)?.value
+  const token = (await cookies()).get(SESSION_COOKIE)?.value
   const session = token ? await verifySession(token) : null
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 

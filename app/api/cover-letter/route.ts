@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Persist to user's account if logged in
-  const token = cookies().get(SESSION_COOKIE)?.value
+  const token = (await cookies()).get(SESSION_COOKIE)?.value
   const session = token ? await verifySession(token) : null
   let savedId: string | undefined
 

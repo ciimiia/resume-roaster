@@ -6,7 +6,7 @@ import { env } from '@/lib/env'
 import type { SiteContent } from '@/lib/SiteContentContext'
 
 async function guard() {
-  const token = cookies().get(SESSION_COOKIE)?.value
+  const token = (await cookies()).get(SESSION_COOKIE)?.value
   const session = token ? await verifySession(token) : null
   if (!session || !env.isAdminEmail(session.email)) return null
   return session

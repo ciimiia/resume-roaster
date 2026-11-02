@@ -6,7 +6,7 @@ import { getResumeForUser } from '@/lib/db/resumes'
 import { ParsedProfileSchema } from '@/lib/resumeProfile'
 
 async function requireSession() {
-  const token = cookies().get(SESSION_COOKIE)?.value
+  const token = (await cookies()).get(SESSION_COOKIE)?.value
   return token ? await verifySession(token) : null
 }
 

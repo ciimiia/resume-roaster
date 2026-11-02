@@ -6,7 +6,7 @@ import { listCoverLettersForUser } from '@/lib/db/coverLetters'
 import DashboardClient from './DashboardClient'
 
 export default async function DashboardPage() {
-  const token = cookies().get(SESSION_COOKIE)?.value
+  const token = (await cookies()).get(SESSION_COOKIE)?.value
   const session = token ? await verifySession(token) : null
   if (!session) redirect('/signin')
 

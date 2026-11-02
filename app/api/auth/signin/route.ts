@@ -49,8 +49,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'INVALID_CREDENTIALS' }, { status: 401 })
     }
 
-    const token = await createSession(user.id, normalizedEmail)
-    cookies().set(SESSION_COOKIE, token, {
+    const token = await createSession(user.id, normalizedEmail);
+    (await cookies()).set(SESSION_COOKIE, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
