@@ -330,6 +330,25 @@ const en = {
   adminNoUsers: 'No users found.',
   adminDate: 'Date',
 
+  // ── Jobs tab (Phase 2a) ──────────────────────────────────
+  adminTabJobs: 'Jobs',
+  adminJobsEyebrow: 'Job Ingestion',
+  adminJobsTitle: 'Job Sources',
+  adminJobsRunBtn: 'Run now',
+  adminJobsRunning: 'Running…',
+  adminJobsRunDone: 'Done',
+  adminJobsSourcesWord: 'sources',
+  adminJobsNewWord: 'new',
+  adminJobsExpiredWord: 'expired',
+  adminJobsActiveWord: 'active jobs',
+  adminJobsCompany: 'Company',
+  adminJobsSourceCol: 'Source',
+  adminJobsLastFetched: 'Last fetched',
+  adminJobsActiveCol: 'Active',
+  adminJobsErrorCol: 'Last error',
+  adminJobsNeverRun: 'never',
+  adminJobsDisabled: 'disabled',
+
   // ── Site Content tab ──────────────────────────────────
   adminTabSiteContent: 'Site Content',
   adminSiteContentTitle: 'Site Content Overrides',
@@ -761,6 +780,25 @@ const fa: typeof en = {
   adminUserJoined: 'تاریخ عضویت',
   adminNoUsers: 'کاربری یافت نشد.',
   adminDate: 'تاریخ',
+
+  // ── Jobs tab (Phase 2a) ──────────────────────────────────
+  adminTabJobs: 'شغل‌ها',
+  adminJobsEyebrow: 'دریافت شغل‌ها',
+  adminJobsTitle: 'منابع شغلی',
+  adminJobsRunBtn: 'اجرا کن',
+  adminJobsRunning: 'در حال اجرا…',
+  adminJobsRunDone: 'انجام شد',
+  adminJobsSourcesWord: 'منبع',
+  adminJobsNewWord: 'جدید',
+  adminJobsExpiredWord: 'منقضی',
+  adminJobsActiveWord: 'شغل فعال',
+  adminJobsCompany: 'شرکت',
+  adminJobsSourceCol: 'منبع',
+  adminJobsLastFetched: 'آخرین دریافت',
+  adminJobsActiveCol: 'فعال',
+  adminJobsErrorCol: 'آخرین خطا',
+  adminJobsNeverRun: 'هیچ‌وقت',
+  adminJobsDisabled: 'غیرفعال',
 
   // ── Site Content tab ──────────────────────────────────
   adminTabSiteContent: 'محتوای سایت',

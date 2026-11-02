@@ -10,7 +10,7 @@
  * nothing to migrate there; no sessions table.
  */
 
-import { pgTable, text, timestamp, integer, jsonb, uuid, date, boolean, primaryKey, index } from 'drizzle-orm/pg-core'
+import { pgTable, text, timestamp, integer, jsonb, uuid, date, boolean, primaryKey, index, uniqueIndex } from 'drizzle-orm/pg-core'
 import { sql } from 'drizzle-orm'
 
 // ── Phase 0 placeholder — kept until something in Phase 1+ needs the
@@ -190,6 +190,79 @@ export const profiles = pgTable('profiles', {
   approved: boolean('approved').notNull().default(false),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 })
+
+// ── Phase 2a: job ingestion ──────────────────────────────────────────────
+
+// One row per company/board we pull from. For the per-company ATS adapters
+// (Greenhouse/Lever/Ashby) this is literally one employer's public board;
+// for the aggregator adapters (Remotive, Arbeitnow, Adzuna) there's a
+// single synthetic row per adapter (boardToken null) since those aren't
+// scoped to one company. `enabled` lets us turn off a board without
+// deleting its history; `lastError` is the ingestion runner's per-source
+// error isolation surfacing to the admin view (see lib/jobIngestion/runner.ts).
+export const jobSources = pgTable('job_sources', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  atsType: text('ats_type').notNull(), // 'greenhouse' | 'lever' | 'ashby' | 'remotive' | 'arbeitnow' | 'adzuna'
+  boardToken: text('board_token'), // company's board slug; null for aggregator-wide sources
+  companyName: text('company_name').notNull(),
+  enabled: boolean('enabled').notNull().default(true),
+  lastFetchedAt: timestamp('last_fetched_at', { withTimezone: true }),
+  lastError: text('last_error'),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  // NULLs are distinct in a unique index by default in Postgres, so this
+  // only enforces uniqueness for the per-company rows (boardToken set);
+  // aggregator sources are kept unique by convention (one row per atsType),
+  // not by this DB constraint, since boardToken is null for all of them.
+  atsBoardIdx: uniqueIndex('job_sources_ats_board_idx').on(t.atsType, t.boardToken),
+}))
+
+// One row per job listing, deduped by (source, sourceJobId). Job text is
+// UNTRUSTED DATA from third-party employers — descriptionText is always the
+// sanitized plain-text output of lib/jobIngestion/sanitizeHtml.ts, never
+// raw HTML, and nothing here is ever executed, templated, or fed back as an
+// LLM instruction (see lib/jobIngestion/ for the ingestion pipeline).
+export const jobs = pgTable('jobs', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  // Which adapter produced this row — see lib/jobIngestion/types.ts's
+  // JobSourceId. For Adzuna-sourced rows that point at an underlying ATS,
+  // `atsType` records that underlying system (e.g. 'greenhouse') while
+  // `source` stays 'adzuna' — they're deliberately separate fields.
+  source: text('source').notNull(),
+  sourceJobId: text('source_job_id').notNull(),
+  atsType: text('ats_type'),
+  applyUrl: text('apply_url').notNull(),
+  // Canonical link back to the original listing — required for attribution
+  // on sources that mandate it (e.g. Adzuna's "Jobs by Adzuna" linking
+  // requirement; see lib/jobIngestion/adapters/adzuna.ts).
+  sourceUrl: text('source_url').notNull(),
+  attributionLabel: text('attribution_label'), // e.g. "Jobs by Adzuna", null where not required
+  company: text('company').notNull(),
+  title: text('title').notNull(),
+  location: text('location'),
+  remoteType: text('remote_type'), // best-effort 'remote' | 'hybrid' | 'onsite' | null (unknown)
+  descriptionText: text('description_text').notNull(),
+  salaryMin: integer('salary_min'),
+  salaryMax: integer('salary_max'),
+  salaryCurrency: text('salary_currency'),
+  // True when the source itself flagged the salary as an estimate/model
+  // prediction rather than employer-provided (e.g. Adzuna's predicted-salary
+  // field) — surfaced so the UI can caveat it instead of presenting it as fact.
+  salaryPredicted: boolean('salary_predicted').notNull().default(false),
+  postedAt: timestamp('posted_at', { withTimezone: true }),
+  language: text('language'),
+  // sha256 of normalized (title+company+location+descriptionText) — lets
+  // the ingestion runner detect "this exact posting changed" vs. just
+  // "still present, nothing changed" without diffing full text every run.
+  contentHash: text('content_hash').notNull(),
+  firstSeenAt: timestamp('first_seen_at', { withTimezone: true }).defaultNow().notNull(),
+  lastSeenAt: timestamp('last_seen_at', { withTimezone: true }).defaultNow().notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }),
+  status: text('status').notNull().default('active'), // 'active' | 'expired'
+}, (t) => ({
+  uniqueSourceJob: uniqueIndex('jobs_source_job_unique_idx').on(t.source, t.sourceJobId),
+  statusIdx: index('jobs_status_idx').on(t.status),
+}))
 
 // One row per user — target roles, locations, remote preference, etc.
 export const jobPreferences = pgTable('job_preferences', {
