@@ -61,6 +61,21 @@ export const env = {
     return readOptional('CRON_SECRET')
   },
 
+  // ── Adzuna job search API — Phase 2a, optional ──────────────────────────
+  // Commercial/revenue-generating use requires a separate Adzuna licence
+  // agreement beyond just registering for a free app_id/app_key — see
+  // lib/jobIngestion/adapters/adzuna.ts. Both vars must be set for the
+  // adapter to run at all; it's skipped cleanly (not an error) otherwise.
+  get adzunaAppId(): string | undefined {
+    return readOptional('ADZUNA_APP_ID')
+  },
+  get adzunaAppKey(): string | undefined {
+    return readOptional('ADZUNA_APP_KEY')
+  },
+  get hasAdzuna(): boolean {
+    return readOptional('ADZUNA_APP_ID') !== undefined && readOptional('ADZUNA_APP_KEY') !== undefined
+  },
+
   get openRouterApiKey(): string | undefined {
     return readOptional('OPENROUTER_API_KEY')
   },

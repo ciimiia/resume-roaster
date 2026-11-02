@@ -333,6 +333,102 @@ function UsersTab() {
   )
 }
 
+interface JobSourceRow {
+  id: string
+  atsType: string
+  boardToken: string | null
+  companyName: string
+  enabled: boolean
+  lastFetchedAt: string | null
+  lastError: string | null
+  activeJobCount: number
+}
+
+/* ── Jobs tab (Phase 2a) ── */
+function JobsTab() {
+  const { t, lang } = useLang()
+  const [sources, setSources] = useState<JobSourceRow[]>([])
+  const [loading, setLoading] = useState(true)
+  const [running, setRunning] = useState(false)
+  const [runResult, setRunResult] = useState('')
+
+  const load = useCallback(() => {
+    fetch('/api/admin/job-sources')
+      .then(r => r.json())
+      .then(d => setSources((d as { sources: JobSourceRow[] }).sources ?? []))
+      .finally(() => setLoading(false))
+  }, [])
+
+  useEffect(() => { load() }, [load])
+
+  const runNow = async () => {
+    setRunning(true)
+    setRunResult('')
+    try {
+      const res = await fetch('/api/admin/job-sources', { method: 'POST' })
+      const data = await res.json() as { processedSources?: number; newJobs?: number; totalJobs?: number; expiredJobs?: number; error?: string }
+      if (!res.ok) { setRunResult(data.error ?? 'Failed'); return }
+      setRunResult(`${t.adminJobsRunDone}: ${data.processedSources} ${t.adminJobsSourcesWord}, ${data.newJobs}/${data.totalJobs} ${t.adminJobsNewWord}, ${data.expiredJobs} ${t.adminJobsExpiredWord}`)
+      load()
+    } finally {
+      setRunning(false)
+    }
+  }
+
+  const totalActive = sources.reduce((sum, s) => sum + s.activeJobCount, 0)
+
+  if (loading) return (
+    <div style={{ padding: 60, textAlign: 'center' }}>
+      <span style={{ width: 24, height: 24, border: '2px solid var(--accent)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin .7s linear infinite', display: 'inline-block' }} />
+    </div>
+  )
+
+  return (
+    <div style={cardStyle({ overflow: 'hidden' })}>
+      <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
+        <div>
+          <Eyebrow>{t.adminJobsEyebrow}</Eyebrow>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20 }}>{t.adminJobsTitle}</h2>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-mute)', marginTop: 4, display: 'block' }}>
+            {sources.length} {t.adminJobsSourcesWord} · {totalActive} {t.adminJobsActiveWord}
+          </span>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <button onClick={runNow} disabled={running} style={{
+            padding: '9px 18px', borderRadius: 8, border: 'none', cursor: running ? 'wait' : 'pointer',
+            background: 'var(--accent)', color: 'var(--accent-ink)', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 13,
+          }}>
+            {running ? t.adminJobsRunning : t.adminJobsRunBtn}
+          </button>
+          {runResult && <div style={{ fontSize: 11, color: 'var(--ink-mute)', marginTop: 6, fontFamily: 'var(--font-mono)' }}>{runResult}</div>}
+        </div>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr 0.8fr 1.4fr', padding: '10px 24px', borderBottom: '1px solid var(--line)', background: 'var(--surface-2)' }}>
+        {[t.adminJobsCompany, t.adminJobsSourceCol, t.adminJobsLastFetched, t.adminJobsActiveCol, t.adminJobsErrorCol].map(h => (
+          <span key={h} style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '.1em', color: 'var(--ink-faint)' }}>{h}</span>
+        ))}
+      </div>
+      {sources.map((s, i) => (
+        <div key={s.id} style={{
+          display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr 0.8fr 1.4fr', padding: '12px 24px',
+          borderBottom: i < sources.length - 1 ? '1px solid var(--line)' : 'none',
+          alignItems: 'center', fontSize: 13,
+          background: i % 2 === 0 ? 'transparent' : 'color-mix(in srgb, var(--surface-2) 40%, transparent)',
+          opacity: s.enabled ? 1 : 0.5,
+        }}>
+          <span style={{ color: 'var(--ink-soft)' }}>{s.companyName}{!s.enabled && ` (${t.adminJobsDisabled})`}</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-mute)' }}>{s.atsType}</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-faint)' }}>
+            {s.lastFetchedAt ? new Date(s.lastFetchedAt).toLocaleString(lang === 'fa' ? 'fa-IR' : 'en-US') : t.adminJobsNeverRun}
+          </span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--ink-soft)' }}>{s.activeJobCount}</span>
+          <span style={{ fontSize: 11, color: s.lastError ? 'var(--roast)' : 'var(--ink-faint)' }}>{s.lastError ?? '—'}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 // i18n defaults used as placeholders in the form
 type SCKey = keyof SiteContent
 
@@ -572,7 +668,7 @@ function SiteContentTab() {
 /* ── Main ── */
 export default function AdminClient({ posts }: { posts: PostWithSource[] }) {
   const { t } = useLang()
-  const [tab, setTab] = useState<'content' | 'stats' | 'users' | 'site'>('content')
+  const [tab, setTab] = useState<'content' | 'stats' | 'users' | 'site' | 'jobs'>('content')
 
   return (
     <div style={{ minHeight: '100vh', padding: '0 var(--gutter) 100px' }}>
@@ -592,6 +688,7 @@ export default function AdminClient({ posts }: { posts: PostWithSource[] }) {
           <TabButton active={tab === 'stats'} onClick={() => setTab('stats')}>{t.adminTabStats}</TabButton>
           <TabButton active={tab === 'users'} onClick={() => setTab('users')}>{t.adminTabUsers}</TabButton>
           <TabButton active={tab === 'site'} onClick={() => setTab('site')}>{t.adminTabSiteContent}</TabButton>
+          <TabButton active={tab === 'jobs'} onClick={() => setTab('jobs')}>{t.adminTabJobs}</TabButton>
         </div>
 
         {/* Tab content */}
@@ -599,6 +696,7 @@ export default function AdminClient({ posts }: { posts: PostWithSource[] }) {
         {tab === 'stats' && <StatsTab />}
         {tab === 'users' && <UsersTab />}
         {tab === 'site' && <SiteContentTab />}
+        {tab === 'jobs' && <JobsTab />}
       </div>
     </div>
   )
