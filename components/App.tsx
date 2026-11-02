@@ -8,7 +8,7 @@ import Results from './Results'
 import Button from './ui/Button'
 import { useLang } from '@/lib/LangContext'
 
-function AppInner() {
+function AppInner({ roastedCount }: { roastedCount: number }) {
   const { t } = useLang()
   const [view, setView]             = useState<View>('landing')
   const [mode, setMode]             = useState<ModeId>('roast')
@@ -52,7 +52,7 @@ function AppInner() {
   return (
     <>
       {view === 'landing' && (
-        <Landing mode={mode} setMode={setMode} onStart={goWorkspace} />
+        <Landing mode={mode} setMode={setMode} onStart={goWorkspace} roastedCount={roastedCount} />
       )}
 
       {view === 'workspace' && (
@@ -86,6 +86,6 @@ function AppInner() {
   )
 }
 
-export default function App() {
-  return <AppInner />
+export default function App({ roastedCount }: { roastedCount: number }) {
+  return <AppInner roastedCount={roastedCount} />
 }

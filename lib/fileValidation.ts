@@ -25,14 +25,22 @@ function startsWith(buf: Buffer, magic: Buffer): boolean {
 /**
  * For DOCX specifically: being a valid ZIP isn't enough on its own (a
  * renamed .xlsx or plain .zip would also pass) — DOCX's ZIP always
- * contains a `[Content_Types].xml` entry near the start of the archive.
- * This is a cheap heuristic (substring search over the raw bytes, not a
- * real ZIP parse) good enough for "simple" validation; mammoth will fail
- * cleanly at the parsing step for anything that slips past this.
+ * contains a `[Content_Types].xml` entry. This is a cheap heuristic
+ * (substring search over the raw bytes, not a real ZIP parse) good enough
+ * for "simple" validation; mammoth will fail cleanly at the parsing step
+ * for anything that slips past this.
+ *
+ * Searches the whole buffer, not just a leading slice — an earlier version
+ * only checked the first 4096 bytes on the assumption the entry would be
+ * near the start, but real DOCX files (confirmed with a fixture generated
+ * by the `docx` library, not just hand-crafted test input) can have other
+ * ZIP entries first, pushing this marker past that window and causing a
+ * real DOCX to be wrongly rejected. The file is already capped at 5 MB
+ * (MAX_RESUME_FILE_SIZE) by the time this runs, so scanning it fully is
+ * cheap.
  */
 function looksLikeDocx(buf: Buffer): boolean {
-  const headSlice = buf.subarray(0, Math.min(buf.length, 4096))
-  return headSlice.includes(Buffer.from('[Content_Types].xml', 'ascii'))
+  return buf.includes(Buffer.from('[Content_Types].xml', 'ascii'))
 }
 
 export function validateResumeFile(buffer: Buffer, filename: string): FileValidationResult {

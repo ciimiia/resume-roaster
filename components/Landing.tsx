@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { MODES, MODE_ORDER, RESULTS } from '@/lib/data'
 import type { ModeId } from '@/lib/types'
@@ -14,14 +14,15 @@ import Pill from './ui/Pill'
 import ScoreRing from './ui/ScoreRing'
 
 
-/* ---- StatTicker ---- */
-function StatTicker() {
+/* ---- StatTicker ----
+ * `n` comes from the server (app/page.tsx fetches it at request time and
+ * passes it down through App -> Landing) rather than a client-side fetch —
+ * no extra round-trip, and it reflects a real count, not a placeholder that
+ * increments on its own. Hidden entirely below 100, per product decision:
+ * a true-but-small number reads worse than showing nothing. */
+function StatTicker({ n }: { n: number }) {
   const { t } = useLang()
-  const [n, setN] = useState(10428)
-  useEffect(() => {
-    const id = setInterval(() => setN(v => v + Math.floor(Math.random() * 3)), 2600)
-    return () => clearInterval(id)
-  }, [])
+  if (n < 100) return null
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -123,9 +124,10 @@ interface LandingProps {
   mode: ModeId
   setMode: (m: ModeId) => void
   onStart: () => void
+  roastedCount: number
 }
 
-export default function Landing({ mode, setMode, onStart }: LandingProps) {
+export default function Landing({ mode, setMode, onStart, roastedCount }: LandingProps) {
   const { t, lang } = useLang()
   const sc = useSiteContent()
   const m = MODES[mode]
@@ -159,7 +161,7 @@ export default function Landing({ mode, setMode, onStart }: LandingProps) {
               <Button size="lg" icon="upload" onClick={onStart}>{s('heroCta1', t.heroCta1)}</Button>
               <Button size="lg" variant="ghost" iconRight="arrow" onClick={onStart}>{s('heroCta2', t.heroCta2)} {m.glyph}</Button>
             </div>
-            <div style={{ marginTop: 'var(--sp-8)' }}><StatTicker /></div>
+            <div style={{ marginTop: 'var(--sp-8)' }}><StatTicker n={roastedCount} /></div>
           </div>
 
           {/* Right — live preview */}

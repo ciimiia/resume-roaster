@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
         'X-Title': PRODUCT.name,
       },
       body: JSON.stringify({
-        model: 'openrouter/free',
+        model: env.openRouterModel,
         messages: [
           { role: 'system', content: SYSTEM_PROMPTS[mode] },
           { role: 'user', content: USER_PROMPT(mode, resumeText) },
@@ -103,6 +103,9 @@ export async function POST(req: NextRequest) {
         // budget on hidden chain-of-thought and never emit the actual JSON
         // answer. Disabling reasoning routes to a model that returns content.
         reasoning: { enabled: false },
+        // Resume text is personal data — route only to providers that don't
+        // retain or train on prompts (requires a paid model; see env.openRouterModel).
+        provider: { data_collection: 'deny' },
       }),
     })
 

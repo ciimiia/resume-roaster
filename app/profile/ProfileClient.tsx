@@ -59,6 +59,8 @@ export default function ProfileClient({ initialProfile, initialPreferences, init
   const [prefsSaved, setPrefsSaved] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [deleteDone, setDeleteDone] = useState(false)
+  const [retryingId, setRetryingId] = useState<string | null>(null)
+  const [retryError, setRetryError] = useState('')
 
   const hasProfile = resumes.length > 0 || initialProfile !== null
 
@@ -138,6 +140,34 @@ export default function ProfileClient({ initialProfile, initialPreferences, init
     }
   }
 
+  const retryParse = async (id: string) => {
+    setRetryError('')
+    setRetryingId(id)
+    try {
+      const res = await fetch(`/api/resumes/${id}/retry-parse`, { method: 'POST' })
+      const data = await res.json() as { parsed?: boolean; error?: string }
+      if (!res.ok) {
+        setRetryError(data.error === 'RATE_LIMITED' ? t.profileRetryRateLimited : t.profileRetryFailed)
+        return
+      }
+      if (!data.parsed) {
+        setRetryError(t.profileRetryFailed)
+        return
+      }
+      setResumes(prev => prev.map(r => r.id === id ? { ...r, hasParsedProfile: true } : r))
+      const detail = await fetch(`/api/resumes/${id}`).then(r => r.json()) as { resume?: { parsedProfile?: ParsedProfile } }
+      if (detail.resume?.parsedProfile) {
+        setProfile(detail.resume.parsedProfile)
+        setSourceResumeId(id)
+        setApproved(false)
+      }
+    } catch {
+      setRetryError(t.profileRetryFailed)
+    } finally {
+      setRetryingId(null)
+    }
+  }
+
   const deleteMyData = async () => {
     if (!confirm(t.profileDeleteConfirm)) return
     setDeleting(true)
@@ -206,8 +236,20 @@ export default function ProfileClient({ initialProfile, initialPreferences, init
                   <Icon name="doc" size={14} />
                   <span>{r.originalFilename}</span>
                   <span className="mono" style={{ fontSize: 11, color: 'var(--ink-faint)' }}>v{r.version}</span>
+                  {!r.hasParsedProfile && (
+                    <button
+                      onClick={() => retryParse(r.id)}
+                      disabled={retryingId === r.id}
+                      style={{ background: 'none', border: 'none', color: 'var(--accent)', fontSize: 12.5, cursor: retryingId === r.id ? 'wait' : 'pointer' }}
+                    >
+                      {retryingId === r.id ? t.profileRetrying : t.profileRetryParseBtn}
+                    </button>
+                  )}
                 </div>
               ))}
+              {retryError && (
+                <div style={{ fontSize: 13, color: 'var(--roast)' }}>{retryError}</div>
+              )}
             </div>
           )}
         </div>

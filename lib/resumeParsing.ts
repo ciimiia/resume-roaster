@@ -94,7 +94,7 @@ export async function parseResumeToProfile(resumeText: string): Promise<ResumePa
         'X-Title': 'Resume Roaster Profile Parser',
       },
       body: JSON.stringify({
-        model: 'openrouter/free',
+        model: env.openRouterModel,
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
           { role: 'user', content: buildUserPrompt(resumeText) },
@@ -102,6 +102,10 @@ export async function parseResumeToProfile(resumeText: string): Promise<ResumePa
         temperature: 0.2, // low — this is extraction, not creative writing
         max_tokens: 3000,
         reasoning: { enabled: false }, // see app/api/analyze/route.ts — same models otherwise burn the budget on hidden reasoning
+        // Resume text is personal data — route only to providers that don't
+        // retain or train on prompts. Requires a paid model; "openrouter/free"
+        // has no route under this constraint (see env.openRouterModel).
+        provider: { data_collection: 'deny' },
       }),
     })
 

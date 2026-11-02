@@ -1,4 +1,4 @@
-import { and, eq, gt, desc } from 'drizzle-orm'
+import { and, eq, gt, desc, count } from 'drizzle-orm'
 import { getDb, schema } from './index'
 import type { ModeId, AnalysisResult } from '@/lib/types'
 
@@ -55,6 +55,13 @@ export async function getResult(id: string): Promise<SavedResult | null> {
     savedAt: row.savedAt.toISOString(),
     userId: row.userId ?? undefined,
   }
+}
+
+/** Total roasts ever run (anonymous + signed-in), for the public landing-page stat. Includes expired rows — this is a lifetime count, not "currently available results". */
+export async function countAllResults(): Promise<number> {
+  const db = getDb()
+  const rows = await db.select({ value: count() }).from(schema.sharedResults)
+  return rows[0]?.value ?? 0
 }
 
 /** For the dashboard — most recent 50, newest first. Expired results are excluded. */

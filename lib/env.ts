@@ -65,6 +65,19 @@ export const env = {
     return readOptional('OPENROUTER_API_KEY')
   },
 
+  /**
+   * Model used for both resume parsing and roast analysis. Defaults to a
+   * low-cost paid model with reliable JSON output — NOT `openrouter/free`,
+   * which routes to whatever free model is available and can't be paired
+   * with a `data_collection: "deny"` provider preference (free models are
+   * free precisely because the provider retains/trains on prompts; "deny"
+   * would leave no route and the request would fail). See
+   * lib/resumeParsing.ts and app/api/analyze/route.ts for where this is used.
+   */
+  get openRouterModel(): string {
+    return readOptional('OPENROUTER_MODEL') ?? 'openai/gpt-4o-mini'
+  },
+
   // ── Postgres (Neon) — primary data store as of Phase 1 ─────────────────────
   get databaseUrl(): string {
     return requireVar(
