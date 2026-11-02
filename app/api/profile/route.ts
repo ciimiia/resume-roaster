@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { verifySession, SESSION_COOKIE } from '@/lib/session'
-import { getProfileForUser, saveProfileForUser } from '@/lib/db/profiles'
+import { getProfileForUser, saveProfileForUser, setProfileEmbedding } from '@/lib/db/profiles'
 import { getResumeForUser } from '@/lib/db/resumes'
 import { ParsedProfileSchema } from '@/lib/resumeProfile'
+import { buildProfileText } from '@/lib/matching/profileText'
+import { embedText } from '@/lib/embeddings'
 
 async function requireSession() {
   const token = (await cookies()).get(SESSION_COOKIE)?.value
@@ -47,6 +49,22 @@ export async function PUT(req: NextRequest) {
       sourceResumeId: body.sourceResumeId ?? null,
       approved: body.approved ?? false,
     })
+
+    // Re-embed on every approval (including re-approving unchanged
+    // content) — approvedAt just bumped to a new version in
+    // saveProfileForUser above, so the match cache for this user is
+    // already stale; this keeps the embedding in step with it. Best-effort:
+    // an embedding failure here shouldn't fail the approval itself, the
+    // user still gets their approved profile — matching just won't have
+    // fresh results until the next successful approval or the admin retries.
+    if (body.approved) {
+      const embedded = await embedText(buildProfileText(profile))
+      if (embedded.ok) {
+        await setProfileEmbedding(session.userId, embedded.embedding)
+      } else {
+        console.error('[profile] approval embedding failed:', embedded.error)
+      }
+    }
 
     return NextResponse.json({ profile })
   } catch (err) {

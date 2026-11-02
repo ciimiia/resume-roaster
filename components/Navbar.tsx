@@ -71,6 +71,14 @@ function UserNav() {
           fontFamily: 'var(--font-mono)', letterSpacing: '.04em', whiteSpace: 'nowrap',
         }}>{t.adminNav}</Link>
       )}
+      <Link href="/jobs" style={{
+        fontSize: 13, color: 'var(--ink-mute)', textDecoration: 'none',
+        padding: '7px 14px', borderRadius: 'var(--r-md)',
+        border: '1px solid var(--line-2)', background: 'var(--surface-2)',
+        whiteSpace: 'nowrap',
+      }}>
+        {t.jobsTitle}
+      </Link>
       <Link href="/dashboard" style={{
         fontSize: 13, color: 'var(--ink-mute)', textDecoration: 'none',
         padding: '7px 14px', borderRadius: 'var(--r-md)',

@@ -22,6 +22,7 @@
  */
 import { listEnabledJobSources, recordFetchSuccess, recordFetchError } from '@/lib/db/jobSources'
 import { upsertJobsBatch, expireStaleJobs } from '@/lib/db/jobs'
+import { getBlockedCompanyNormalizedSet, normalizeCompanyName } from '@/lib/db/blockedCompanies'
 import { ADAPTERS } from './adapters'
 import type { JobSourceId } from './types'
 
@@ -86,6 +87,7 @@ export async function runIngestion(options: RunnerOptions = {}): Promise<RunnerR
   const startedAt = Date.now()
 
   const sources = await listEnabledJobSources()
+  const blockedCompanies = await getBlockedCompanyNormalizedSet()
   const perSource: SourceRunResult[] = []
   let totalJobs = 0
   let newJobs = 0
@@ -97,12 +99,18 @@ export async function runIngestion(options: RunnerOptions = {}): Promise<RunnerR
 
     processed++
     try {
-      const { jobs } = await fetchWithRetry(source.atsType, {
+      const { jobs: fetchedJobs } = await fetchWithRetry(source.atsType, {
         id: source.id,
         atsType: source.atsType,
         boardToken: source.boardToken,
         companyName: source.companyName,
       })
+
+      // Admin-blocked companies (lib/db/blockedCompanies.ts) are dropped
+      // before they ever reach the database — covers both per-company
+      // boards and aggregator sources (Adzuna etc.) that might return a
+      // blocked employer's listing alongside others.
+      const jobs = fetchedJobs.filter(j => !blockedCompanies.has(normalizeCompanyName(j.company)))
 
       // Bulk upsert, not one round trip per job — a single large company
       // board (hundreds of jobs) upserted one row at a time measured

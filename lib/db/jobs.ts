@@ -1,4 +1,4 @@
-import { eq, and, lt, inArray, sql, count } from 'drizzle-orm'
+import { eq, and, lt, ne, isNull, or, inArray, sql, count } from 'drizzle-orm'
 import { getDb, schema } from './index'
 import type { NormalizedJob } from '@/lib/jobIngestion/types'
 import { computeContentHash } from '@/lib/jobIngestion/contentHash'
@@ -259,4 +259,73 @@ export async function searchJobs(params: SearchJobsParams): Promise<{ items: Job
     items: rows.map(toListItem),
     total: Number(totalRows[0]?.count ?? 0),
   }
+}
+
+// ── Phase 2b: embeddings ─────────────────────────────────────────────────
+
+export interface JobForEmbedding {
+  id: string
+  title: string
+  company: string
+  descriptionText: string
+  contentHash: string
+}
+
+/** Text embedded for a job — title+company carry real signal for matching title/seniority, description is the bulk of it. */
+export function buildJobEmbeddingText(job: Pick<JobForEmbedding, 'title' | 'company' | 'descriptionText'>): string {
+  return `${job.title} at ${job.company}\n\n${job.descriptionText}`
+}
+
+/**
+ * Active jobs that have never been embedded, or whose content changed
+ * since their last embedding (contentHash vs. embeddingContentHash) —
+ * see lib/db/schema.ts's jobs.embeddingContentHash comment. Ordered
+ * oldest-first-seen so a backlog clears in FIFO order across cron ticks.
+ */
+export async function getJobsNeedingEmbedding(limit: number): Promise<JobForEmbedding[]> {
+  const db = getDb()
+  const rows = await db.select({
+    id: schema.jobs.id,
+    title: schema.jobs.title,
+    company: schema.jobs.company,
+    descriptionText: schema.jobs.descriptionText,
+    contentHash: schema.jobs.contentHash,
+  }).from(schema.jobs)
+    .where(and(
+      eq(schema.jobs.status, 'active'),
+      or(isNull(schema.jobs.embeddingContentHash), ne(schema.jobs.embeddingContentHash, schema.jobs.contentHash)),
+    ))
+    .orderBy(schema.jobs.firstSeenAt)
+    .limit(limit)
+  return rows
+}
+
+export async function setJobEmbedding(jobId: string, embedding: number[], contentHash: string): Promise<void> {
+  const db = getDb()
+  await db.update(schema.jobs)
+    .set({ embedding, embeddingContentHash: contentHash })
+    .where(eq(schema.jobs.id, jobId))
+}
+
+// ── Phase 2b: admin removal ───────────────────────────────────────────────
+
+/** Case-insensitive exact match on company name — used by the admin "block + purge" action (lib/db/blockedCompanies.ts handles preventing re-ingestion; this removes what's already there). */
+export async function deleteJobsByCompany(company: string): Promise<number> {
+  const db = getDb()
+  const rows = await db.delete(schema.jobs)
+    .where(sql`lower(${schema.jobs.company}) = lower(${company})`)
+    .returning({ id: schema.jobs.id })
+  return rows.length
+}
+
+export async function jobExists(jobId: string): Promise<boolean> {
+  const db = getDb()
+  const rows = await db.select({ id: schema.jobs.id }).from(schema.jobs).where(eq(schema.jobs.id, jobId)).limit(1)
+  return rows.length > 0
+}
+
+export async function deleteJobsBySource(source: string): Promise<number> {
+  const db = getDb()
+  const rows = await db.delete(schema.jobs).where(eq(schema.jobs.source, source)).returning({ id: schema.jobs.id })
+  return rows.length
 }

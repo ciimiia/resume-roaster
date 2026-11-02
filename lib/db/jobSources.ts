@@ -59,6 +59,11 @@ export async function createJobSource(input: {
   return toRow(rows[0])
 }
 
+export async function setJobSourceEnabled(sourceId: string, enabled: boolean): Promise<void> {
+  const db = getDb()
+  await db.update(schema.jobSources).set({ enabled }).where(eq(schema.jobSources.id, sourceId))
+}
+
 export async function recordFetchSuccess(sourceId: string): Promise<void> {
   const db = getDb()
   await db.update(schema.jobSources)
