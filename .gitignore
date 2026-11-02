@@ -37,3 +37,6 @@ next-env.d.ts
 
 .vercel
 .env*
+
+# scratch files from manual testing (curl cookies, generated test fixtures, etc.)
+.tmp_*

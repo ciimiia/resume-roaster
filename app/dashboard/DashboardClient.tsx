@@ -188,6 +188,12 @@ export default function DashboardClient({ analyses, coverLetters }: Props) {
           <p style={{ fontSize: 'var(--fs-md)', color: 'var(--ink-mute)', lineHeight: 1.6 }}>
             {t.dashboardWelcome}
           </p>
+          <Link href="/profile" style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 'var(--sp-4)',
+            fontSize: 13.5, color: 'var(--accent)', textDecoration: 'none',
+          }}>
+            <Icon name="doc" size={14} /> {t.profileTitle} →
+          </Link>
         </div>
 
         {/* ── Stats strip ── */}
