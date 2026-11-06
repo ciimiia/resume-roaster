@@ -145,6 +145,17 @@ export default function Landing({ mode, setMode, onStart, roastedCount }: Landin
 
           {/* Left */}
           <div style={{ animation: 'fadeUp .6s both' }}>
+            <div style={{ marginBottom: 'var(--sp-4)' }}>
+              <Link href="/jobs" style={{
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+                padding: '7px 14px', borderRadius: 999, textDecoration: 'none',
+                background: 'color-mix(in srgb, var(--accent) 12%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--accent) 35%, transparent)',
+                color: 'var(--accent)', fontSize: 13, fontWeight: 600,
+              }}>
+                <Icon name="bolt" size={13} /> {t.jobsAnnounceBanner} · {t.jobsAnnounceCta} →
+              </Link>
+            </div>
             <Pill tone="accent" style={{ marginBottom: 'var(--sp-5)' }}>
               <Icon name="spark" size={13} /> {t.heroPill}
             </Pill>
@@ -248,6 +259,7 @@ export default function Landing({ mode, setMode, onStart, roastedCount }: Landin
         <Logo size={24} />
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-5)', flexWrap: 'wrap' }}>
           {[
+            { label: t.jobsTitle, href: '/jobs' },
             { label: t.navBlog, href: '/blog' },
             { label: t.navBuilder, href: '/builder' },
             { label: t.clTitle, href: '/cover-letter' },

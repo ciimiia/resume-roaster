@@ -13,6 +13,8 @@ const en = {
 
   // ── Hero ──────────────────────────────────────────────
   heroPill: 'AI resume feedback · in 12 seconds',
+  jobsAnnounceBanner: 'New: AI-matched jobs, ranked against your resume',
+  jobsAnnounceCta: 'Try job matching',
   heroH1a: 'Your resume',
   heroH1b: "called. It's",
   heroH1c: 'embarrassed.',
@@ -527,6 +529,8 @@ const fa: typeof en = {
   navUploadBtn: 'رزومه‌ات رو آپلود کن',
 
   heroPill: 'بازخورد هوش مصنوعی · در ۱۲ ثانیه',
+  jobsAnnounceBanner: 'جدید: شغل‌های متناسب با رزومه‌ات، با امتیازدهی هوش مصنوعی',
+  jobsAnnounceCta: 'تطبیق شغل رو ببین',
   heroH1a: 'رزومه‌ات',
   heroH1b: 'زنگ زد.',
   heroH1c: 'خجالت می‌کشد.',
