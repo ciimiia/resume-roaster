@@ -10,8 +10,13 @@
  * nothing to migrate there; no sessions table.
  */
 
-import { pgTable, text, timestamp, integer, jsonb, uuid, date, boolean, primaryKey, index, uniqueIndex } from 'drizzle-orm/pg-core'
+import { pgTable, text, timestamp, integer, jsonb, uuid, date, boolean, primaryKey, index, uniqueIndex, vector } from 'drizzle-orm/pg-core'
 import { sql } from 'drizzle-orm'
+
+// text-embedding-3-small (see lib/embeddings.ts) — hardcoded here rather
+// than imported from lib/embeddings.ts to keep the schema module free of
+// any dependency on env/fetch-touching code.
+const EMBEDDING_DIMENSIONS = 1536
 
 // ── Phase 0 placeholder — kept until something in Phase 1+ needs the
 // pipeline proven again, delete whenever ──────────────────────────────────
@@ -188,6 +193,13 @@ export const profiles = pgTable('profiles', {
   languages: jsonb('languages').notNull().default([]),
   certifications: jsonb('certifications').notNull().default([]),
   approved: boolean('approved').notNull().default(false),
+  // Bumped every time the user (re-)approves — this, not updatedAt (which
+  // also changes on unapproved edits), is the "profile version" that job
+  // match scores are cached against and invalidated by. See
+  // lib/db/jobMatches.ts and lib/matching/.
+  approvedAt: timestamp('approved_at', { withTimezone: true }),
+  embedding: vector('embedding', { dimensions: EMBEDDING_DIMENSIONS }),
+  embeddingUpdatedAt: timestamp('embedding_updated_at', { withTimezone: true }),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 })
 
@@ -255,6 +267,12 @@ export const jobs = pgTable('jobs', {
   // the ingestion runner detect "this exact posting changed" vs. just
   // "still present, nothing changed" without diffing full text every run.
   contentHash: text('content_hash').notNull(),
+  // Phase 2b: embedding of (title+company+descriptionText), plus the
+  // contentHash it was computed from — the embedding cron re-embeds a job
+  // only when embeddingContentHash doesn't match the current contentHash
+  // (new job, or re-ingested with changed text), not every run.
+  embedding: vector('embedding', { dimensions: EMBEDDING_DIMENSIONS }),
+  embeddingContentHash: text('embedding_content_hash'),
   firstSeenAt: timestamp('first_seen_at', { withTimezone: true }).defaultNow().notNull(),
   lastSeenAt: timestamp('last_seen_at', { withTimezone: true }).defaultNow().notNull(),
   expiresAt: timestamp('expires_at', { withTimezone: true }),
@@ -277,5 +295,60 @@ export const jobPreferences = pgTable('job_preferences', {
   salaryCurrency: text('salary_currency'),
   visaNeeds: text('visa_needs'),
   languages: jsonb('languages').notNull().default([]),
+  // Companies this user never wants to see, regardless of match score —
+  // separate from the admin-wide `blockedCompanies` table below (that one
+  // hides a company for everyone, this one is per-user).
+  excludedCompanies: jsonb('excluded_companies').notNull().default([]),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 })
+
+// ── Phase 2b: matching ───────────────────────────────────────────────────
+
+// Admin-managed, site-wide: a company on this list is excluded from
+// ingestion (the runner skips/removes its jobs) and from match results for
+// everyone, regardless of per-user preferences. Matched case-insensitively
+// against jobs.company — see lib/db/blockedCompanies.ts.
+export const blockedCompanies = pgTable('blocked_companies', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  companyName: text('company_name').notNull(),
+  normalizedName: text('normalized_name').notNull(),
+  reason: text('reason'),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  normalizedIdx: uniqueIndex('blocked_companies_normalized_idx').on(t.normalizedName),
+}))
+
+// LLM re-rank result cache, keyed by (userId, jobId) — one row per pair,
+// overwritten on recompute rather than versioned by row, with
+// profileApprovedAt recording which profile version produced it. A cached
+// row is considered stale (and recomputed) the moment it doesn't match the
+// user's current profiles.approvedAt — see lib/matching/rerank.ts.
+export const jobMatches = pgTable('job_matches', {
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  jobId: uuid('job_id').notNull().references(() => jobs.id, { onDelete: 'cascade' }),
+  profileApprovedAt: timestamp('profile_approved_at', { withTimezone: true }).notNull(),
+  matchScore: integer('match_score').notNull(),
+  strengths: jsonb('strengths').notNull().default([]),
+  gaps: jsonb('gaps').notNull().default([]),
+  missingKeywords: jsonb('missing_keywords').notNull().default([]),
+  recommendation: text('recommendation').notNull().default(''),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.userId, t.jobId] }),
+}))
+
+export const savedJobs = pgTable('saved_jobs', {
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  jobId: uuid('job_id').notNull().references(() => jobs.id, { onDelete: 'cascade' }),
+  savedAt: timestamp('saved_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.userId, t.jobId] }),
+}))
+
+export const hiddenJobs = pgTable('hidden_jobs', {
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  jobId: uuid('job_id').notNull().references(() => jobs.id, { onDelete: 'cascade' }),
+  hiddenAt: timestamp('hidden_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.userId, t.jobId] }),
+}))

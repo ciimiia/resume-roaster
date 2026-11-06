@@ -344,13 +344,23 @@ interface JobSourceRow {
   activeJobCount: number
 }
 
-/* ── Jobs tab (Phase 2a) ── */
+const smallBtnStyle = (variant: 'default' | 'danger' = 'default'): React.CSSProperties => ({
+  padding: '4px 10px', borderRadius: 6, cursor: 'pointer', fontSize: 11,
+  fontFamily: 'var(--font-mono)', border: '1px solid var(--line-2)',
+  background: variant === 'danger' ? 'color-mix(in srgb, var(--roast) 10%, transparent)' : 'var(--surface-2)',
+  color: variant === 'danger' ? 'var(--roast)' : 'var(--ink-soft)',
+  whiteSpace: 'nowrap',
+})
+
+/* ── Jobs tab (Phase 2a/2b) ── */
 function JobsTab() {
   const { t, lang } = useLang()
   const [sources, setSources] = useState<JobSourceRow[]>([])
   const [loading, setLoading] = useState(true)
   const [running, setRunning] = useState(false)
   const [runResult, setRunResult] = useState('')
+  const [rowBusy, setRowBusy] = useState<string | null>(null)
+  const [rowMsg, setRowMsg] = useState<Record<string, string>>({})
 
   const load = useCallback(() => {
     fetch('/api/admin/job-sources')
@@ -375,6 +385,32 @@ function JobsTab() {
     }
   }
 
+  const toggleEnabled = async (source: JobSourceRow) => {
+    setRowBusy(source.id)
+    try {
+      await fetch('/api/admin/job-sources', {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: source.id, enabled: !source.enabled }),
+      })
+      load()
+    } finally {
+      setRowBusy(null)
+    }
+  }
+
+  const purgeJobs = async (source: JobSourceRow) => {
+    if (!confirm(t.adminJobsPurgeConfirm.replace('{company}', source.companyName))) return
+    setRowBusy(source.id)
+    try {
+      const res = await fetch(`/api/admin/jobs?company=${encodeURIComponent(source.companyName)}`, { method: 'DELETE' })
+      const data = await res.json() as { removedCount?: number }
+      setRowMsg(m => ({ ...m, [source.id]: t.adminJobsPurgeDone.replace('{count}', String(data.removedCount ?? 0)) }))
+      load()
+    } finally {
+      setRowBusy(null)
+    }
+  }
+
   const totalActive = sources.reduce((sum, s) => sum + s.activeJobCount, 0)
 
   if (loading) return (
@@ -384,47 +420,170 @@ function JobsTab() {
   )
 
   return (
-    <div style={cardStyle({ overflow: 'hidden' })}>
-      <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
-        <div>
-          <Eyebrow>{t.adminJobsEyebrow}</Eyebrow>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20 }}>{t.adminJobsTitle}</h2>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-mute)', marginTop: 4, display: 'block' }}>
-            {sources.length} {t.adminJobsSourcesWord} · {totalActive} {t.adminJobsActiveWord}
-          </span>
+    <>
+      <div style={cardStyle({ overflow: 'hidden' })}>
+        <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
+          <div>
+            <Eyebrow>{t.adminJobsEyebrow}</Eyebrow>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20 }}>{t.adminJobsTitle}</h2>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-mute)', marginTop: 4, display: 'block' }}>
+              {sources.length} {t.adminJobsSourcesWord} · {totalActive} {t.adminJobsActiveWord}
+            </span>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <button onClick={runNow} disabled={running} style={{
+              padding: '9px 18px', borderRadius: 8, border: 'none', cursor: running ? 'wait' : 'pointer',
+              background: 'var(--accent)', color: 'var(--accent-ink)', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 13,
+            }}>
+              {running ? t.adminJobsRunning : t.adminJobsRunBtn}
+            </button>
+            {runResult && <div style={{ fontSize: 11, color: 'var(--ink-mute)', marginTop: 6, fontFamily: 'var(--font-mono)' }}>{runResult}</div>}
+          </div>
         </div>
-        <div style={{ textAlign: 'right' }}>
-          <button onClick={runNow} disabled={running} style={{
-            padding: '9px 18px', borderRadius: 8, border: 'none', cursor: running ? 'wait' : 'pointer',
-            background: 'var(--accent)', color: 'var(--accent-ink)', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 13,
+        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 0.8fr 1fr 0.7fr 1.2fr 1.3fr', padding: '10px 24px', borderBottom: '1px solid var(--line)', background: 'var(--surface-2)' }}>
+          {[t.adminJobsCompany, t.adminJobsSourceCol, t.adminJobsLastFetched, t.adminJobsActiveCol, t.adminJobsErrorCol, ''].map(h => (
+            <span key={h} style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '.1em', color: 'var(--ink-faint)' }}>{h}</span>
+          ))}
+        </div>
+        {sources.map((s, i) => (
+          <div key={s.id} style={{
+            display: 'grid', gridTemplateColumns: '1.4fr 0.8fr 1fr 0.7fr 1.2fr 1.3fr', padding: '12px 24px',
+            borderBottom: i < sources.length - 1 ? '1px solid var(--line)' : 'none',
+            alignItems: 'center', fontSize: 13,
+            background: i % 2 === 0 ? 'transparent' : 'color-mix(in srgb, var(--surface-2) 40%, transparent)',
           }}>
-            {running ? t.adminJobsRunning : t.adminJobsRunBtn}
-          </button>
-          {runResult && <div style={{ fontSize: 11, color: 'var(--ink-mute)', marginTop: 6, fontFamily: 'var(--font-mono)' }}>{runResult}</div>}
-        </div>
-      </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr 0.8fr 1.4fr', padding: '10px 24px', borderBottom: '1px solid var(--line)', background: 'var(--surface-2)' }}>
-        {[t.adminJobsCompany, t.adminJobsSourceCol, t.adminJobsLastFetched, t.adminJobsActiveCol, t.adminJobsErrorCol].map(h => (
-          <span key={h} style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '.1em', color: 'var(--ink-faint)' }}>{h}</span>
+            <span style={{ color: 'var(--ink-soft)', opacity: s.enabled ? 1 : 0.5 }}>{s.companyName}{!s.enabled && ` (${t.adminJobsDisabled})`}</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-mute)', opacity: s.enabled ? 1 : 0.5 }}>{s.atsType}</span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-faint)', opacity: s.enabled ? 1 : 0.5 }}>
+              {s.lastFetchedAt ? new Date(s.lastFetchedAt).toLocaleString(lang === 'fa' ? 'fa-IR' : 'en-US') : t.adminJobsNeverRun}
+            </span>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--ink-soft)', opacity: s.enabled ? 1 : 0.5 }}>{s.activeJobCount}</span>
+            <span style={{ fontSize: 11, color: s.lastError ? 'var(--roast)' : 'var(--ink-faint)', opacity: s.enabled ? 1 : 0.5 }}>{s.lastError ?? '—'}</span>
+            <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', alignItems: 'center' }}>
+              {rowMsg[s.id] && <span style={{ fontSize: 10, color: 'var(--ink-faint)' }}>{rowMsg[s.id]}</span>}
+              <button disabled={rowBusy === s.id} onClick={() => toggleEnabled(s)} style={smallBtnStyle()}>
+                {s.enabled ? t.adminJobsDisableBtn : t.adminJobsEnableBtn}
+              </button>
+              <button disabled={rowBusy === s.id} onClick={() => purgeJobs(s)} style={smallBtnStyle('danger')}>
+                {t.adminJobsPurgeBtn}
+              </button>
+            </div>
+          </div>
         ))}
       </div>
-      {sources.map((s, i) => (
-        <div key={s.id} style={{
-          display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr 0.8fr 1.4fr', padding: '12px 24px',
-          borderBottom: i < sources.length - 1 ? '1px solid var(--line)' : 'none',
-          alignItems: 'center', fontSize: 13,
-          background: i % 2 === 0 ? 'transparent' : 'color-mix(in srgb, var(--surface-2) 40%, transparent)',
-          opacity: s.enabled ? 1 : 0.5,
-        }}>
-          <span style={{ color: 'var(--ink-soft)' }}>{s.companyName}{!s.enabled && ` (${t.adminJobsDisabled})`}</span>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-mute)' }}>{s.atsType}</span>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-faint)' }}>
-            {s.lastFetchedAt ? new Date(s.lastFetchedAt).toLocaleString(lang === 'fa' ? 'fa-IR' : 'en-US') : t.adminJobsNeverRun}
-          </span>
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--ink-soft)' }}>{s.activeJobCount}</span>
-          <span style={{ fontSize: 11, color: s.lastError ? 'var(--roast)' : 'var(--ink-faint)' }}>{s.lastError ?? '—'}</span>
+      <div style={{ height: 24 }} />
+      <BlockedCompaniesSection />
+    </>
+  )
+}
+
+interface BlockedCompanyRow {
+  id: string
+  companyName: string
+  normalizedName: string
+  reason: string | null
+  createdAt: string
+}
+
+/* ── Blocked companies section (Phase 2b) ── */
+function BlockedCompaniesSection() {
+  const { t, lang } = useLang()
+  const [companies, setCompanies] = useState<BlockedCompanyRow[]>([])
+  const [loading, setLoading] = useState(true)
+  const [name, setName] = useState('')
+  const [reason, setReason] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [msg, setMsg] = useState('')
+
+  const load = useCallback(() => {
+    fetch('/api/admin/blocked-companies')
+      .then(r => r.json())
+      .then(d => setCompanies((d as { companies: BlockedCompanyRow[] }).companies ?? []))
+      .finally(() => setLoading(false))
+  }, [])
+
+  useEffect(() => { load() }, [load])
+
+  const addBlock = async () => {
+    if (!name.trim()) return
+    if (!confirm(t.adminBlockedConfirm.replace('{company}', name.trim()))) return
+    setBusy(true)
+    setMsg('')
+    try {
+      const res = await fetch('/api/admin/blocked-companies', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ companyName: name.trim(), reason: reason.trim() || undefined }),
+      })
+      const data = await res.json() as { removedJobCount?: number }
+      setMsg(t.adminBlockedAddedMsg.replace('{count}', String(data.removedJobCount ?? 0)))
+      setName(''); setReason('')
+      load()
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const unblock = async (id: string) => {
+    setBusy(true)
+    try {
+      await fetch(`/api/admin/blocked-companies?id=${encodeURIComponent(id)}`, { method: 'DELETE' })
+      load()
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  if (loading) return null
+
+  return (
+    <div style={cardStyle({ overflow: 'hidden' })}>
+      <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--line)' }}>
+        <Eyebrow>{t.adminBlockedEyebrow}</Eyebrow>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 20 }}>{t.adminBlockedTitle}</h2>
+        <p style={{ fontSize: 12.5, color: 'var(--ink-mute)', marginTop: 6 }}>{t.adminBlockedDesc}</p>
+        <div style={{ display: 'flex', gap: 8, marginTop: 14, flexWrap: 'wrap' }}>
+          <input value={name} onChange={e => setName(e.target.value)} placeholder={t.adminBlockedNamePlaceholder}
+            style={{ flex: '1 1 200px', padding: '8px 12px', borderRadius: 7, border: '1px solid var(--line-2)', background: 'var(--surface-2)', color: 'var(--ink)', fontSize: 13 }} />
+          <input value={reason} onChange={e => setReason(e.target.value)} placeholder={t.adminBlockedReasonPlaceholder}
+            style={{ flex: '1 1 220px', padding: '8px 12px', borderRadius: 7, border: '1px solid var(--line-2)', background: 'var(--surface-2)', color: 'var(--ink)', fontSize: 13 }} />
+          <button onClick={addBlock} disabled={busy || !name.trim()} style={{
+            padding: '8px 16px', borderRadius: 7, border: 'none', cursor: 'pointer',
+            background: 'var(--accent)', color: 'var(--accent-ink)', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 13,
+          }}>
+            {t.adminBlockedAddBtn}
+          </button>
         </div>
-      ))}
+        {msg && <div style={{ fontSize: 11.5, color: 'var(--ink-mute)', marginTop: 8, fontFamily: 'var(--font-mono)' }}>{msg}</div>}
+      </div>
+
+      {companies.length === 0 ? (
+        <div style={{ padding: '24px', textAlign: 'center', color: 'var(--ink-mute)', fontSize: 13 }}>{t.adminBlockedEmpty}</div>
+      ) : (
+        <>
+          <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1.6fr 1fr 0.6fr', padding: '10px 24px', borderBottom: '1px solid var(--line)', background: 'var(--surface-2)' }}>
+            {[t.adminBlockedNameCol, t.adminBlockedReasonCol, t.adminBlockedDateCol, ''].map(h => (
+              <span key={h} style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '.1em', color: 'var(--ink-faint)' }}>{h}</span>
+            ))}
+          </div>
+          {companies.map((c, i) => (
+            <div key={c.id} style={{
+              display: 'grid', gridTemplateColumns: '1.3fr 1.6fr 1fr 0.6fr', padding: '12px 24px',
+              borderBottom: i < companies.length - 1 ? '1px solid var(--line)' : 'none',
+              alignItems: 'center', fontSize: 13,
+              background: i % 2 === 0 ? 'transparent' : 'color-mix(in srgb, var(--surface-2) 40%, transparent)',
+            }}>
+              <span style={{ color: 'var(--ink-soft)' }}>{c.companyName}</span>
+              <span style={{ fontSize: 12, color: 'var(--ink-faint)' }}>{c.reason ?? '—'}</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-faint)' }}>
+                {new Date(c.createdAt).toLocaleDateString(lang === 'fa' ? 'fa-IR' : 'en-US')}
+              </span>
+              <div style={{ textAlign: 'right' }}>
+                <button disabled={busy} onClick={() => unblock(c.id)} style={smallBtnStyle()}>{t.adminBlockedUnblockBtn}</button>
+              </div>
+            </div>
+          ))}
+        </>
+      )}
     </div>
   )
 }

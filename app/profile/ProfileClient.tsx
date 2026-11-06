@@ -457,6 +457,11 @@ export default function ProfileClient({ initialProfile, initialPreferences, init
               <input style={inputStyle} value={prefs.languages.join(', ')}
                 onChange={e => setPrefs(p => ({ ...p, languages: splitCommas(e.target.value) }))} />
             </Field>
+
+            <Field label={t.prefsFieldExcludedCompanies}>
+              <input style={inputStyle} value={prefs.excludedCompanies.join(', ')}
+                onChange={e => setPrefs(p => ({ ...p, excludedCompanies: splitCommas(e.target.value) }))} />
+            </Field>
           </div>
 
           <div style={{ display: 'flex', gap: 'var(--sp-3)', marginTop: 'var(--sp-6)', paddingTop: 'var(--sp-5)', borderTop: '1px solid var(--line)' }}>

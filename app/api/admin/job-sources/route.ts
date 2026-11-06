@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { verifySession, SESSION_COOKIE } from '@/lib/session'
 import { env } from '@/lib/env'
-import { listAllJobSources } from '@/lib/db/jobSources'
+import { listAllJobSources, setJobSourceEnabled } from '@/lib/db/jobSources'
 import { countActiveJobsBySource } from '@/lib/db/jobs'
 import { runIngestion } from '@/lib/jobIngestion/runner'
 
@@ -34,6 +34,29 @@ export async function GET() {
     })
   } catch (err) {
     console.error('[admin/job-sources] GET failed:', err)
+    return NextResponse.json({ error: 'SERVER_ERROR' }, { status: 500 })
+  }
+}
+
+// Disable a company's board without deleting its history/jobs — the
+// "disable a company" admin action distinct from blocked-companies' full
+// block-and-purge (lib/db/blockedCompanies.ts). A disabled source is
+// simply skipped by the next ingestion run; its existing jobs stay until
+// they naturally expire.
+export async function PATCH(req: NextRequest) {
+  const session = await requireAdmin()
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  try {
+    const body = await req.json() as { id?: string; enabled?: boolean }
+    if (!body.id || typeof body.enabled !== 'boolean') {
+      return NextResponse.json({ error: 'ID_AND_ENABLED_REQUIRED' }, { status: 400 })
+    }
+
+    await setJobSourceEnabled(body.id, body.enabled)
+    return NextResponse.json({ ok: true })
+  } catch (err) {
+    console.error('[admin/job-sources] PATCH failed:', err)
     return NextResponse.json({ error: 'SERVER_ERROR' }, { status: 500 })
   }
 }

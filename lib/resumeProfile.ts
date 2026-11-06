@@ -93,6 +93,9 @@ export const JobPreferencesSchema = z.object({
   salaryCurrency: z.string().optional(),
   visaNeeds: z.string().optional(),
   languages: z.array(z.string()).default([]),
+  // Companies this user never wants matched/shown, regardless of score —
+  // separate from the admin-wide blocked_companies table (lib/db/schema.ts).
+  excludedCompanies: z.array(z.string()).default([]),
 })
 
 export type JobPreferences = z.infer<typeof JobPreferencesSchema>
@@ -103,4 +106,5 @@ export const EMPTY_JOB_PREFERENCES: JobPreferences = {
   remoteType: [],
   countries: [],
   languages: [],
+  excludedCompanies: [],
 }

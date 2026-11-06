@@ -19,6 +19,7 @@ function toRecord(row: typeof schema.jobPreferences.$inferSelect): JobPreference
     salaryCurrency: row.salaryCurrency ?? undefined,
     visaNeeds: row.visaNeeds ?? undefined,
     languages: row.languages,
+    excludedCompanies: row.excludedCompanies,
   })
   return { ...parsed, userId: row.userId, updatedAt: row.updatedAt.toISOString() }
 }
@@ -45,6 +46,7 @@ export async function saveJobPreferencesForUser(userId: string, prefs: JobPrefer
     salaryCurrency: validated.salaryCurrency ?? null,
     visaNeeds: validated.visaNeeds ?? null,
     languages: validated.languages,
+    excludedCompanies: validated.excludedCompanies,
     updatedAt: now,
   }
   const rows = await db.insert(schema.jobPreferences)

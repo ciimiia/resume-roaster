@@ -93,6 +93,24 @@ export const env = {
     return readOptional('OPENROUTER_MODEL') ?? 'openai/gpt-4o-mini'
   },
 
+  /**
+   * Model used for job/profile embeddings (Phase 2b). Confirmed OpenRouter's
+   * embeddings endpoint (POST /api/v1/embeddings) accepts the same
+   * `provider: { data_collection: "deny" }` routing constraint as chat
+   * completions — see lib/embeddings.ts. Default is
+   * openai/text-embedding-3-small: 1536 dimensions (matches the `vector`
+   * columns in lib/db/schema.ts — changing this to a model with a
+   * different dimension count requires a new migration), $0.02/1M tokens.
+   */
+  get embeddingModel(): string {
+    return readOptional('EMBEDDING_MODEL') ?? 'openai/text-embedding-3-small'
+  },
+
+  /** Model used for the job-match LLM re-rank step (Phase 2b). Same privacy constraint as openRouterModel — must be a paid model, routed with data_collection deny. */
+  get rerankModel(): string {
+    return readOptional('RERANK_MODEL') ?? this.openRouterModel
+  },
+
   // ── Postgres (Neon) — primary data store as of Phase 1 ─────────────────────
   get databaseUrl(): string {
     return requireVar(
