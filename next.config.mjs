@@ -30,7 +30,11 @@ const nextConfig = {
   // the top level (`serverExternalPackages`) in Next 15; the old
   // `experimental.serverComponentsExternalPackages` key still works but is
   // deprecated.
-  serverExternalPackages: ['@node-rs/argon2', 'pdf-parse', 'pdfjs-dist'],
+  // puppeteer-core + @sparticuz/chromium (Phase 4 PDF export, see
+  // lib/tailoring/pdf/render.ts) — @sparticuz/chromium ships a large
+  // platform-specific binary; same reasoning as @node-rs/argon2 below for
+  // why this must be external rather than webpack-bundled.
+  serverExternalPackages: ['@node-rs/argon2', 'pdf-parse', 'pdfjs-dist', 'puppeteer-core', '@sparticuz/chromium'],
   // Externalizing pdfjs-dist (above) means webpack no longer statically
   // analyzes its imports, so Next's output file tracing — which decides
   // what actually gets copied into each deployed serverless function's

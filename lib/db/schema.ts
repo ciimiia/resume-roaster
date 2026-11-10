@@ -82,6 +82,12 @@ export const coverLetters = pgTable('cover_letters', {
   id: text('id').primaryKey(), // same short-id convention as sharedResults
   userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   letter: text('letter').notNull(),
+  // Phase 4: set when this letter was generated from the tailoring flow
+  // (grounded in a specific tailored resume + job), null for the original
+  // standalone /cover-letter generator's output.
+  tailoredResumeId: uuid('tailored_resume_id').references(() => tailoredResumes.id, { onDelete: 'cascade' }),
+  jobId: uuid('job_id').references(() => jobs.id, { onDelete: 'set null' }),
+  flags: jsonb('flags').notNull().default([]), // FabricationFlag[] from lib/tailoring/guard.ts, same as tailoredResumes.flags
   savedAt: timestamp('saved_at', { withTimezone: true }).defaultNow().notNull(),
 }, (t) => ({
   userIdx: index('cover_letters_user_idx').on(t.userId),
@@ -351,4 +357,38 @@ export const hiddenJobs = pgTable('hidden_jobs', {
   hiddenAt: timestamp('hidden_at', { withTimezone: true }).defaultNow().notNull(),
 }, (t) => ({
   pk: primaryKey({ columns: [t.userId, t.jobId] }),
+}))
+
+// ── Phase 4: tailoring ───────────────────────────────────────────────────
+
+// One row per "tailor this resume for this job" run. jobId is set when the
+// job came from our own DB (the /jobs feed); jobTextHash (sha256 of the
+// sanitized pasted text) is set instead when the user pasted raw job text
+// — never both null, never both set. profileApprovedAt snapshots which
+// profile version this was tailored against, same "version" concept as
+// job_matches.profileApprovedAt (lib/db/schema.ts's jobMatches comment) —
+// not for cache invalidation here, just so a saved tailoring always shows
+// what it was based on even after the user re-approves their profile.
+export const tailoredResumes = pgTable('tailored_resumes', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  jobId: uuid('job_id').references(() => jobs.id, { onDelete: 'set null' }),
+  jobTextHash: text('job_text_hash'),
+  jobTitleSnapshot: text('job_title_snapshot').notNull(),
+  companySnapshot: text('company_snapshot'),
+  profileApprovedAt: timestamp('profile_approved_at', { withTimezone: true }).notNull(),
+  // TailoredProfile shape — see lib/tailoring/types.ts.
+  tailoredProfile: jsonb('tailored_profile').notNull(),
+  // ChangeItem[] — the model's own stated reasons for each change (not
+  // security-relevant, just UI copy) — see lib/tailoring/types.ts.
+  changes: jsonb('changes').notNull().default([]),
+  // FabricationFlag[] — lib/tailoring/guard.ts's deterministic (non-LLM)
+  // output, the authoritative record of anything not traceable to the
+  // source profile. Never derived from the LLM's own self-report.
+  flags: jsonb('flags').notNull().default([]),
+  // {matchedKeywords, missingKeywords, formattingWarnings} — lib/tailoring/ats.ts.
+  atsCoverage: jsonb('ats_coverage').notNull().default({}),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  userIdx: index('tailored_resumes_user_idx').on(t.userId),
 }))

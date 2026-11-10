@@ -101,6 +101,11 @@ function JobCard({ job, onSave, onHide, t }: {
           <Button variant="outline" size="sm" icon="link" onClick={() => window.open(job.applyUrl, '_blank', 'noopener,noreferrer')}>
             {t.jobsApplyBtn}
           </Button>
+          <Link href={`/jobs/tailor?jobId=${job.id}`} style={{ textDecoration: 'none' }}>
+            <Button variant="ghost" size="sm" icon="bolt" full>
+              {t.tailorMyResumeBtn}
+            </Button>
+          </Link>
           <Button variant={job.saved ? 'ghost' : 'quiet'} size="sm" icon="star" onClick={() => onSave(job.id, !job.saved)}>
             {job.saved ? t.jobsSavedBtn : t.jobsSaveBtn}
           </Button>
