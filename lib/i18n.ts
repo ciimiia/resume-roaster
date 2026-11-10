@@ -72,6 +72,7 @@ const en = {
   scoreSections: 'Scoring sections',
   generateVerdict: 'Generating verdict',
   apiError: 'API unavailable — showing sample analysis.',
+  apiRateLimited: 'Too many requests right now — showing sample analysis. Try your own resume again in a few minutes.',
 
   // ── Results ───────────────────────────────────────────
   newAnalysis: 'New analysis',
@@ -582,6 +583,7 @@ const fa: typeof en = {
   scoreSections: 'نمره‌دهی بخش‌ها',
   generateVerdict: 'تولید حکم نهایی',
   apiError: 'API در دسترس نیست — نمایش تحلیل نمونه.',
+  apiRateLimited: 'درخواست‌ها زیاد شده — نمایش تحلیل نمونه. چند دقیقه دیگه دوباره با رزومهٔ خودت امتحان کن.',
 
   newAnalysis: 'تحلیل جدید',
   shareYourRoast: 'داغ‌شدنت رو به اشتراک بذار',

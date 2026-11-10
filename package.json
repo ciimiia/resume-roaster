@@ -24,8 +24,9 @@
     "test:rerankInjection": "cross-env NODE_OPTIONS=--conditions=react-server tsx scripts/test-rerankInjection.ts",
     "test:matchingIntegration": "tsx scripts/test-matchingIntegration.ts",
     "test:dbConnectRetry": "tsx scripts/test-dbConnectRetry.ts",
+    "test:analyzeRateLimit": "tsx scripts/test-analyzeRateLimit.ts",
     "seed:jobSources": "tsx scripts/seedJobSources.ts",
-    "test:all": "npm run test:password && npm run test:fileValidation && npm run test:profileSchema && npm run test:ownership && npm run test:docxFixture && npm run test:promptInjection && npm run test:jobAdapters && npm run test:jobSanitize && npm run test:jobDedupeExpiry && npm run test:cronAuth && npm run test:matchingFilters && npm run test:rerankInjection && npm run test:matchingIntegration && npm run test:dbConnectRetry"
+    "test:all": "npm run test:password && npm run test:fileValidation && npm run test:profileSchema && npm run test:ownership && npm run test:docxFixture && npm run test:promptInjection && npm run test:jobAdapters && npm run test:jobSanitize && npm run test:jobDedupeExpiry && npm run test:cronAuth && npm run test:matchingFilters && npm run test:rerankInjection && npm run test:matchingIntegration && npm run test:dbConnectRetry && npm run test:analyzeRateLimit"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",

@@ -4,6 +4,10 @@ import type { ModeId } from '@/lib/types'
 import { env } from '@/lib/env'
 import { PRODUCT } from '@/lib/config'
 import { ensureDomMatrixPolyfill } from '@/lib/pdfPolyfill'
+import { checkRateLimit } from '@/lib/rateLimit'
+import { getClientIp } from '@/lib/requestIp'
+import { MAX_RESUME_FILE_SIZE } from '@/lib/fileValidation'
+import { IP_LIMIT, GLOBAL_DAILY_LIMIT, MAX_RESUME_TEXT_CHARS } from '@/lib/analyzeRateLimit'
 
 const SYSTEM_PROMPTS: Record<ModeId, string> = {
   roast: `You are a brutally honest, witty resume critic. Roast this resume mercilessly but helpfully.
@@ -56,6 +60,15 @@ async function extractPdfText(file: File): Promise<string> {
 }
 
 export async function POST(req: NextRequest) {
+  const ip = getClientIp(req)
+  const [ipRate, globalRate] = await Promise.all([
+    checkRateLimit(`analyze:ip:${ip}`, IP_LIMIT.max, IP_LIMIT.windowSeconds),
+    checkRateLimit('analyze:global:day', GLOBAL_DAILY_LIMIT.max, GLOBAL_DAILY_LIMIT.windowSeconds),
+  ])
+  if (!ipRate.allowed || !globalRate.allowed) {
+    return NextResponse.json({ error: 'RATE_LIMITED' }, { status: 429 })
+  }
+
   const formData = await req.formData()
   const mode = ((formData.get('mode') as string) || 'roast') as ModeId
   const useSample = formData.get('useSampleText') === 'true'
@@ -64,15 +77,22 @@ export async function POST(req: NextRequest) {
   let resumeText = SAMPLE_TEXT
 
   if (!useSample && file) {
-    try {
-      const extracted = await extractPdfText(file)
-      if (extracted.length > 50) {
-        resumeText = extracted
-      } else {
-        console.warn('PDF text extraction returned too little text — using sample')
+    if (file.size > MAX_RESUME_FILE_SIZE) {
+      // Checked via File.size, before ever buffering the upload into
+      // memory — same cap as the authenticated resume-upload flow
+      // (lib/fileValidation.ts), reused here rather than duplicated.
+      console.warn('Uploaded file exceeds size cap — using sample')
+    } else {
+      try {
+        const extracted = await extractPdfText(file)
+        if (extracted.length > 50) {
+          resumeText = extracted.slice(0, MAX_RESUME_TEXT_CHARS)
+        } else {
+          console.warn('PDF text extraction returned too little text — using sample')
+        }
+      } catch (err) {
+        console.error('PDF parse error — using sample text:', err)
       }
-    } catch (err) {
-      console.error('PDF parse error — using sample text:', err)
     }
   }
 

@@ -44,6 +44,17 @@ export const env = {
     return parsed.data.replace(/\/$/, '')
   },
 
+  /**
+   * Shows the homepage's "AI-matched jobs" banner/footer link. Default
+   * OFF — until a real ingestion run has populated the `jobs` table (see
+   * lib/jobIngestion/runner.ts), the feature it points to has nothing to
+   * show, so advertising it to anonymous visitors would be misleading.
+   * Flip on via NEXT_PUBLIC_SHOW_JOBS_BANNER=true once jobs exist.
+   */
+  get showJobsBanner(): boolean {
+    return readOptional('NEXT_PUBLIC_SHOW_JOBS_BANNER') === 'true'
+  },
+
   get sessionSecret(): string {
     return requireVar('SESSION_SECRET', 'Used to sign session cookies. Generate one with `openssl rand -hex 32`.')
   },

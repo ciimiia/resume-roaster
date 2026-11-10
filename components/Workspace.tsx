@@ -207,6 +207,12 @@ export default function Workspace({ mode, setMode, step, setStep, file, setFile,
         formData.append('mode', mode)
 
         const res = await fetch('/api/analyze', { method: 'POST', body: formData })
+        if (res.status === 429) {
+          setAnalyzeError(t.apiRateLimited)
+          const { RESULTS } = await import('@/lib/data')
+          onAnalyze(RESULTS[mode])
+          return
+        }
         if (!res.ok) throw new Error('API error')
         const result = await res.json()
         if (result.error) throw new Error(result.error)
