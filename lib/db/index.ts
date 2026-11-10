@@ -40,7 +40,15 @@ export function isRetryableConnectError(err: unknown): boolean {
     const code = (cur as { code?: unknown })?.code
     const name = (cur as { name?: unknown })?.name
     if (code === 'UND_ERR_CONNECT_TIMEOUT' || name === 'ConnectTimeoutError') return true
-    cur = (cur as { cause?: unknown })?.cause
+    // @neondatabase/serverless's NeonDbError links the error it caught via
+    // `.sourceError`, not the standard `.cause` — the real failure (an
+    // undici ConnectTimeoutError several layers down) is unreachable by
+    // only following `.cause`. Confirmed by reading the actual thrown
+    // shape against this logic — an earlier version of this function that
+    // only walked `.cause` silently never matched a real cold-start error
+    // and never retried at all, despite passing its own unit tests (which
+    // only ever constructed `.cause`-chained fakes).
+    cur = (cur as { cause?: unknown; sourceError?: unknown })?.cause ?? (cur as { sourceError?: unknown })?.sourceError
   }
   return false
 }
