@@ -53,7 +53,11 @@ export async function renderHtmlToPdf(html: string): Promise<Buffer> {
   const browser = await launchBrowser()
   try {
     const page = await browser.newPage()
-    await page.setContent(html, { waitUntil: 'networkidle0' })
+    // 'load' is sufficient (not 'networkidle0', which setContent's newer
+    // puppeteer-core types no longer accept) — all fonts are embedded as
+    // base64 data URIs (lib/tailoring/pdf/fonts.ts), so there's no
+    // external network activity to wait out.
+    await page.setContent(html, { waitUntil: 'load' })
     const pdf = await page.pdf({ format: 'A4', printBackground: true, margin: { top: '0', bottom: '0', left: '0', right: '0' } })
     return Buffer.from(pdf)
   } finally {
