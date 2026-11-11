@@ -86,9 +86,15 @@ const nextConfig = {
   //  - frame-ancestors 'none' + X-Frame-Options: DENY: this app is never
   //    meant to be embedded in another site's iframe.
   async headers() {
+    // next dev's HMR/Fast Refresh runtime uses eval() to apply module
+    // updates — harmless locally (never shipped to `next build`/production,
+    // which is what Vercel deploys), but without 'unsafe-eval' here the
+    // strict production CSP blocks it and the dev server renders blank/
+    // unstyled pages. dev-only, so this never weakens the real CSP users get.
+    const isDev = process.env.NODE_ENV !== 'production'
     const csp = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline'",
+      `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com data:",
       "img-src 'self' data: blob:",
