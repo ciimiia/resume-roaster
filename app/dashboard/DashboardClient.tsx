@@ -72,7 +72,7 @@ function EmptyCard({ icon, message, ctaLabel, ctaHref }: {
 }
 
 /* ── Analysis card ── */
-function AnalysisCard({ a, viewLabel }: { a: AnalysisSummary; viewLabel: string }) {
+function AnalysisCard({ a, viewLabel, deleteLabel, onDelete }: { a: AnalysisSummary; viewLabel: string; deleteLabel: string; onDelete: (id: string) => void }) {
   const accent = gradeAccent(a.grade)
   const [hovered, setHovered] = useState(false)
 
@@ -126,6 +126,12 @@ function AnalysisCard({ a, viewLabel }: { a: AnalysisSummary; viewLabel: string 
         background: `color-mix(in srgb, ${accent} 8%, transparent)`,
         transition: 'background .2s',
       }}>{viewLabel}</Link>
+      <button onClick={() => onDelete(a.id)} title={deleteLabel} style={{
+        flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer',
+        color: 'var(--ink-faint)', padding: 8,
+      }}>
+        <Icon name="x" size={14} />
+      </button>
     </div>
   )
 }
@@ -169,8 +175,15 @@ function CoverLetterCard({ cl, savedLabel }: { cl: CoverLetterSummary; savedLabe
 }
 
 /* ── Main component ── */
-export default function DashboardClient({ analyses, coverLetters }: Props) {
+export default function DashboardClient({ analyses: initialAnalyses, coverLetters }: Props) {
   const { t } = useLang()
+  const [analyses, setAnalyses] = useState(initialAnalyses)
+
+  const deleteAnalysis = async (id: string) => {
+    if (!confirm(t.dashboardDeleteConfirm)) return
+    const res = await fetch(`/api/save/${id}`, { method: 'DELETE' })
+    if (res.ok) setAnalyses(prev => prev.filter(a => a.id !== id))
+  }
 
   return (
     <div style={{ minHeight: '100vh', padding: '0 var(--gutter) 100px' }}>
@@ -254,7 +267,7 @@ export default function DashboardClient({ analyses, coverLetters }: Props) {
             : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-2)' }}>
                 {analyses.map(a => (
-                  <AnalysisCard key={a.id} a={a} viewLabel={t.dashboardViewResult} />
+                  <AnalysisCard key={a.id} a={a} viewLabel={t.dashboardViewResult} deleteLabel={t.dashboardDeleteBtn} onDelete={deleteAnalysis} />
                 ))}
               </div>
             )}

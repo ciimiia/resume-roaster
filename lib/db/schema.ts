@@ -37,7 +37,28 @@ export const users = pgTable('users', {
   email: text('email').notNull().unique(),
   passwordHash: text('password_hash').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  // Launch-readiness: when this account's signup accepted the Privacy
+  // Policy/Terms consent checkbox — an auditable "when did they consent"
+  // record, not just "there's a checkbox in the UI today". Null for
+  // accounts created before this existed.
+  consentAcceptedAt: timestamp('consent_accepted_at', { withTimezone: true }),
 })
+
+// Launch-readiness: password reset. Tokens are single-use, expiring, and
+// stored only as a hash (sha256) — never the raw token, same principle as
+// password hashing itself: if this table ever leaked, no usable reset
+// tokens leak with it. usedAt makes re-use detectable/blocked even within
+// the expiry window.
+export const passwordResetTokens = pgTable('password_reset_tokens', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  tokenHash: text('token_hash').notNull().unique(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  usedAt: timestamp('used_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+}, (t) => ({
+  userIdx: index('password_reset_tokens_user_idx').on(t.userId),
+}))
 
 // ── Shared roast results (was result:{id} + user:analyses:{userId}) ────────
 // Consolidated: the old "AnalysisSummary" written to user:analyses:* was

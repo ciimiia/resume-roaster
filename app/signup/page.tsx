@@ -10,8 +10,9 @@ import { useSession } from '@/lib/SessionContext'
 import { cardStyle } from '@/lib/styles'
 
 const ERROR_MAP: Record<string, keyof ReturnType<typeof useLang>['t']> = {
-  EMAIL_EXISTS:    'authErrorExists',
-  PASSWORD_WEAK:   'authErrorWeak',
+  EMAIL_EXISTS:      'authErrorExists',
+  PASSWORD_WEAK:     'authErrorWeak',
+  CONSENT_REQUIRED:  'authConsentRequired',
 }
 
 export default function SignUpPage() {
@@ -22,6 +23,7 @@ export default function SignUpPage() {
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm]   = useState('')
+  const [consentAccepted, setConsentAccepted] = useState(false)
   const [error, setError]       = useState('')
   const [loading, setLoading]   = useState(false)
 
@@ -42,12 +44,13 @@ export default function SignUpPage() {
     setError('')
     if (password !== confirm) { setError(t.authErrorMismatch); return }
     if (password.length < 8)  { setError(t.authErrorWeak);    return }
+    if (!consentAccepted)     { setError(t.authConsentRequired); return }
     setLoading(true)
     try {
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, consentAccepted }),
       })
       const data = await res.json() as { ok?: boolean; error?: string }
       if (!res.ok || !data.ok) {
@@ -99,6 +102,17 @@ export default function SignUpPage() {
                 onBlur={e  => (e.currentTarget.style.borderColor = 'var(--line-2)')} />
             </div>
 
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: 'var(--ink-mute)', cursor: 'pointer' }}>
+              <input type="checkbox" checked={consentAccepted} onChange={e => setConsentAccepted(e.target.checked)}
+                style={{ marginTop: 2, flexShrink: 0 }} required />
+              <span>
+                {t.authConsentPrefix}
+                <Link href="/privacy" target="_blank" style={{ color: 'var(--accent)' }}>{t.authConsentPrivacy}</Link>
+                {t.authConsentAnd}
+                <Link href="/terms" target="_blank" style={{ color: 'var(--accent)' }}>{t.authConsentTerms}</Link>
+              </span>
+            </label>
+
             {error && (
               <div style={{ padding: '11px 16px', borderRadius: 'var(--r-md)', fontSize: 14,
                 background: 'color-mix(in srgb, var(--roast) 10%, var(--surface-2))',
@@ -108,12 +122,12 @@ export default function SignUpPage() {
               </div>
             )}
 
-            <button type="submit" disabled={loading} style={{
+            <button type="submit" disabled={loading || !consentAccepted} style={{
               padding: '13px', borderRadius: 'var(--r-md)', border: 'none', cursor: loading ? 'wait' : 'pointer',
               background: 'linear-gradient(140deg, var(--accent), var(--accent-2))',
               color: 'var(--accent-ink)', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15,
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-              opacity: loading ? 0.7 : 1, transition: 'opacity .2s',
+              opacity: loading || !consentAccepted ? 0.6 : 1, transition: 'opacity .2s',
             }}>
               {loading
                 ? <><span style={{ width: 16, height: 16, border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin .7s linear infinite', display: 'inline-block' }} /> {t.signUp}</>

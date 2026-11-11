@@ -154,4 +154,27 @@ export const env = {
   get hasBlobStorage(): boolean {
     return readOptional('BLOB_READ_WRITE_TOKEN') !== undefined
   },
+
+  // ── Email (password reset) — launch-readiness, optional ─────────────────
+  // Behind one env var so the whole feature fails closed (hidden in the UI,
+  // 404 from the API) rather than erroring if unset — see lib/email.ts.
+  get resendApiKey(): string | undefined {
+    return readOptional('RESEND_API_KEY')
+  },
+  get hasEmailProvider(): boolean {
+    return readOptional('RESEND_API_KEY') !== undefined
+  },
+  /** Verified sending address — Resend requires a verified domain for anything beyond their sandbox onboarding@resend.dev address. */
+  get emailFrom(): string {
+    return readOptional('EMAIL_FROM') ?? 'onboarding@resend.dev'
+  },
+
+  // ── Legal / contact (launch-readiness) ──────────────────────────────────
+  // NEXT_PUBLIC_ (not a secret) — /privacy and /terms are rendered
+  // client-side to match this app's lang-toggle pattern (lib/LangContext.tsx,
+  // no server-side locale routing), so this needs to be readable there too.
+  /** Shown on /privacy and /terms as the contact address for data requests. */
+  get contactEmail(): string {
+    return readOptional('NEXT_PUBLIC_CONTACT_EMAIL') ?? 'support@example.com'
+  },
 }

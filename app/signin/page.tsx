@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import Icon from '@/components/ui/Icon'
@@ -22,6 +22,11 @@ export default function SignInPage() {
   const [password, setPassword] = useState('')
   const [error, setError]       = useState('')
   const [loading, setLoading]   = useState(false)
+  const [resetEnabled, setResetEnabled] = useState(false)
+
+  useEffect(() => {
+    fetch('/api/auth/password-reset-status').then(r => r.json()).then(d => setResetEnabled(!!d.enabled)).catch(() => {})
+  }, [])
 
   const inp: React.CSSProperties = {
     width: '100%', boxSizing: 'border-box',
@@ -87,6 +92,11 @@ export default function SignInPage() {
                 style={inp} autoComplete="current-password"
                 onFocus={e => (e.currentTarget.style.borderColor = 'var(--accent)')}
                 onBlur={e  => (e.currentTarget.style.borderColor = 'var(--line-2)')} />
+              {resetEnabled && (
+                <Link href="/forgot-password" style={{ display: 'inline-block', marginTop: 8, fontSize: 12.5, color: 'var(--ink-mute)', textDecoration: 'none' }}>
+                  {t.authForgotPasswordLink}
+                </Link>
+              )}
             </div>
 
             {error && (

@@ -61,12 +61,16 @@ export default function CoverLetterPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ resumeText: resumeText.trim(), jobDescription: jobDesc.trim() }),
       })
+      // Error codes only, never shown verbatim — the server never returns
+      // provider/internal error text to the client (see app/api/cover-letter/
+      // route.ts's comment on why), so there's nothing user-meaningful to
+      // surface beyond "rate limited" vs. "something went wrong".
       const data = await res.json() as { letter?: string; error?: string }
-      if (!res.ok || data.error) throw new Error(data.error ?? 'failed')
+      if (res.status === 429) { setError(t.clRateLimited); return }
+      if (!res.ok || data.error) { setError(t.clApiError); return }
       setLetter(data.letter ?? '')
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err)
-      setError(msg && msg !== 'failed' ? msg : t.clApiError)
+    } catch {
+      setError(t.clApiError)
     } finally {
       setLoading(false)
     }
