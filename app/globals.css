@@ -6,33 +6,41 @@
    Design Tokens — Resume Roaster
    ============================================================ */
 :root {
-  --bg: #0A0A0F;
-  --bg-2: #0E0E15;
-  --surface: #121219;
-  --surface-2: #17171F;
-  --surface-3: #1E1E27;
+  /* Single app-wide theme (theme-unification) — navy/amber/teal "night
+     map" palette, formerly scoped to the landing page only. roast/coach/
+     intl below are NOT per-page re-themes anymore — they're fixed semantic
+     colors (danger/info/success) used throughout the app regardless of
+     theme: error banners, the profile danger zone, score-ring win/fix/risk
+     coloring, the mode-selector cards' own accent. Never reassign --bg/
+     --surface/--accent/--accent-ink per mode again — that was the
+     multi-palette conflict this unification resolves. */
+  --bg: #0B1424;
+  --bg-2: #0E1A2E;
+  --surface: #101D33;
+  --surface-2: #16263F;
+  --surface-3: #1D324F;
   --line: rgba(255,255,255,0.08);
   --line-2: rgba(255,255,255,0.14);
-  --ink: #F5F5F7;
-  --ink-soft: #C7C7D1;
-  --ink-mute: #84848F;
-  --ink-faint: #56565F;
+  --ink: #F3F6FB;
+  --ink-soft: #C6D0DE;
+  --ink-mute: #8A97AC;
+  --ink-faint: #5A6578;
   --roast: #FF4D4D;
   --roast-2: #FF8A3D;
   --coach: #4D9FFF;
   --coach-2: #7C7CFF;
   --intl: #4DCC88;
   --intl-2: #36D6C3;
-  --accent: #6E6E7A;
-  --accent-2: #6E6E7A;
-  --accent-ink: #0A0A0F;
-  --glow: rgba(110,110,122,0.0);
-  --tint: transparent;
+  --accent: #F5B544;
+  --accent-2: #5FD3C4;
+  --accent-ink: #0B1424;
+  --glow: rgba(245,181,68,0.16);
+  --tint: rgba(245,181,68,0.05);
   --font-display: 'Space Grotesk', system-ui, sans-serif;
-  --font-body: 'Hanken Grotesk', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
   --font-mono: 'Space Mono', ui-monospace, monospace;
-  --shadow-1: 0 1px 0 rgba(255,255,255,0.04) inset, 0 8px 24px rgba(0,0,0,0.4);
-  --shadow-2: 0 24px 80px rgba(0,0,0,0.6);
+  --shadow-1: 0 1px 0 rgba(255,255,255,0.04) inset, 0 8px 24px rgba(0,0,0,0.45);
+  --shadow-2: 0 24px 80px rgba(0,0,0,0.55);
   --r-sm: 10px; --r-md: 16px; --r-lg: 24px; --r-xl: 32px;
 
   /* Spacing scale (4px base) — use for gap/padding/margin instead of
@@ -60,75 +68,26 @@
 }
 
 /* ── Light mode ─────────────────────────────────────────────────────────── */
+/* Same navy/amber/teal brand, light surface instead of dark — not a
+   separate theme, just the light/dark display preference (ThemeContext). */
 html[data-color-theme="light"] {
-  --bg: #F4F4F6;
-  --bg-2: #EEEEF2;
+  --bg: #F5F6FA;
+  --bg-2: #EFF1F7;
   --surface: #FFFFFF;
-  --surface-2: #F0F0F4;
-  --surface-3: #E4E4EA;
-  --line: rgba(0,0,0,0.08);
-  --line-2: rgba(0,0,0,0.14);
-  --ink: #0A0A0F;
-  --ink-soft: #2C2C38;
-  --ink-mute: #6B6B78;
-  --ink-faint: #9A9AAA;
-  --shadow-1: 0 1px 0 rgba(255,255,255,0.8) inset, 0 4px 16px rgba(0,0,0,0.10);
-  --shadow-2: 0 16px 60px rgba(0,0,0,0.15);
-}
-
-/* Light mode per-theme accent overrides — keep glows subtle */
-html[data-color-theme="light"][data-theme="roast"] {
-  --glow: rgba(255,77,77,0.08);
-  --tint: rgba(255,77,77,0.03);
-  --bg: #FDF4F4; --bg-2: #F9EDED;
-  --surface: #FFFFFF; --surface-2: #F9F0F0; --surface-3: #F3E8E8;
-}
-html[data-color-theme="light"][data-theme="coach"] {
-  --glow: rgba(77,159,255,0.07);
-  --tint: rgba(77,159,255,0.02);
-}
-html[data-color-theme="light"][data-theme="intl"] {
-  --glow: rgba(77,204,136,0.07);
-  --tint: rgba(77,204,136,0.02);
-}
-
-html[data-theme="roast"] {
-  --accent: #FF4D4D; --accent-2: #FF8A3D;
-  --glow: rgba(255,77,77,0.16); --tint: rgba(255,77,77,0.05);
-  --bg: #0E0809; --bg-2: #140A0B; --surface: #17100F;
-  --surface-2: #1D1413; --surface-3: #261917; --accent-ink: #160404;
-}
-html[data-theme="coach"] {
-  --accent: #4D9FFF; --accent-2: #7C7CFF;
-  --glow: rgba(77,159,255,0.14); --tint: rgba(77,159,255,0.04);
-  --accent-ink: #02060f;
-}
-html[data-theme="intl"] {
-  --accent: #4DCC88; --accent-2: #36D6C3;
-  --glow: rgba(77,204,136,0.14); --tint: rgba(77,204,136,0.04);
-  --accent-ink: #02100a;
-}
-
-/* ── Home page ("night map" palette) ─────────────────────────────────────
-   Overrides whatever mode/color-theme is active while the landing view is
-   shown (App.tsx sets html[data-view]) so the whole home page — Navbar
-   included — reads as one design instead of the dark per-mode roast/coach/
-   intl theme used in Workspace/Results.
-   NOTE (landing-map-refactor): this is a THIRD distinct palette in the
-   codebase — the default dark roast/coach/intl theme above, the light
-   purple one from the earlier explorer-hero iteration (not merged), and
-   this navy/amber/teal one. Flagged in the phase report; not resolved here
-   — product decision on one consistent app-wide theme is pending. */
-html[data-view="landing"] {
-  --bg: #0B1424; --bg-2: #0E1A2E;
-  --surface: #101D33; --surface-2: #16263F; --surface-3: #1D324F;
-  --line: rgba(255,255,255,0.08); --line-2: rgba(255,255,255,0.14);
-  --ink: #F3F6FB; --ink-soft: #C6D0DE; --ink-mute: #8A97AC; --ink-faint: #5A6578;
-  --accent: #F5B544; --accent-2: #5FD3C4; --accent-ink: #0B1424;
-  --glow: rgba(245,181,68,0.16); --tint: rgba(245,181,68,0.05);
-  --shadow-1: 0 1px 0 rgba(255,255,255,0.04) inset, 0 8px 24px rgba(0,0,0,0.45);
-  --shadow-2: 0 24px 80px rgba(0,0,0,0.55);
-  --font-body: 'Inter', system-ui, sans-serif;
+  --surface-2: #F1F3F8;
+  --surface-3: #E5E8F0;
+  --line: rgba(11,20,36,0.08);
+  --line-2: rgba(11,20,36,0.14);
+  --ink: #0B1424;
+  --ink-soft: #2C3748;
+  --ink-mute: #666F82;
+  --ink-faint: #99A1B3;
+  --accent: #D9922E;
+  --accent-2: #2E9A8C;
+  --glow: rgba(217,146,46,0.08);
+  --tint: rgba(217,146,46,0.03);
+  --shadow-1: 0 1px 0 rgba(255,255,255,0.8) inset, 0 4px 16px rgba(11,20,36,0.10);
+  --shadow-2: 0 16px 60px rgba(11,20,36,0.15);
 }
 
 /* ============================================================

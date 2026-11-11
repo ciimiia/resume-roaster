@@ -17,17 +17,16 @@ function AppInner({ roastedCount }: { roastedCount: number }) {
   const [usingSample, setUsingSample] = useState(false)
   const [result, setResult]         = useState<AnalysisResult | null>(null)
 
+  // data-theme is still set per mode (theme-unification kept this
+  // attribute rather than ripping it out, in case something keys off it
+  // later) but no CSS selector reassigns tokens from it anymore — the
+  // whole app uses one palette (globals.css's :root) now, with roast/
+  // coach/intl kept only as fixed semantic colors (danger/info/success)
+  // and the mode-selector cards' own accent (lib/data.ts's MODES.accent,
+  // not a CSS var).
   useEffect(() => {
     document.documentElement.dataset.theme = mode
   }, [mode])
-
-  // Landing uses its own "night map" palette (globals.css's
-  // html[data-view="landing"] override) so the Navbar and the rest of the
-  // home page read as one consistent design, without re-theming
-  // Workspace/Results, which keep the per-mode theme above.
-  useEffect(() => {
-    document.documentElement.dataset.view = view
-  }, [view])
 
   const goWorkspace = () => {
     setStep('mode')

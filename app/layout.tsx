@@ -64,7 +64,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
-        {/* Atmosphere — fixed full-screen glow that reacts to data-theme CSS vars */}
+        {/* Atmosphere — fixed full-screen glow using the --glow/--tint tokens */}
         <div
           id="atmosphere"
           style={{
