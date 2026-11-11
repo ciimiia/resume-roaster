@@ -122,6 +122,16 @@ export const env = {
     return readOptional('RERANK_MODEL') ?? this.openRouterModel
   },
 
+  /** Model used for resume tailoring (Phase 4) — same data_collection:deny constraint. */
+  get tailorModel(): string {
+    return readOptional('TAILOR_MODEL') ?? this.openRouterModel
+  },
+
+  /** Model used for the tailored cover letter generator (Phase 4) — same data_collection:deny constraint. */
+  get tailorCoverLetterModel(): string {
+    return readOptional('TAILOR_COVER_LETTER_MODEL') ?? this.openRouterModel
+  },
+
   // ── Postgres (Neon) — primary data store as of Phase 1 ─────────────────────
   get databaseUrl(): string {
     return requireVar(

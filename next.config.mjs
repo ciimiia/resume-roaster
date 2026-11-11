@@ -30,7 +30,11 @@ const nextConfig = {
   // the top level (`serverExternalPackages`) in Next 15; the old
   // `experimental.serverComponentsExternalPackages` key still works but is
   // deprecated.
-  serverExternalPackages: ['@node-rs/argon2', 'pdf-parse', 'pdfjs-dist'],
+  // puppeteer-core + @sparticuz/chromium (Phase 4 PDF export, see
+  // lib/tailoring/pdf/render.ts) — @sparticuz/chromium ships a large
+  // platform-specific binary; same reasoning as @node-rs/argon2 below for
+  // why this must be external rather than webpack-bundled.
+  serverExternalPackages: ['@node-rs/argon2', 'pdf-parse', 'pdfjs-dist', 'puppeteer-core', '@sparticuz/chromium'],
   // Externalizing pdfjs-dist (above) means webpack no longer statically
   // analyzes its imports, so Next's output file tracing — which decides
   // what actually gets copied into each deployed serverless function's
@@ -47,6 +51,21 @@ const nextConfig = {
   outputFileTracingIncludes: {
     '/api/analyze': ['./node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs'],
     '/api/resumes': ['./node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs'],
+    // @sparticuz/chromium ships its actual Chromium binary (and the fonts/
+    // swiftshader/al2023 archives it unpacks at cold start) as non-JS
+    // assets under bin/ — externalizing the package (above) stops them
+    // from being bundled, but also means tracing can't discover them via
+    // static import analysis, same class of bug as pdf.worker.mjs above.
+    // Confirmed necessary against an actual Vercel deployment: without
+    // this, the function builds and deploys fine but throws "The input
+    // directory .../@sparticuz/chromium/bin does not exist" at runtime.
+    // public/fonts/* (the embedded Vazirmatn files, lib/tailoring/pdf/fonts.ts)
+    // is included explicitly too, even though Next normally ships all of
+    // public/ unconditionally — belt-and-suspenders since this is the one
+    // route where a missing font file would silently degrade to garbled
+    // PDF output rather than a loud error.
+    '/api/tailor/[id]/pdf': ['./node_modules/@sparticuz/chromium/bin/**', './public/fonts/*'],
+    '/api/cover-letter/[id]/pdf': ['./node_modules/@sparticuz/chromium/bin/**', './public/fonts/*'],
   },
 }
 

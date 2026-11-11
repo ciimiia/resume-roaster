@@ -324,6 +324,19 @@ export async function jobExists(jobId: string): Promise<boolean> {
   return rows.length > 0
 }
 
+export interface JobWithDescription extends JobListItem {
+  descriptionText: string
+}
+
+/** Full job row including descriptionText — lib/db/jobs.ts's other reads (searchJobs, retrieveCandidateJobs) deliberately omit it from list responses to keep payloads small; the tailoring pipeline (Phase 4) is the one place that needs the full text. */
+export async function getJobById(jobId: string): Promise<JobWithDescription | null> {
+  const db = getDb()
+  const rows = await db.select().from(schema.jobs).where(eq(schema.jobs.id, jobId)).limit(1)
+  const row = rows[0]
+  if (!row) return null
+  return { ...toListItem(row), descriptionText: row.descriptionText }
+}
+
 export async function deleteJobsBySource(source: string): Promise<number> {
   const db = getDb()
   const rows = await db.delete(schema.jobs).where(eq(schema.jobs.source, source)).returning({ id: schema.jobs.id })

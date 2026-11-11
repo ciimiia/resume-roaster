@@ -4,11 +4,13 @@ import { verifySession, SESSION_COOKIE } from '@/lib/session'
 import { deleteAllResumesForUser } from '@/lib/db/resumes'
 import { deleteProfileForUser } from '@/lib/db/profiles'
 import { deleteJobPreferencesForUser } from '@/lib/db/jobPreferences'
+import { deleteTailoredResumesForUser } from '@/lib/db/tailoredResumes'
 import { vercelBlobStorage } from '@/lib/storage'
 
 /**
  * "Delete my data" — removes resumes (DB rows + Blob files), the approved
- * profile, and job preferences for the signed-in user. Does NOT delete the
+ * profile, job preferences, and tailored resumes (+ any cover letters
+ * generated from them, via cascade) for the signed-in user. Does NOT delete the
  * user's account/login or their roast history (shared_results, which
  * un-links from any deleted resume via onDelete 'set null' rather than
  * cascading) — this endpoint is scoped to candidate-profile data
@@ -34,6 +36,8 @@ export async function DELETE() {
     await Promise.all([
       deleteProfileForUser(session.userId),
       deleteJobPreferencesForUser(session.userId),
+      // Cascades (DB FK) to any cover letter generated from each one.
+      deleteTailoredResumesForUser(session.userId),
     ])
 
     return NextResponse.json({ ok: true, deletedResumes: filePathnames.length })
