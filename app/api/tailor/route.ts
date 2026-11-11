@@ -6,6 +6,9 @@ import { checkRateLimit } from '@/lib/rateLimit'
 import { TAILOR_MINUTE_LIMIT, TAILOR_DAILY_LIMIT } from '@/lib/tailoring/caps'
 import { runTailoring } from '@/lib/tailoring/runTailoring'
 import { listTailoredResumesForUser } from '@/lib/db/tailoredResumes'
+import { readJsonWithLimit } from '@/lib/requestSize'
+
+const MAX_BODY_BYTES = 64 * 1024 // generous for a pasted job posting, well short of abuse
 
 async function requireSession() {
   const token = (await cookies()).get(SESSION_COOKIE)?.value
@@ -43,7 +46,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'PROFILE_NOT_APPROVED' }, { status: 409 })
     }
 
-    const body = await req.json() as { jobId?: string; jobText?: string }
+    const parsed = await readJsonWithLimit<{ jobId?: string; jobText?: string }>(req, MAX_BODY_BYTES)
+    if (!parsed.ok) {
+      return NextResponse.json({ error: parsed.error }, { status: parsed.error === 'TOO_LARGE' ? 413 : 400 })
+    }
+    const body = parsed.data
     const result = await runTailoring({
       userId: session.userId,
       profile,

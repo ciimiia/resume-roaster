@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useLang } from '@/lib/LangContext'
 import { cardStyle } from '@/lib/styles'
 import Button from '@/components/ui/Button'
@@ -43,6 +44,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 export default function ProfileClient({ initialProfile, initialPreferences, initialResumes }: Props) {
   const { t } = useLang()
+  const router = useRouter()
 
   const [resumes, setResumes] = useState(initialResumes)
   const [profile, setProfile] = useState<ParsedProfile>(initialProfile ?? EMPTY_PROFILE)
@@ -59,6 +61,10 @@ export default function ProfileClient({ initialProfile, initialPreferences, init
   const [prefsSaved, setPrefsSaved] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [deleteDone, setDeleteDone] = useState(false)
+  const [downloadingData, setDownloadingData] = useState(false)
+  const [downloadError, setDownloadError] = useState('')
+  const [deletingAccount, setDeletingAccount] = useState(false)
+  const [accountDeleted, setAccountDeleted] = useState(false)
   const [retryingId, setRetryingId] = useState<string | null>(null)
   const [retryError, setRetryError] = useState('')
 
@@ -183,6 +189,42 @@ export default function ProfileClient({ initialProfile, initialPreferences, init
       }
     } finally {
       setDeleting(false)
+    }
+  }
+
+  const downloadMyData = async () => {
+    setDownloadingData(true)
+    setDownloadError('')
+    try {
+      const res = await fetch('/api/account/export')
+      if (!res.ok) { setDownloadError(t.profileDownloadDataError); return }
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'my-data-export.json'
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+    } catch {
+      setDownloadError(t.profileDownloadDataError)
+    } finally {
+      setDownloadingData(false)
+    }
+  }
+
+  const deleteMyAccount = async () => {
+    if (!confirm(t.profileDeleteAccountConfirm)) return
+    setDeletingAccount(true)
+    try {
+      const res = await fetch('/api/account', { method: 'DELETE' })
+      if (res.ok) {
+        setAccountDeleted(true)
+        setTimeout(() => router.push('/'), 1500)
+      }
+    } finally {
+      setDeletingAccount(false)
     }
   }
 
@@ -470,6 +512,16 @@ export default function ProfileClient({ initialProfile, initialPreferences, init
           </div>
         </div>
 
+        {/* Download my data */}
+        <div style={cardStyle({ padding: 'var(--sp-6)' })}>
+          <button onClick={downloadMyData} disabled={downloadingData} style={{
+            padding: '10px 20px', borderRadius: 'var(--r-md)', background: 'var(--surface-2)',
+            border: '1px solid var(--line-2)', color: 'var(--ink)', fontFamily: 'var(--font-display)',
+            fontWeight: 600, fontSize: 14, cursor: downloadingData ? 'wait' : 'pointer',
+          }}>{t.profileDownloadDataBtn}</button>
+          {downloadError && <p style={{ fontSize: 13, color: 'var(--roast)', marginTop: 'var(--sp-3)' }}>{downloadError}</p>}
+        </div>
+
         {/* Danger zone */}
         <div style={cardStyle({ padding: 'var(--sp-6)', border: '1px solid color-mix(in srgb, var(--roast) 30%, var(--line))' })}>
           <h3 style={{ fontSize: 16, color: 'var(--roast)', marginBottom: 'var(--sp-1)' }}>{t.profileDangerZoneTitle}</h3>
@@ -481,6 +533,18 @@ export default function ProfileClient({ initialProfile, initialPreferences, init
                 border: '1px solid var(--roast)', color: 'var(--roast)', fontFamily: 'var(--font-display)',
                 fontWeight: 600, fontSize: 14, cursor: deleting ? 'wait' : 'pointer',
               }}>{t.profileDeleteBtn}</button>}
+
+          <div style={{ marginTop: 'var(--sp-5)', paddingTop: 'var(--sp-5)', borderTop: '1px solid color-mix(in srgb, var(--roast) 20%, var(--line))' }}>
+            <h4 style={{ fontSize: 15, color: 'var(--roast)', marginBottom: 'var(--sp-1)' }}>{t.profileDeleteAccountTitle}</h4>
+            <p style={{ fontSize: 13.5, color: 'var(--ink-mute)', marginBottom: 'var(--sp-4)' }}>{t.profileDeleteAccountDesc}</p>
+            {accountDeleted
+              ? <p style={{ fontSize: 14, color: 'var(--intl)' }}>{t.profileDeleteAccountDone}</p>
+              : <button onClick={deleteMyAccount} disabled={deletingAccount} style={{
+                  padding: '10px 20px', borderRadius: 'var(--r-md)', background: 'var(--roast)',
+                  border: '1px solid var(--roast)', color: '#fff', fontFamily: 'var(--font-display)',
+                  fontWeight: 700, fontSize: 14, cursor: deletingAccount ? 'wait' : 'pointer',
+                }}>{t.profileDeleteAccountBtn}</button>}
+          </div>
         </div>
       </div>
     </div>

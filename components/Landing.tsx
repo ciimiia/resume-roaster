@@ -266,6 +266,8 @@ export default function Landing({ mode, setMode, onStart, roastedCount }: Landin
             { label: t.navBlog, href: '/blog' },
             { label: t.navBuilder, href: '/builder' },
             { label: t.clTitle, href: '/cover-letter' },
+            { label: t.navPrivacy, href: '/privacy' },
+            { label: t.navTerms, href: '/terms' },
           ].map(l => (
             <Link key={l.href} href={l.href} style={footerLinkStyle}
               onMouseEnter={e => (e.currentTarget.style.color = 'var(--ink)')}

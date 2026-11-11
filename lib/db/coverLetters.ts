@@ -70,3 +70,13 @@ export async function listCoverLettersForUser(userId: string): Promise<CoverLett
     .limit(50)
   return rows.map(r => ({ id: r.id, preview: r.preview, savedAt: r.savedAt.toISOString() }))
 }
+
+/** Full letter text (not just the dashboard's 120-char preview) — for the "download my data" export (app/api/account/export/route.ts). */
+export async function listFullCoverLettersForUser(userId: string): Promise<{ id: string; letter: string; savedAt: string }[]> {
+  const db = getDb()
+  const rows = await db.select({ id: schema.coverLetters.id, letter: schema.coverLetters.letter, savedAt: schema.coverLetters.savedAt })
+    .from(schema.coverLetters)
+    .where(eq(schema.coverLetters.userId, userId))
+    .orderBy(desc(schema.coverLetters.savedAt))
+  return rows.map(r => ({ id: r.id, letter: r.letter, savedAt: r.savedAt.toISOString() }))
+}

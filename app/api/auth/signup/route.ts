@@ -14,7 +14,7 @@ const EMAIL_LIMIT = { max: 5, windowSeconds: 15 * 60 }
 const IP_LIMIT = { max: 20, windowSeconds: 15 * 60 }
 
 export async function POST(req: NextRequest) {
-  const { email, password } = await req.json() as { email: string; password: string }
+  const { email, password, consentAccepted } = await req.json() as { email: string; password: string; consentAccepted?: boolean }
 
   const normalizedEmail = email.trim().toLowerCase()
 
@@ -23,6 +23,11 @@ export async function POST(req: NextRequest) {
   }
   if (password.length < 8) {
     return NextResponse.json({ error: 'PASSWORD_WEAK' }, { status: 400 })
+  }
+  // Server-side enforced, not just a disabled submit button client-side —
+  // launch-readiness requirement: a required consent checkbox.
+  if (!consentAccepted) {
+    return NextResponse.json({ error: 'CONSENT_REQUIRED' }, { status: 400 })
   }
 
   try {
@@ -43,7 +48,7 @@ export async function POST(req: NextRequest) {
     const passwordHash = await hashPassword(password)
     let user
     try {
-      user = await createUser(normalizedEmail, passwordHash)
+      user = await createUser(normalizedEmail, passwordHash, { consentAcceptedAt: new Date() })
     } catch (err) {
       // Unique-violation (two concurrent signups for the same email racing
       // past the findUserByEmail check above) — the DB constraint is the

@@ -67,6 +67,57 @@ const nextConfig = {
     '/api/tailor/[id]/pdf': ['./node_modules/@sparticuz/chromium/bin/**', './public/fonts/*'],
     '/api/cover-letter/[id]/pdf': ['./node_modules/@sparticuz/chromium/bin/**', './public/fonts/*'],
   },
+
+  // Launch-readiness security pass. Built and checked against this app's
+  // actual needs, not a generic template:
+  //  - style-src needs 'unsafe-inline' because every component here uses
+  //    React's `style={{...}}` (inline style attributes), not CSS modules —
+  //    removing it would break the entire UI, not just a few components.
+  //  - script-src needs 'unsafe-inline' for Next's small inline bootstrap/
+  //    hydration script; everything else (app code) ships as external
+  //    same-origin chunks.
+  //  - fonts.googleapis.com/fonts.gstatic.com: Google Fonts, loaded from
+  //    app/layout.tsx (Space Grotesk/Hanken Grotesk/Space Mono/Syne) and
+  //    lib/LangContext.tsx (Vazirmatn for Farsi) — both via <link> tags,
+  //    not next/font (see app/layout.tsx's comment on why).
+  //  - connect-src 'self' only: every OpenRouter/Resend call in this app
+  //    happens server-side (fetch from a route handler), never from the
+  //    browser — the client never needs to connect anywhere but this origin.
+  //  - frame-ancestors 'none' + X-Frame-Options: DENY: this app is never
+  //    meant to be embedded in another site's iframe.
+  async headers() {
+    // next dev's HMR/Fast Refresh runtime uses eval() to apply module
+    // updates — harmless locally (never shipped to `next build`/production,
+    // which is what Vercel deploys), but without 'unsafe-eval' here the
+    // strict production CSP blocks it and the dev server renders blank/
+    // unstyled pages. dev-only, so this never weakens the real CSP users get.
+    const isDev = process.env.NODE_ENV !== 'production'
+    const csp = [
+      "default-src 'self'",
+      `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' https://fonts.gstatic.com data:",
+      "img-src 'self' data: blob:",
+      "connect-src 'self'",
+      "frame-src 'none'",
+      "frame-ancestors 'none'",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ].join('; ')
+
+    return [{
+      source: '/:path*',
+      headers: [
+        { key: 'Content-Security-Policy', value: csp },
+        { key: 'X-Frame-Options', value: 'DENY' },
+        { key: 'X-Content-Type-Options', value: 'nosniff' },
+        { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+        { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+        { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()' },
+      ],
+    }]
+  },
 }
 
 export default nextConfig

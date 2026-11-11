@@ -6,6 +6,17 @@ import { getResumeForUser } from '@/lib/db/resumes'
 import { ParsedProfileSchema } from '@/lib/resumeProfile'
 import { buildProfileText } from '@/lib/matching/profileText'
 import { embedText } from '@/lib/embeddings'
+import { readJsonWithLimit } from '@/lib/requestSize'
+import { checkRateLimit } from '@/lib/rateLimit'
+
+const MAX_BODY_BYTES = 256 * 1024 // a full parsed profile (many experience entries/bullets) is still well under this in practice
+
+// Only the approval path below calls a paid API (embedding, see
+// lib/embeddings.ts) — launch-readiness security pass: this route had no
+// rate limit at all before, meaning repeated approve/re-approve calls
+// were unbounded paid-API calls. Generous enough for legitimate profile
+// iteration (edit → re-approve a few times while reviewing).
+const APPROVE_LIMIT = { max: 15, windowSeconds: 60 * 60 }
 
 async function requireSession() {
   const token = (await cookies()).get(SESSION_COOKIE)?.value
@@ -30,7 +41,11 @@ export async function PUT(req: NextRequest) {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
-    const body = await req.json() as { profile: unknown; sourceResumeId?: string; approved?: boolean }
+    const parsed = await readJsonWithLimit<{ profile: unknown; sourceResumeId?: string; approved?: boolean }>(req, MAX_BODY_BYTES)
+    if (!parsed.ok) {
+      return NextResponse.json({ error: parsed.error }, { status: parsed.error === 'TOO_LARGE' ? 413 : 400 })
+    }
+    const body = parsed.data
 
     const validated = ParsedProfileSchema.safeParse(body.profile)
     if (!validated.success) {
@@ -58,6 +73,15 @@ export async function PUT(req: NextRequest) {
     // user still gets their approved profile — matching just won't have
     // fresh results until the next successful approval or the admin retries.
     if (body.approved) {
+      const rate = await checkRateLimit(`profile-approve:${session.userId}`, APPROVE_LIMIT.max, APPROVE_LIMIT.windowSeconds)
+      if (!rate.allowed) {
+        // The profile was already saved above (approved=true in the DB) —
+        // only the embedding call is skipped, so matching serves a stale
+        // embedding until the next successful approval rather than this
+        // request failing outright.
+        console.warn('[profile] approval rate-limited, skipping re-embed for user:', session.userId)
+        return NextResponse.json({ profile })
+      }
       const embedded = await embedText(buildProfileText(profile))
       if (embedded.ok) {
         await setProfileEmbedding(session.userId, embedded.embedding)

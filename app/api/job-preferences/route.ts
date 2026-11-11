@@ -3,6 +3,9 @@ import { cookies } from 'next/headers'
 import { verifySession, SESSION_COOKIE } from '@/lib/session'
 import { getJobPreferencesForUser, saveJobPreferencesForUser } from '@/lib/db/jobPreferences'
 import { JobPreferencesSchema } from '@/lib/resumeProfile'
+import { readJsonWithLimit } from '@/lib/requestSize'
+
+const MAX_BODY_BYTES = 16 * 1024
 
 async function requireSession() {
   const token = (await cookies()).get(SESSION_COOKIE)?.value
@@ -27,8 +30,11 @@ export async function PUT(req: NextRequest) {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
-    const body = await req.json()
-    const validated = JobPreferencesSchema.safeParse(body)
+    const parsed = await readJsonWithLimit<unknown>(req, MAX_BODY_BYTES)
+    if (!parsed.ok) {
+      return NextResponse.json({ error: parsed.error }, { status: parsed.error === 'TOO_LARGE' ? 413 : 400 })
+    }
+    const validated = JobPreferencesSchema.safeParse(parsed.data)
     if (!validated.success) {
       return NextResponse.json({ error: 'INVALID_PREFERENCES', issues: validated.error.issues.map(i => i.path.join('.')) }, { status: 400 })
     }

@@ -64,6 +64,15 @@ export async function countAllResults(): Promise<number> {
   return rows[0]?.value ?? 0
 }
 
+/** Ownership-checked — deletes only if the result belongs to this user; returns whether a row was actually deleted. Anonymous (userId=null) saves have no owner and can't be deleted via this path. */
+export async function deleteResultForUser(id: string, userId: string): Promise<boolean> {
+  const db = getDb()
+  const rows = await db.delete(schema.sharedResults)
+    .where(and(eq(schema.sharedResults.id, id), eq(schema.sharedResults.userId, userId)))
+    .returning({ id: schema.sharedResults.id })
+  return rows.length > 0
+}
+
 /** For the dashboard — most recent 50, newest first. Expired results are excluded. */
 export async function listResultsForUser(userId: string): Promise<AnalysisSummary[]> {
   const db = getDb()
