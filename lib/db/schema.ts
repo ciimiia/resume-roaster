@@ -60,6 +60,21 @@ export const passwordResetTokens = pgTable('password_reset_tokens', {
   userIdx: index('password_reset_tokens_user_idx').on(t.userId),
 }))
 
+// ── University interest signups (landing-map-refactor placeholder page) ───
+// /universities has no real data yet — this just captures "notify me when
+// this launches" leads, scoped to what the visitor picked on the homepage
+// map (countries/level/field), not tied to a user account (anonymous — a
+// study-track visitor isn't necessarily signed in).
+export const universityInterestSignups = pgTable('university_interest_signups', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  email: text('email').notNull(),
+  consentAcceptedAt: timestamp('consent_accepted_at', { withTimezone: true }).notNull(),
+  countries: jsonb('countries').notNull().default([]), // string[] of ISO 3166-1 alpha-2 codes
+  level: text('level'),
+  field: text('field'),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+})
+
 // ── Shared roast results (was result:{id} + user:analyses:{userId}) ────────
 // Consolidated: the old "AnalysisSummary" written to user:analyses:* was
 // just {id, mode, score, grade, verdict, savedAt} — a strict subset of the

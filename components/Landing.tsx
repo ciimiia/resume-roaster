@@ -13,6 +13,8 @@ import Icon from './ui/Icon'
 import Logo from './ui/Logo'
 import Pill from './ui/Pill'
 import ScoreRing from './ui/ScoreRing'
+import WorldMapPicker from './WorldMapPicker'
+import EntryPaths from './EntryPaths'
 
 
 /* ---- StatTicker ----
@@ -140,8 +142,14 @@ export default function Landing({ mode, setMode, onStart, roastedCount }: Landin
 
   return (
     <div style={{ animation: 'fadeIn .5s both' }}>
-      {/* HERO */}
-      <section style={{ maxWidth: 1240, margin: '0 auto', padding: 'clamp(40px,7vw,84px) var(--gutter) var(--sp-8)' }}>
+      <WorldMapPicker />
+      <EntryPaths onStartRoast={onStart} />
+
+      {/* Secondary: the original roast/coach/intl lens picker + live preview —
+          demoted below the work/study map picker per the landing-map-refactor
+          brief ("roast my resume stays but is secondary"), reachable from the
+          EntryPaths roast card and the navbar's "Modes" link (#modes). */}
+      <section id="modes-section" style={{ maxWidth: 1240, margin: '0 auto', padding: 'clamp(40px,7vw,84px) var(--gutter) var(--sp-8)' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.05fr) minmax(0,0.95fr)', gap: 'clamp(28px,4vw,64px)', alignItems: 'center' }} className="hero-grid">
 
           {/* Left */}

@@ -21,6 +21,14 @@ function AppInner({ roastedCount }: { roastedCount: number }) {
     document.documentElement.dataset.theme = mode
   }, [mode])
 
+  // Landing uses its own "night map" palette (globals.css's
+  // html[data-view="landing"] override) so the Navbar and the rest of the
+  // home page read as one consistent design, without re-theming
+  // Workspace/Results, which keep the per-mode theme above.
+  useEffect(() => {
+    document.documentElement.dataset.view = view
+  }, [view])
+
   const goWorkspace = () => {
     setStep('mode')
     setView('workspace')
