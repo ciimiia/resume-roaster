@@ -57,6 +57,13 @@
       "when": 1794384609780,
       "tag": "0007_warm_gunslinger",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794428781709,
+      "tag": "0008_cool_swordsman",
+      "breakpoints": true
     }
   ]
 }

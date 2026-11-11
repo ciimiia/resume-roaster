@@ -109,6 +109,28 @@ html[data-theme="intl"] {
   --accent-ink: #02100a;
 }
 
+/* ── Home page ("night map" palette) ─────────────────────────────────────
+   Overrides whatever mode/color-theme is active while the landing view is
+   shown (App.tsx sets html[data-view]) so the whole home page — Navbar
+   included — reads as one design instead of the dark per-mode roast/coach/
+   intl theme used in Workspace/Results.
+   NOTE (landing-map-refactor): this is a THIRD distinct palette in the
+   codebase — the default dark roast/coach/intl theme above, the light
+   purple one from the earlier explorer-hero iteration (not merged), and
+   this navy/amber/teal one. Flagged in the phase report; not resolved here
+   — product decision on one consistent app-wide theme is pending. */
+html[data-view="landing"] {
+  --bg: #0B1424; --bg-2: #0E1A2E;
+  --surface: #101D33; --surface-2: #16263F; --surface-3: #1D324F;
+  --line: rgba(255,255,255,0.08); --line-2: rgba(255,255,255,0.14);
+  --ink: #F3F6FB; --ink-soft: #C6D0DE; --ink-mute: #8A97AC; --ink-faint: #5A6578;
+  --accent: #F5B544; --accent-2: #5FD3C4; --accent-ink: #0B1424;
+  --glow: rgba(245,181,68,0.16); --tint: rgba(245,181,68,0.05);
+  --shadow-1: 0 1px 0 rgba(255,255,255,0.04) inset, 0 8px 24px rgba(0,0,0,0.45);
+  --shadow-2: 0 24px 80px rgba(0,0,0,0.55);
+  --font-body: 'Inter', system-ui, sans-serif;
+}
+
 /* ============================================================
    Base Reset
    ============================================================ */
@@ -197,6 +219,13 @@ a { color: inherit; text-decoration: none; }
 }
 @media (max-width: 760px) {
   .steps-grid, .modes-grid, .lists-grid { grid-template-columns: 1fr !important; }
+}
+@media (max-width: 680px) {
+  /* The world map is a pointer-only visual enhancement — every region and
+     country is already a real, always-present button (WorldMapPicker.tsx),
+     so hiding the map at phone width loses nothing functionally; it just
+     leaves the button-based region/country "sheet" as the only UI. */
+  .map-picker-visual { display: none !important; }
 }
 
 .corners-sharp { --r-sm: 3px; --r-md: 5px; --r-lg: 7px; --r-xl: 9px; }

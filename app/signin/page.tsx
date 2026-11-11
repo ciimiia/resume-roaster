@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Icon from '@/components/ui/Icon'
 import Logo from '@/components/ui/Logo'
 import { useLang } from '@/lib/LangContext'
@@ -14,9 +14,27 @@ const ERROR_MAP: Record<string, keyof ReturnType<typeof useLang>['t']> = {
 }
 
 export default function SignInPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignInInner />
+    </Suspense>
+  )
+}
+
+/** Only a path starting with a single "/" is accepted — never "//host/..."
+ * (protocol-relative) or an absolute URL, so a crafted `next` param can't
+ * redirect a signed-in user off-site. */
+function safeNextPath(raw: string | null): string {
+  if (!raw || !raw.startsWith('/') || raw.startsWith('//')) return '/dashboard'
+  return raw
+}
+
+function SignInInner() {
   const { t } = useLang()
   const { refresh } = useSession()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const next = safeNextPath(searchParams.get('next'))
 
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
@@ -58,7 +76,7 @@ export default function SignInPage() {
         return
       }
       await refresh()
-      router.push('/dashboard')
+      router.push(next)
     } catch {
       setError(t.authErrorServer)
     } finally {

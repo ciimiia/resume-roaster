@@ -1,11 +1,16 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, Suspense } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { useLang } from '@/lib/LangContext'
 import Icon from '@/components/ui/Icon'
 import Button from '@/components/ui/Button'
 import { cardStyle, containerStyle } from '@/lib/styles'
+import { parseExplorerQuery } from '@/lib/explorerQuery'
+import { WORLD_COUNTRIES } from '@/lib/worldMapData'
+
+const ISO_TO_NAME = new Map(WORLD_COUNTRIES.map(c => [c.iso, c.name]))
 
 interface JobMatchItem {
   id: string
@@ -146,14 +151,34 @@ function JobCard({ job, onSave, onHide, t }: {
 }
 
 export default function JobsClient() {
+  return (
+    <Suspense fallback={null}>
+      <JobsClientInner />
+    </Suspense>
+  )
+}
+
+function JobsClientInner() {
   const { t } = useLang()
+  const searchParams = useSearchParams()
+  // From the homepage world-map picker (lib/explorerQuery.ts) — read once on
+  // mount as an initial filter seed, not kept in sync with the URL after
+  // that (the existing filter inputs below take over from there).
+  const picked = useMemo(() => parseExplorerQuery(searchParams), [searchParams])
+  const pickedCountryNames = useMemo(
+    () => picked.countries.map(iso => ISO_TO_NAME.get(iso)).filter((n): n is string => !!n),
+    [picked.countries],
+  )
+
   const [state, setState] = useState<'loading' | 'needsApproval' | 'error' | 'ready'>('loading')
   const [items, setItems] = useState<JobMatchItem[]>([])
   const [rerankCapped, setRerankCapped] = useState(false)
   const [remoteFilter, setRemoteFilter] = useState('')
   const [countryFilter, setCountryFilter] = useState('')
+  const [keywordFilter, setKeywordFilter] = useState(picked.track === 'work' ? picked.career : '')
   const [sort, setSort] = useState<'match' | 'newest'>('match')
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set())
+  const [pickedCountriesDismissed, setPickedCountriesDismissed] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -178,11 +203,19 @@ export default function JobsClient() {
       const q = countryFilter.trim().toLowerCase()
       list = list.filter(j => (j.location ?? '').toLowerCase().includes(q))
     }
+    if (!pickedCountriesDismissed && pickedCountryNames.length) {
+      const names = pickedCountryNames.map(n => n.toLowerCase())
+      list = list.filter(j => names.some(n => (j.location ?? '').toLowerCase().includes(n)))
+    }
+    if (keywordFilter.trim()) {
+      const q = keywordFilter.trim().toLowerCase()
+      list = list.filter(j => j.title.toLowerCase().includes(q) || j.company.toLowerCase().includes(q))
+    }
     list = [...list].sort((a, b) => sort === 'match'
       ? b.matchScore - a.matchScore
       : (new Date(b.postedAt ?? 0).getTime() - new Date(a.postedAt ?? 0).getTime()))
     return list
-  }, [items, hiddenIds, remoteFilter, countryFilter, sort])
+  }, [items, hiddenIds, remoteFilter, countryFilter, pickedCountriesDismissed, pickedCountryNames, keywordFilter, sort])
 
   async function handleSave(id: string, saved: boolean) {
     setItems(prev => prev.map(j => j.id === id ? { ...j, saved } : j))
@@ -224,7 +257,29 @@ export default function JobsClient() {
 
         {state === 'ready' && (
           <>
+            {!pickedCountriesDismissed && pickedCountryNames.length > 0 && (
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
+                padding: '10px 14px', borderRadius: 'var(--r-md)', background: 'var(--tint)',
+                border: '1px solid var(--line-2)', marginBottom: 'var(--sp-4)', fontSize: 13.5,
+              }}>
+                <span style={{ color: 'var(--ink-mute)' }}>
+                  {t.jobsFilteredByPicker}: {pickedCountryNames.join(', ')}
+                  {picked.track === 'work' && picked.career ? ` · ${picked.career}` : ''}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setPickedCountriesDismissed(true)}
+                  style={{ marginInlineStart: 'auto', background: 'none', border: 'none', color: 'var(--accent)', fontSize: 13, cursor: 'pointer', fontWeight: 600 }}
+                >
+                  {t.jobsClearPickerFilter}
+                </button>
+              </div>
+            )}
+
             <div style={{ display: 'flex', gap: 10, marginBottom: 'var(--sp-6)', flexWrap: 'wrap' }}>
+              <input value={keywordFilter} onChange={e => setKeywordFilter(e.target.value)} placeholder={t.xCareerPlaceholder}
+                style={{ flex: 1, minWidth: 180, padding: '10px 14px', borderRadius: 'var(--r-md)', border: '1px solid var(--line-2)', background: 'var(--surface-2)', color: 'var(--ink)', fontSize: 13.5 }} />
               <select value={remoteFilter} onChange={e => setRemoteFilter(e.target.value)}
                 style={{ padding: '10px 14px', borderRadius: 'var(--r-md)', border: '1px solid var(--line-2)', background: 'var(--surface-2)', color: 'var(--ink)', fontSize: 13.5 }}>
                 <option value="">{t.jobsFilterRemoteAll}</option>
