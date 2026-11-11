@@ -5,6 +5,8 @@ import { getTailoredResumeForUser } from '@/lib/db/tailoredResumes'
 import { getProfileForUser } from '@/lib/db/profiles'
 import { buildResumeHtml, type ResumeTemplateId } from '@/lib/tailoring/pdf/templates'
 import { renderHtmlToPdf } from '@/lib/tailoring/pdf/render'
+import { checkRateLimit } from '@/lib/rateLimit'
+import { PDF_WINDOW_LIMIT, PDF_DAILY_LIMIT } from '@/lib/tailoring/caps'
 
 export const maxDuration = 60 // headless Chromium launch + render can take a few seconds, well under the limit with room to spare
 
@@ -21,6 +23,20 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const { id } = await params
     const tailored = await getTailoredResumeForUser(id, session.userId)
     if (!tailored) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
+
+    // After ownership, before launching Chromium — a full browser process
+    // per request is real CPU/memory cost even though it doesn't call a
+    // paid API, see lib/tailoring/caps.ts's PDF_WINDOW_LIMIT comment. Same
+    // "pdf:*" bucket as app/api/cover-letter/[id]/pdf/route.ts — both
+    // routes launch Chromium, so the cap is shared per user across them
+    // rather than doubled by giving each route its own budget.
+    const [windowRate, dailyRate] = await Promise.all([
+      checkRateLimit(`pdf:window:${session.userId}`, PDF_WINDOW_LIMIT.max, PDF_WINDOW_LIMIT.windowSeconds),
+      checkRateLimit(`pdf:day:${session.userId}`, PDF_DAILY_LIMIT.max, PDF_DAILY_LIMIT.windowSeconds),
+    ])
+    if (!windowRate.allowed || !dailyRate.allowed) {
+      return NextResponse.json({ error: 'RATE_LIMITED' }, { status: 429 })
+    }
 
     const profile = await getProfileForUser(session.userId)
     if (!profile) return NextResponse.json({ error: 'PROFILE_NOT_APPROVED' }, { status: 409 })

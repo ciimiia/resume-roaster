@@ -45,6 +45,10 @@ export default function TailorClient() {
   const [coverLetter, setCoverLetter] = useState<{ id: string; letter: string } | null>(null)
   const [coverLetterRunning, setCoverLetterRunning] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [resumePdfLoading, setResumePdfLoading] = useState(false)
+  const [resumePdfError, setResumePdfError] = useState('')
+  const [coverLetterPdfLoading, setCoverLetterPdfLoading] = useState(false)
+  const [coverLetterPdfError, setCoverLetterPdfError] = useState('')
 
   useEffect(() => {
     fetch('/api/profile').then(r => r.json()).then(d => {
@@ -97,6 +101,33 @@ export default function TailorClient() {
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
+
+  /** fetch + blob download instead of a plain <a href> — so a 429/500 can show a friendly message instead of the browser opening a raw JSON error page. */
+  const downloadPdf = async (url: string, filename: string, setLoading: (v: boolean) => void, setErr: (v: string) => void) => {
+    setLoading(true)
+    setErr('')
+    try {
+      const res = await fetch(url)
+      if (res.status === 429) { setErr(t.tailorPdfRateLimited); return }
+      if (!res.ok) { setErr(t.tailorPdfError); return }
+      const blob = await res.blob()
+      const blobUrl = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = blobUrl
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(blobUrl)
+    } catch {
+      setErr(t.tailorPdfError)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const downloadResumePdf = () => downloadPdf(`/api/tailor/${result!.id}/pdf?template=${template}`, `resume-${template}.pdf`, setResumePdfLoading, setResumePdfError)
+  const downloadCoverLetterPdf = () => downloadPdf(`/api/cover-letter/${coverLetter!.id}/pdf`, 'cover-letter.pdf', setCoverLetterPdfLoading, setCoverLetterPdfError)
 
   return (
     <div style={{ minHeight: '100vh', padding: '0 var(--gutter) 100px' }}>
@@ -190,23 +221,25 @@ export default function TailorClient() {
                 <option value="modern">{t.tailorTemplateModern}</option>
                 <option value="classic">{t.tailorTemplateClassic}</option>
               </select>
-              <a href={`/api/tailor/${result.id}/pdf?template=${template}`} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-                <Button icon="download" size="sm">{t.tailorDownloadPdfBtn}</Button>
-              </a>
+              <Button icon="download" size="sm" onClick={downloadResumePdf} disabled={resumePdfLoading}>
+                {resumePdfLoading ? t.tailorPdfPreparing : t.tailorDownloadPdfBtn}
+              </Button>
               <Button variant="ghost" size="sm" icon="doc" onClick={generateCoverLetter} disabled={coverLetterRunning}>
                 {coverLetterRunning ? t.tailorCoverLetterRunning : t.tailorCoverLetterBtn}
               </Button>
             </div>
+            {resumePdfError && <div style={{ fontSize: 12.5, color: 'var(--roast)', marginTop: -8, marginBottom: 16 }}>{resumePdfError}</div>}
 
             {coverLetter && (
               <div style={cardStyle({ padding: '18px' })}>
                 <p style={{ fontSize: 12.5, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{coverLetter.letter}</p>
                 <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
                   <Button variant="ghost" size="sm" icon="link" onClick={copyLetter}>{copied ? t.tailorCoverLetterCopied : t.tailorCoverLetterCopyBtn}</Button>
-                  <a href={`/api/cover-letter/${coverLetter.id}/pdf`} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-                    <Button variant="ghost" size="sm" icon="download">{t.tailorDownloadPdfBtn}</Button>
-                  </a>
+                  <Button variant="ghost" size="sm" icon="download" onClick={downloadCoverLetterPdf} disabled={coverLetterPdfLoading}>
+                    {coverLetterPdfLoading ? t.tailorPdfPreparing : t.tailorDownloadPdfBtn}
+                  </Button>
                 </div>
+                {coverLetterPdfError && <div style={{ fontSize: 12.5, color: 'var(--roast)', marginTop: 8 }}>{coverLetterPdfError}</div>}
               </div>
             )}
           </>
