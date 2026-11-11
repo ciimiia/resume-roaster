@@ -29,11 +29,15 @@ export async function GET() {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   try {
-    const rate = await checkRateLimit(`account-export:${session.userId}`, LIMIT.max, LIMIT.windowSeconds)
-    if (!rate.allowed) return NextResponse.json({ error: 'RATE_LIMITED' }, { status: 429 })
-
+    // Checked before the rate limit write below — a stale session cookie
+    // for an already-deleted account (sessions are stateless signed cookies,
+    // not server-invalidated) would otherwise still create a fresh
+    // rate_limits row keyed to a userId that no longer exists.
     const user = await findUserById(session.userId)
     if (!user) return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 })
+
+    const rate = await checkRateLimit(`account-export:${session.userId}`, LIMIT.max, LIMIT.windowSeconds)
+    if (!rate.allowed) return NextResponse.json({ error: 'RATE_LIMITED' }, { status: 429 })
 
     const [profile, jobPreferences, resumes, tailoredResumes, coverLetters, savedJobIds, hiddenJobIds, roasts] = await Promise.all([
       getProfileForUser(session.userId),
