@@ -24,7 +24,7 @@
   --ink: #F3F6FB;
   --ink-soft: #C6D0DE;
   --ink-mute: #8A97AC;
-  --ink-faint: #5A6578;
+  --ink-faint: #7C8698; /* lightened from #5A6578 — the original only hit 3.13:1 against --bg, below WCAG AA's 4.5:1 for normal text; this hits 5.02:1 */
   --roast: #FF4D4D;
   --roast-2: #FF8A3D;
   --coach: #4D9FFF;
@@ -69,7 +69,14 @@
 
 /* ── Light mode ─────────────────────────────────────────────────────────── */
 /* Same navy/amber/teal brand, light surface instead of dark — not a
-   separate theme, just the light/dark display preference (ThemeContext). */
+   separate theme, just the light/dark display preference (ThemeContext).
+   --accent/--accent-2/--roast/--coach/--intl are deliberately darker here
+   than their dark-mode values (and --accent-ink flips to white): the
+   bright dark-mode shades read fine against navy but fail WCAG AA against
+   a white/light surface used as plain text (checked against the exact
+   backgrounds these tokens render on — see the contrast audit in the
+   theme-unification phase report). Hue/identity unchanged, just tuned per
+   surface so "amber accent" and "red = danger" etc. stay readable in both. */
 html[data-color-theme="light"] {
   --bg: #F5F6FA;
   --bg-2: #EFF1F7;
@@ -81,11 +88,15 @@ html[data-color-theme="light"] {
   --ink: #0B1424;
   --ink-soft: #2C3748;
   --ink-mute: #666F82;
-  --ink-faint: #99A1B3;
-  --accent: #D9922E;
-  --accent-2: #2E9A8C;
-  --glow: rgba(217,146,46,0.08);
-  --tint: rgba(217,146,46,0.03);
+  --ink-faint: #636B7E;
+  --roast: #D1374B;
+  --coach: #1C6FD6;
+  --intl: #167A48;
+  --accent: #9C6314;
+  --accent-2: #1E7A6E;
+  --accent-ink: #FFFFFF;
+  --glow: rgba(156,99,20,0.08);
+  --tint: rgba(156,99,20,0.03);
   --shadow-1: 0 1px 0 rgba(255,255,255,0.8) inset, 0 4px 16px rgba(11,20,36,0.10);
   --shadow-2: 0 16px 60px rgba(11,20,36,0.15);
 }
