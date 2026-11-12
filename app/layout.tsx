@@ -94,21 +94,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
-        {/* Atmosphere — fixed full-screen glow using the --glow/--tint tokens */}
-        <div
-          id="atmosphere"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 0,
-            pointerEvents: 'none',
-            background:
-              'radial-gradient(1200px 700px at 80% -10%, var(--glow), transparent 60%),' +
-              'radial-gradient(900px 600px at 10% 110%, var(--tint), transparent 70%)',
-            transition: 'background .7s cubic-bezier(.4,0,.2,1)',
-          }}
-        />
-
         <SessionProvider>
           <LangProvider>
             <ThemeProvider>
