@@ -24,7 +24,7 @@ export default function Button({
 
   const base: React.CSSProperties = {
     display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-    fontFamily: 'var(--font-display)', fontWeight: 600, letterSpacing: '-0.01em',
+    fontFamily: 'var(--font-display)', fontWeight: 600, letterSpacing: 'var(--tracking-tight)',
     border: '1px solid transparent', borderRadius: s.r,
     padding: s.p, fontSize: s.fs, width: full ? '100%' : 'auto',
     transition: 'transform .15s cubic-bezier(.34,1.56,.64,1), background .2s, border-color .2s, box-shadow .2s, color .2s',

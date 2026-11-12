@@ -65,10 +65,20 @@
   --shadow-1: 0 1px 0 rgba(255,255,255,0.8) inset, 0 4px 16px rgba(11,20,36,0.10);
   --shadow-2: 0 16px 60px rgba(11,20,36,0.15);
 
-  --font-display: 'Space Grotesk', system-ui, sans-serif;
-  --font-body: 'Inter', system-ui, sans-serif;
+  /* ONE Latin family for both display and body — Plus Jakarta Sans. To
+     switch typeface app-wide, change ONLY these two lines plus the single
+     Google Fonts <link> in app/layout.tsx (same weights: 400/500/600/700/
+     800). Good drop-in alternatives, same approach: DM Sans, Manrope,
+     Outfit — all have a comparable weight range and x-height, so nothing
+     else here (letter-spacing, line-height) should need retuning. */
+  --font-display: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
   --font-mono: 'Space Mono', ui-monospace, monospace;
   --font-fa: 'Vazirmatn', system-ui, sans-serif;
+  /* Plus Jakarta Sans needs less tightening than Space Grotesk did — see
+     html[lang="fa"] below for why this must be a token, not a literal
+     per-component value. */
+  --tracking-tight: -0.02em;
   --r-sm: 10px; --r-md: 16px; --r-lg: 24px; --r-xl: 32px;
 
   /* Spacing scale (4px base) — use for gap/padding/margin instead of
@@ -105,6 +115,12 @@ html[lang="fa"] {
   --font-display: var(--font-fa);
   --font-body: var(--font-fa);
   --font-mono: var(--font-fa);
+  /* Negative letter-spacing breaks Arabic-script letter joining — never
+     apply Latin tracking to Persian text. --tracking-tight is the one
+     place a handful of display elements (the logo wordmark, button
+     labels, the score-ring number) get a tight-but-not-cramped Latin
+     tracking value; this neutralizes it the moment lang="fa". */
+  --tracking-tight: normal;
 }
 
 /* ── NIGHT (dark variant) ─────────────────────────────────────────────── */

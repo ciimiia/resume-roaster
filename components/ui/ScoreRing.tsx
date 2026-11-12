@@ -66,7 +66,7 @@ export default function ScoreRing({ score, run = true, size = 180, label, grade 
       }}>
         <div style={{
           fontFamily: 'var(--font-display)', fontWeight: 700,
-          fontSize: size * 0.30, lineHeight: 1, letterSpacing: '-0.04em',
+          fontSize: size * 0.30, lineHeight: 1, letterSpacing: 'var(--tracking-tight)',
         }}>
           {v}
           {grade && <span style={{ fontSize: size * 0.13, color: 'var(--accent)', marginLeft: 4 }}>{grade}</span>}

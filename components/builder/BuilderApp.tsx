@@ -395,7 +395,7 @@ function ResumeDoc({ data, t }: { data: ResumeData; t: ReturnType<typeof useLang
   return (
     <div className="resume-doc" style={{
       background: '#fff', color: '#111',
-      fontFamily: "'Hanken Grotesk', 'Inter', system-ui, sans-serif",
+      fontFamily: "'Hanken Grotesk', system-ui, sans-serif",
       fontSize: 13, lineHeight: 1.5,
       padding: '36px 40px', borderRadius: 'var(--r-md)',
       boxShadow: '0 8px 40px rgba(0,0,0,0.3)',

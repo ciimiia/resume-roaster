@@ -60,10 +60,10 @@ function drawShareCard(canvas: HTMLCanvasElement, mode: ModeId, r: AnalysisResul
   ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H)
 
   ctx.textBaseline = 'middle'
-  ctx.font = '52px "Space Grotesk", sans-serif'
+  ctx.font = '52px "Plus Jakarta Sans", sans-serif'
   ctx.fillText('🔥', PAD, 110)
   ctx.fillStyle = '#F5F5F7'
-  ctx.font = '700 38px "Space Grotesk", sans-serif'
+  ctx.font = '700 38px "Plus Jakarta Sans", sans-serif'
   ctx.fillText('Resume Roaster', PAD + 64, 112)
 
   ctx.font = '700 24px "Space Mono", monospace'
@@ -87,16 +87,16 @@ function drawShareCard(canvas: HTMLCanvasElement, mode: ModeId, r: AnalysisResul
   ctx.beginPath(); ctx.arc(cx, cy, rad, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * r.score / 100)); ctx.stroke()
 
   ctx.fillStyle = '#F5F5F7'
-  ctx.font = '700 88px "Space Grotesk", sans-serif'; ctx.textAlign = 'center'
+  ctx.font = '700 88px "Plus Jakarta Sans", sans-serif'; ctx.textAlign = 'center'
   ctx.fillText(String(r.score), cx, cy - 6)
-  ctx.fillStyle = t.a; ctx.font = '700 30px "Space Grotesk", sans-serif'
+  ctx.fillStyle = t.a; ctx.font = '700 30px "Plus Jakarta Sans", sans-serif'
   ctx.fillText(r.grade + ' · ATS', cx, cy + 56)
   ctx.textAlign = 'left'
 
   const vx = cx + rad + 70, vw = W - PAD - vx
   ctx.fillStyle = '#9A9AA8'; ctx.font = '700 20px "Space Mono", monospace'
   ctx.fillText('THE VERDICT', vx, cy - 110)
-  ctx.fillStyle = '#F5F5F7'; ctx.font = '600 42px "Space Grotesk", sans-serif'
+  ctx.fillStyle = '#F5F5F7'; ctx.font = '600 42px "Plus Jakarta Sans", sans-serif'
   wrapText(ctx, '"' + r.verdict + '"', vx, cy - 60, vw, 50)
 
   let y = 660
@@ -108,7 +108,7 @@ function drawShareCard(canvas: HTMLCanvasElement, mode: ModeId, r: AnalysisResul
     ctx.fillText(s.label, PAD, y)
     ctx.textAlign = 'right'
     ctx.fillStyle = s.score >= 75 ? '#4DCC88' : s.score >= 55 ? t.a : '#FF4D4D'
-    ctx.font = '700 28px "Space Grotesk", sans-serif'; ctx.fillText(String(s.score), W - PAD, y)
+    ctx.font = '700 28px "Plus Jakarta Sans", sans-serif'; ctx.fillText(String(s.score), W - PAD, y)
     ctx.textAlign = 'left'
     const by = y + 22, bw2 = W - PAD * 2
     ctx.fillStyle = 'rgba(255,255,255,0.08)'

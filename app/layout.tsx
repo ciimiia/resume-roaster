@@ -58,11 +58,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           (Persian) is loaded here too, not injected dynamically on language
           switch — it's available immediately, so FA text never has a moment
           where it falls back to a Latin-only family while the font loads.
+
+          Plus Jakarta Sans is the one app-wide Latin family (--font-display
+          and --font-body in app/globals.css both point at it) — to swap it
+          for DM Sans, Manrope, or Outfit, change the family name in BOTH
+          this href and those two globals.css lines; all four have a
+          comparable weight range (400–800) so this same weight list works
+          unchanged. Space Mono stays (still used for mono/eyebrow text).
+          Hanken Grotesk stays too, but ONLY for the few allowlisted fixed-
+          font exceptions (the resume preview panes, the canvas-drawn share
+          image — see scripts/test-noHardcodedFonts.ts) — it is NOT a
+          --font-* token and nothing else should reference it.
         */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Hanken+Grotesk:wght@400;500;600;700&family=Syne:wght@400;700;800&family=Inter:wght@400;500;600;700&family=Vazirmatn:wght@400;500;600;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&family=Hanken+Grotesk:wght@400;500;600;700&family=Vazirmatn:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         />
         {/*
