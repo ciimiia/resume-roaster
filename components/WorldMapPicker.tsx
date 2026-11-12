@@ -1,9 +1,9 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLang } from '@/lib/LangContext'
-import { WORLD_COUNTRIES, projectLonLat, type WorldRegionId } from '@/lib/worldMapData'
+import { WORLD_COUNTRIES, type WorldRegionId } from '@/lib/worldMapData'
 import { WORLD_CITIES } from '@/lib/worldCities'
 import { buildExplorerQueryString, type StudyLevel, type Track } from '@/lib/explorerQuery'
 
@@ -37,24 +37,6 @@ const MAP_VIEWBOX = `0 ${MAP_CROP_TOP} ${FULL_W} ${MAP_CROP_HEIGHT}`
 const MIN_ZOOM = 1
 const MAX_ZOOM = 8
 
-// City dots fade in progressively as you zoom — tier 1 (major global
-// cities/capitals) first, tier 2 (everything else) once you're in further —
-// so the map doesn't look cluttered at the default zoomed-out view.
-//
-// A region's auto-framed zoom (frameRegion, 0.7x padding) varies a lot by
-// how wide that region's bounding box is — wide regions like Latin America
-// or Africa frame at barely above MIN_ZOOM, narrow ones like the Middle
-// East frame as high as ~2.75 — so gating tier-1 visibility on raw `zoom`
-// alone meant picking a wide region never revealed any cities at all. Tier
-// 1 instead uses an "effective zoom" that's floored at REGION_ZOOM_FLOOR
-// the moment any region is selected, regardless of its actual framed zoom.
-const CITY_DOT_ZOOM: Record<1 | 2, number> = { 1: 1.15, 2: 2 }
-const REGION_ZOOM_FLOOR = 1.3
-// Which city LABELS actually show (as opposed to just their dots) is decided
-// by greedily placing each label's estimated on-screen bounding box and
-// skipping it if it would overlap one already placed — see the render below.
-const LABEL_GAP_PX = 5
-
 function clampNum(v: number, min: number, max: number) {
   return Math.min(max, Math.max(min, v))
 }
@@ -76,6 +58,16 @@ const COUNTRIES_BY_REGION: Record<WorldRegionId, { iso: string; name: string }[]
   return map
 })()
 
+// Keyed by the same `iso` the country buttons use, so "cities available for
+// the currently selected countries" is a plain lookup — capitals/major hubs
+// (tier 1) first, dataset order breaks ties.
+const CITIES_BY_ISO: Record<string, { name: string; tier: 1 | 2 }[]> = (() => {
+  const map: Record<string, { name: string; tier: 1 | 2 }[]> = {}
+  for (const c of WORLD_CITIES) (map[c.iso] ??= []).push({ name: c.name, tier: c.tier })
+  for (const iso of Object.keys(map)) map[iso].sort((a, b) => a.tier - b.tier)
+  return map
+})()
+
 const ACCENT = 'var(--accent)'
 
 export default function WorldMapPicker() {
@@ -85,6 +77,7 @@ export default function WorldMapPicker() {
   const [track, setTrack] = useState<Track>('work')
   const [region, setRegion] = useState<WorldRegionId | null>(null)
   const [countries, setCountries] = useState<string[]>([])
+  const [cities, setCities] = useState<string[]>([])
   const [career, setCareer] = useState('')
   const [studyLevel, setStudyLevel] = useState<StudyLevel | ''>('')
   const [studyField, setStudyField] = useState('')
@@ -116,22 +109,6 @@ export default function WorldMapPicker() {
   // actually under the cursor, which silently broke country selection the
   // moment the map was zoomed in enough for dragging to be possible at all.
   const DRAG_THRESHOLD_PX = 4
-
-  // Tracked so the city-label declutter pass (below) can reason in real
-  // screen pixels — the map card can be anywhere from ~280px (mobile) to
-  // ~700px+ wide, and "how many labels fit without overlapping" depends on
-  // that, not just the zoom level.
-  const [mapWidthPx, setMapWidthPx] = useState(600)
-  useEffect(() => {
-    const el = svgRef.current
-    if (!el) return
-    const ro = new ResizeObserver(entries => {
-      const w = entries[0]?.contentRect.width
-      if (w) setMapWidthPx(w)
-    })
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [])
 
   const screenDeltaToViewBox = useCallback((dx: number, dy: number) => {
     const rect = svgRef.current?.getBoundingClientRect()
@@ -209,7 +186,24 @@ export default function WorldMapPicker() {
   const toggleCountry = (iso: string, countryRegion: WorldRegionId) => {
     if (countryRegion !== region) frameRegion(countryRegion)
     setRegion(countryRegion)
-    setCountries(cs => (cs.includes(iso) ? cs.filter(c => c !== iso) : [...cs, iso]))
+    setCountries(cs => {
+      const next = cs.includes(iso) ? cs.filter(c => c !== iso) : [...cs, iso]
+      // Deselecting a country drops any of its cities too, so `cities` never
+      // holds a city whose country isn't actually selected any more.
+      if (!next.includes(iso)) {
+        const droppedNames = new Set((CITIES_BY_ISO[iso] ?? []).map(c => c.name))
+        setCities(prev => prev.filter(name => !droppedNames.has(name)))
+      }
+      return next
+    })
+  }
+
+  // Union of every selected country's cities — the picklist shown below the
+  // country buttons. Selecting a city is an optional refinement, not
+  // required to submit.
+  const availableCities = countries.flatMap(iso => CITIES_BY_ISO[iso] ?? [])
+  const toggleCity = (name: string) => {
+    setCities(cs => (cs.includes(name) ? cs.filter(c => c !== name) : [...cs, name]))
   }
 
   const ready = countries.length > 0
@@ -220,8 +214,8 @@ export default function WorldMapPicker() {
   const submit = () => {
     if (!ready) return
     const qs = track === 'work'
-      ? buildExplorerQueryString({ track: 'work', countries, career })
-      : buildExplorerQueryString({ track: 'study', countries, level: studyLevel, field: studyField })
+      ? buildExplorerQueryString({ track: 'work', countries, cities, career })
+      : buildExplorerQueryString({ track: 'study', countries, cities, level: studyLevel, field: studyField })
     router.push(`/${track === 'work' ? 'jobs' : 'universities'}?${qs}`)
   }
 
@@ -314,71 +308,6 @@ export default function WorldMapPicker() {
                       />
                     )
                   })}
-
-                  {/* Cities — purely decorative/orientation aid, not interactive,
-                      so they never compete with the country <path> clicks above.
-                      Dot/label sizes are in the <g>'s own (unscaled-by-zoom)
-                      local units — unlike the country borders above, which
-                      divide by zoom so they stay a constant thin line, city
-                      markers are meant to grow more prominent as you zoom in,
-                      the way map pins do.
-                      Labels are greedily decluttered by real on-screen
-                      distance (not a fixed zoom cutoff per city), so exactly
-                      how many show depends on how much room there actually
-                      is: zooming in naturally spreads cities apart on screen,
-                      which is what reveals more of their names, rather than
-                      every eligible label suddenly appearing at once. */}
-                  <g style={{ pointerEvents: 'none' }}>
-                    {(() => {
-                      const pxPerUnit = mapWidthPx / FULL_W
-                      const eligible = WORLD_CITIES
-                        .map(city => {
-                          const { x, y } = projectLonLat(city.lon, city.lat)
-                          const z = city.tier === 1 ? Math.max(zoom, region ? REGION_ZOOM_FLOOR : MIN_ZOOM) : zoom
-                          return { city, x, y, z }
-                        })
-                        .filter(({ city, z }) => z >= CITY_DOT_ZOOM[city.tier])
-                        // Capitals/major hubs get first pick of the available
-                        // label space; dataset order breaks ties within a tier.
-                        .sort((a, b) => a.city.tier - b.city.tier)
-
-                      // Label on-screen size is constant regardless of zoom
-                      // (same reasoning as the dot/font sizes above), so this
-                      // can be computed once rather than per-city.
-                      const labelHeightPx = 20 * pxPerUnit * 1.3
-                      const placed: { left: number; right: number; top: number; bottom: number }[] = []
-                      return eligible.map(({ city, x, y }) => {
-                        const sx = (pan.x + zoom * x) * pxPerUnit
-                        const sy = (pan.y + zoom * y) * pxPerUnit
-                        const labelWidthPx = city.name.length * 20 * pxPerUnit * 0.62
-                        const box = {
-                          left: sx - LABEL_GAP_PX, right: sx + labelWidthPx + LABEL_GAP_PX,
-                          top: sy - labelHeightPx / 2 - LABEL_GAP_PX, bottom: sy + labelHeightPx / 2 + LABEL_GAP_PX,
-                        }
-                        const overlaps = placed.some(p =>
-                          box.left < p.right && box.right > p.left && box.top < p.bottom && box.bottom > p.top)
-                        const showLabel = !overlaps
-                        if (showLabel) placed.push(box)
-                        return (
-                          <g key={city.name}>
-                            <circle cx={x} cy={y} r={6 / zoom} fill="var(--accent)" stroke="var(--surface)" strokeWidth={2 / zoom} />
-                            {showLabel && (
-                              <text
-                                x={x + 9 / zoom}
-                                y={y + 3 / zoom}
-                                fontSize={20 / zoom}
-                                fontFamily="var(--font-mono)"
-                                fill="var(--ink)"
-                                style={{ paintOrder: 'stroke', stroke: 'var(--surface)', strokeWidth: 5 / zoom }}
-                              >
-                                {city.name}
-                              </text>
-                            )}
-                          </g>
-                        )
-                      })
-                    })()}
-                  </g>
                 </g>
               </svg>
 
@@ -459,6 +388,37 @@ export default function WorldMapPicker() {
                   </div>
                 ) : (
                   <div style={{ fontSize: 13.5, color: 'var(--ink-faint)' }}>{t.xCountriesNone}</div>
+                )}
+              </div>
+
+              <div>
+                <div style={{ fontSize: 11, color: 'var(--ink-faint)', fontWeight: 600, marginBottom: 6 }}>{t.xCitiesLabel}</div>
+                {countries.length === 0 ? (
+                  <div style={{ fontSize: 13.5, color: 'var(--ink-faint)' }}>{t.xCitiesNone}</div>
+                ) : availableCities.length === 0 ? (
+                  <div style={{ fontSize: 13.5, color: 'var(--ink-faint)' }}>{t.xCitiesUnavailable}</div>
+                ) : (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, maxHeight: 130, overflowY: 'auto' }}>
+                    {availableCities.map(c => {
+                      const selected = cities.includes(c.name)
+                      return (
+                        <button
+                          key={c.name}
+                          type="button"
+                          aria-pressed={selected}
+                          onClick={() => toggleCity(c.name)}
+                          style={{
+                            padding: '6px 12px', borderRadius: 999, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                            border: `1px solid ${selected ? ACCENT : 'var(--line-2)'}`,
+                            background: selected ? ACCENT : 'var(--surface-2)',
+                            color: selected ? 'var(--accent-ink)' : 'var(--ink-soft)',
+                          }}
+                        >
+                          {c.name}
+                        </button>
+                      )
+                    })}
+                  </div>
                 )}
               </div>
 
