@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLang } from '@/lib/LangContext'
 import { WORLD_COUNTRIES, projectLonLat, type WorldRegionId } from '@/lib/worldMapData'
@@ -49,8 +49,11 @@ const MAX_ZOOM = 8
 // 1 instead uses an "effective zoom" that's floored at REGION_ZOOM_FLOOR
 // the moment any region is selected, regardless of its actual framed zoom.
 const CITY_DOT_ZOOM: Record<1 | 2, number> = { 1: 1.15, 2: 2 }
-const CITY_LABEL_ZOOM: Record<1 | 2, number> = { 1: 1.3, 2: 3 }
 const REGION_ZOOM_FLOOR = 1.3
+// Which city LABELS actually show (as opposed to just their dots) is decided
+// by greedily placing each label's estimated on-screen bounding box and
+// skipping it if it would overlap one already placed — see the render below.
+const LABEL_GAP_PX = 5
 
 function clampNum(v: number, min: number, max: number) {
   return Math.min(max, Math.max(min, v))
@@ -113,6 +116,22 @@ export default function WorldMapPicker() {
   // actually under the cursor, which silently broke country selection the
   // moment the map was zoomed in enough for dragging to be possible at all.
   const DRAG_THRESHOLD_PX = 4
+
+  // Tracked so the city-label declutter pass (below) can reason in real
+  // screen pixels — the map card can be anywhere from ~280px (mobile) to
+  // ~700px+ wide, and "how many labels fit without overlapping" depends on
+  // that, not just the zoom level.
+  const [mapWidthPx, setMapWidthPx] = useState(600)
+  useEffect(() => {
+    const el = svgRef.current
+    if (!el) return
+    const ro = new ResizeObserver(entries => {
+      const w = entries[0]?.contentRect.width
+      if (w) setMapWidthPx(w)
+    })
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
 
   const screenDeltaToViewBox = useCallback((dx: number, dy: number) => {
     const rect = svgRef.current?.getBoundingClientRect()
@@ -298,41 +317,67 @@ export default function WorldMapPicker() {
 
                   {/* Cities — purely decorative/orientation aid, not interactive,
                       so they never compete with the country <path> clicks above.
-                      Sizes are in the <g>'s own (unscaled-by-zoom) local units —
-                      unlike the country borders above, which divide by zoom so
-                      they stay a constant thin line, city markers are meant to
-                      grow more prominent as you zoom in, the way map pins do. */}
+                      Dot/label sizes are in the <g>'s own (unscaled-by-zoom)
+                      local units — unlike the country borders above, which
+                      divide by zoom so they stay a constant thin line, city
+                      markers are meant to grow more prominent as you zoom in,
+                      the way map pins do.
+                      Labels are greedily decluttered by real on-screen
+                      distance (not a fixed zoom cutoff per city), so exactly
+                      how many show depends on how much room there actually
+                      is: zooming in naturally spreads cities apart on screen,
+                      which is what reveals more of their names, rather than
+                      every eligible label suddenly appearing at once. */}
                   <g style={{ pointerEvents: 'none' }}>
-                    {WORLD_CITIES.filter(city => {
-                      const z = city.tier === 1 ? Math.max(zoom, region ? REGION_ZOOM_FLOOR : MIN_ZOOM) : zoom
-                      return z >= CITY_DOT_ZOOM[city.tier]
-                    }).map(city => {
-                      const { x, y } = projectLonLat(city.lon, city.lat)
-                      const z = city.tier === 1 ? Math.max(zoom, region ? REGION_ZOOM_FLOOR : MIN_ZOOM) : zoom
-                      const showLabel = z >= CITY_LABEL_ZOOM[city.tier]
-                      // Divided by the REAL zoom (not the effective/floored one
-                      // above) so the on-screen size is constant regardless of
-                      // zoom level — same technique as the border strokeWidth,
-                      // just with a much bigger base size: a city marker needs
-                      // to read as a visible dot/label, not a hairline.
-                      return (
-                        <g key={city.name}>
-                          <circle cx={x} cy={y} r={6 / zoom} fill="var(--accent)" stroke="var(--surface)" strokeWidth={2 / zoom} />
-                          {showLabel && (
-                            <text
-                              x={x + 9 / zoom}
-                              y={y + 3 / zoom}
-                              fontSize={20 / zoom}
-                              fontFamily="var(--font-mono)"
-                              fill="var(--ink)"
-                              style={{ paintOrder: 'stroke', stroke: 'var(--surface)', strokeWidth: 5 / zoom }}
-                            >
-                              {city.name}
-                            </text>
-                          )}
-                        </g>
-                      )
-                    })}
+                    {(() => {
+                      const pxPerUnit = mapWidthPx / FULL_W
+                      const eligible = WORLD_CITIES
+                        .map(city => {
+                          const { x, y } = projectLonLat(city.lon, city.lat)
+                          const z = city.tier === 1 ? Math.max(zoom, region ? REGION_ZOOM_FLOOR : MIN_ZOOM) : zoom
+                          return { city, x, y, z }
+                        })
+                        .filter(({ city, z }) => z >= CITY_DOT_ZOOM[city.tier])
+                        // Capitals/major hubs get first pick of the available
+                        // label space; dataset order breaks ties within a tier.
+                        .sort((a, b) => a.city.tier - b.city.tier)
+
+                      // Label on-screen size is constant regardless of zoom
+                      // (same reasoning as the dot/font sizes above), so this
+                      // can be computed once rather than per-city.
+                      const labelHeightPx = 20 * pxPerUnit * 1.3
+                      const placed: { left: number; right: number; top: number; bottom: number }[] = []
+                      return eligible.map(({ city, x, y }) => {
+                        const sx = (pan.x + zoom * x) * pxPerUnit
+                        const sy = (pan.y + zoom * y) * pxPerUnit
+                        const labelWidthPx = city.name.length * 20 * pxPerUnit * 0.62
+                        const box = {
+                          left: sx - LABEL_GAP_PX, right: sx + labelWidthPx + LABEL_GAP_PX,
+                          top: sy - labelHeightPx / 2 - LABEL_GAP_PX, bottom: sy + labelHeightPx / 2 + LABEL_GAP_PX,
+                        }
+                        const overlaps = placed.some(p =>
+                          box.left < p.right && box.right > p.left && box.top < p.bottom && box.bottom > p.top)
+                        const showLabel = !overlaps
+                        if (showLabel) placed.push(box)
+                        return (
+                          <g key={city.name}>
+                            <circle cx={x} cy={y} r={6 / zoom} fill="var(--accent)" stroke="var(--surface)" strokeWidth={2 / zoom} />
+                            {showLabel && (
+                              <text
+                                x={x + 9 / zoom}
+                                y={y + 3 / zoom}
+                                fontSize={20 / zoom}
+                                fontFamily="var(--font-mono)"
+                                fill="var(--ink)"
+                                style={{ paintOrder: 'stroke', stroke: 'var(--surface)', strokeWidth: 5 / zoom }}
+                              >
+                                {city.name}
+                              </text>
+                            )}
+                          </g>
+                        )
+                      })
+                    })()}
                   </g>
                 </g>
               </svg>
