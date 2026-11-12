@@ -310,17 +310,22 @@ export default function WorldMapPicker() {
                       const { x, y } = projectLonLat(city.lon, city.lat)
                       const z = city.tier === 1 ? Math.max(zoom, region ? REGION_ZOOM_FLOOR : MIN_ZOOM) : zoom
                       const showLabel = z >= CITY_LABEL_ZOOM[city.tier]
+                      // Divided by the REAL zoom (not the effective/floored one
+                      // above) so the on-screen size is constant regardless of
+                      // zoom level — same technique as the border strokeWidth,
+                      // just with a much bigger base size: a city marker needs
+                      // to read as a visible dot/label, not a hairline.
                       return (
                         <g key={city.name}>
-                          <circle cx={x} cy={y} r={1.3} fill="var(--accent)" stroke="var(--surface)" strokeWidth={0.5} />
+                          <circle cx={x} cy={y} r={6 / zoom} fill="var(--accent)" stroke="var(--surface)" strokeWidth={2 / zoom} />
                           {showLabel && (
                             <text
-                              x={x + 3}
-                              y={y + 1.8}
-                              fontSize={4.5}
+                              x={x + 9 / zoom}
+                              y={y + 3 / zoom}
+                              fontSize={20 / zoom}
                               fontFamily="var(--font-mono)"
                               fill="var(--ink)"
-                              style={{ paintOrder: 'stroke', stroke: 'var(--surface)', strokeWidth: 1.6 }}
+                              style={{ paintOrder: 'stroke', stroke: 'var(--surface)', strokeWidth: 5 / zoom }}
                             >
                               {city.name}
                             </text>
