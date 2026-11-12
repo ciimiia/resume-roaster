@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLang } from '@/lib/LangContext'
 import { WORLD_COUNTRIES, type WorldRegionId } from '@/lib/worldMapData'
@@ -130,16 +130,30 @@ export default function WorldMapPicker() {
     })
   }, [])
 
-  const onWheel = (e: React.WheelEvent<SVGSVGElement>) => {
-    e.preventDefault()
-    const rect = e.currentTarget.getBoundingClientRect()
-    if (rect.width === 0 || rect.height === 0) return
-    const focal = {
-      x: (e.clientX - rect.left) * (FULL_W / rect.width),
-      y: MAP_CROP_TOP + (e.clientY - rect.top) * (MAP_CROP_HEIGHT / rect.height),
+  // A plain React onWheel prop is bound passively (React delegates wheel
+  // listeners at the root and marks them passive by default for scroll
+  // performance), so e.preventDefault() inside it is silently ignored — the
+  // page kept scrolling underneath the map even though zoom was working.
+  // Attaching the listener natively with { passive: false } is the only way
+  // to actually block the page scroll while wheel-zooming the map.
+  const zoomRef = useRef(zoom)
+  zoomRef.current = zoom
+  useEffect(() => {
+    const el = svgRef.current
+    if (!el) return
+    const handler = (e: WheelEvent) => {
+      e.preventDefault()
+      const rect = el.getBoundingClientRect()
+      if (rect.width === 0 || rect.height === 0) return
+      const focal = {
+        x: (e.clientX - rect.left) * (FULL_W / rect.width),
+        y: MAP_CROP_TOP + (e.clientY - rect.top) * (MAP_CROP_HEIGHT / rect.height),
+      }
+      zoomAround(focal, zoomRef.current * (e.deltaY < 0 ? 1.15 : 1 / 1.15))
     }
-    zoomAround(focal, zoom * (e.deltaY < 0 ? 1.15 : 1 / 1.15))
-  }
+    el.addEventListener('wheel', handler, { passive: false })
+    return () => el.removeEventListener('wheel', handler)
+  }, [zoomAround])
 
   const onPointerDown = (e: React.PointerEvent<SVGSVGElement>) => {
     if (zoom <= MIN_ZOOM) return
@@ -277,7 +291,6 @@ export default function WorldMapPicker() {
                 ref={svgRef}
                 viewBox={MAP_VIEWBOX}
                 aria-hidden="true"
-                onWheel={onWheel}
                 onPointerDown={onPointerDown}
                 onPointerMove={onPointerMove}
                 onPointerUp={endDrag}
