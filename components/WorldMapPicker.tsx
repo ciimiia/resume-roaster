@@ -89,7 +89,14 @@ export default function WorldMapPicker() {
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const [dragging, setDragging] = useState(false)
   const svgRef = useRef<SVGSVGElement>(null)
-  const dragRef = useRef<{ startX: number; startY: number; startPan: { x: number; y: number } } | null>(null)
+  const dragRef = useRef<{ startX: number; startY: number; startPan: { x: number; y: number }; moved: boolean } | null>(null)
+  // Below this many screen px of movement, a pointerdown→pointerup is a
+  // click (select the country), not a drag — matters because calling
+  // setPointerCapture retargets the browser's synthesized `click` event to
+  // whatever element captured the pointer (the <svg>), not the <path>
+  // actually under the cursor, which silently broke country selection the
+  // moment the map was zoomed in enough for dragging to be possible at all.
+  const DRAG_THRESHOLD_PX = 4
 
   const screenDeltaToViewBox = useCallback((dx: number, dy: number) => {
     const rect = svgRef.current?.getBoundingClientRect()
@@ -124,14 +131,22 @@ export default function WorldMapPicker() {
 
   const onPointerDown = (e: React.PointerEvent<SVGSVGElement>) => {
     if (zoom <= MIN_ZOOM) return
-    e.currentTarget.setPointerCapture(e.pointerId)
-    dragRef.current = { startX: e.clientX, startY: e.clientY, startPan: pan }
-    setDragging(true)
+    // No setPointerCapture here — only once movement proves it's a real
+    // drag (see onPointerMove), so a plain click still reaches the path.
+    dragRef.current = { startX: e.clientX, startY: e.clientY, startPan: pan, moved: false }
   }
   const onPointerMove = (e: React.PointerEvent<SVGSVGElement>) => {
-    if (!dragRef.current) return
-    const d = screenDeltaToViewBox(e.clientX - dragRef.current.startX, e.clientY - dragRef.current.startY)
-    setPan(clampPan({ x: dragRef.current.startPan.x + d.x, y: dragRef.current.startPan.y + d.y }, zoom))
+    const drag = dragRef.current
+    if (!drag) return
+    if (!drag.moved) {
+      const dist = Math.hypot(e.clientX - drag.startX, e.clientY - drag.startY)
+      if (dist < DRAG_THRESHOLD_PX) return
+      drag.moved = true
+      setDragging(true)
+      e.currentTarget.setPointerCapture(e.pointerId)
+    }
+    const d = screenDeltaToViewBox(e.clientX - drag.startX, e.clientY - drag.startY)
+    setPan(clampPan({ x: drag.startPan.x + d.x, y: drag.startPan.y + d.y }, zoom))
   }
   const endDrag = () => { dragRef.current = null; setDragging(false) }
 
