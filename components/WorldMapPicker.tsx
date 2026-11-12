@@ -313,8 +313,13 @@ export default function WorldMapPicker() {
                         key={c.iso + c.name}
                         d={c.d}
                         fill={selected ? 'var(--map-selected)' : inActiveRegion ? 'var(--map-hover)' : 'var(--map-land)'}
-                        stroke="var(--map-line)"
-                        strokeWidth={0.6 / zoom}
+                        // Selected countries use a higher-contrast stroke
+                        // (--surface, not --map-line) and a thicker line —
+                        // --map-line is close in tone to --map-selected, so
+                        // two adjacent selected countries' shared border was
+                        // nearly invisible, making them read as one blob.
+                        stroke={selected ? 'var(--surface)' : 'var(--map-line)'}
+                        strokeWidth={(selected ? 1.4 : 0.6) / zoom}
                         strokeLinejoin="round"
                         onClick={() => toggleCountry(c.iso, c.region)}
                         style={{ cursor: 'pointer' }}
