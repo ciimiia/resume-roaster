@@ -119,25 +119,27 @@ function ToolsDropdown({ linkStyle }: { linkStyle: (isActive: boolean) => React.
         {t.navTools}
       </button>
       {open && (
-        <div role="menu" style={{
-          position: 'absolute', top: '100%', insetInlineStart: 0, marginTop: 4, minWidth: 200,
-          background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 'var(--r-md)',
-          boxShadow: 'var(--shadow-2)', padding: 6, zIndex: 50,
-        }}>
-          {items.map(item => (
-            <Link
-              key={item.href}
-              href={item.href}
-              role="menuitem"
-              onClick={() => setOpen(false)}
-              style={{
-                display: 'block', padding: '9px 12px', borderRadius: 8,
-                color: 'var(--ink)', fontSize: 14, textDecoration: 'none', whiteSpace: 'nowrap',
-              }}
-            >
-              {item.label}
-            </Link>
-          ))}
+        <div style={{ position: 'absolute', top: '100%', insetInlineStart: 0, paddingTop: 4, zIndex: 50 }}>
+          <div role="menu" style={{
+            minWidth: 200,
+            background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 'var(--r-md)',
+            boxShadow: 'var(--shadow-2)', padding: 6,
+          }}>
+            {items.map(item => (
+              <Link
+                key={item.href}
+                href={item.href}
+                role="menuitem"
+                onClick={() => setOpen(false)}
+                style={{
+                  display: 'block', padding: '9px 12px', borderRadius: 8,
+                  color: 'var(--ink)', fontSize: 14, textDecoration: 'none', whiteSpace: 'nowrap',
+                }}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
         </div>
       )}
     </div>
