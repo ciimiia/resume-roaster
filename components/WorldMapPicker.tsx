@@ -29,8 +29,8 @@ const REGION_BBOX: Record<WorldRegionId, { x1: number; y1: number; x2: number; y
 // rest — the crop is just the starting view, not a hard limit on content.
 const FULL_W = 1000
 const FULL_H = 500
-const MAP_CROP_TOP = 20
-const MAP_CROP_HEIGHT = 400
+const MAP_CROP_TOP = 40
+const MAP_CROP_HEIGHT = 330
 const WIN_BOTTOM = MAP_CROP_TOP + MAP_CROP_HEIGHT
 const MAP_VIEWBOX = `0 ${MAP_CROP_TOP} ${FULL_W} ${MAP_CROP_HEIGHT}`
 const MIN_ZOOM = 1
@@ -191,19 +191,19 @@ export default function WorldMapPicker() {
   }
 
   return (
-    <section id="explorer" style={{ position: 'relative', background: 'var(--bg)', padding: 'clamp(10px,1.6vw,20px) 0 clamp(20px,3vw,32px)' }}>
-      <div style={{ maxWidth: 1180, margin: '0 auto', padding: '0 var(--gutter)', display: 'flex', flexDirection: 'column', gap: 18, color: 'var(--ink)' }}>
+    <section id="explorer" style={{ position: 'relative', background: 'var(--bg)', padding: 'clamp(6px,0.8vw,12px) 0 clamp(14px,2vw,22px)' }}>
+      <div style={{ maxWidth: 1180, margin: '0 auto', padding: '0 var(--gutter)', display: 'flex', flexDirection: 'column', gap: 12, color: 'var(--ink)' }}>
 
         {/* Headline + track toggle */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, textAlign: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, textAlign: 'center' }}>
           <span style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 999,
-            background: 'var(--tint)', border: '1px solid var(--line-2)', color: ACCENT, fontSize: 12, fontWeight: 600,
+            display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 11px', borderRadius: 999,
+            background: 'var(--tint)', border: '1px solid var(--line-2)', color: ACCENT, fontSize: 11.5, fontWeight: 600,
           }}>
             {t.xBadge}
           </span>
 
-          <div role="tablist" aria-label="Work or study" style={{ display: 'inline-flex', background: 'var(--surface-2)', border: '1px solid var(--line-2)', borderRadius: 999, padding: 4, gap: 4, marginTop: 2 }}>
+          <div role="tablist" aria-label="Work or study" style={{ display: 'inline-flex', background: 'var(--surface-2)', border: '1px solid var(--line-2)', borderRadius: 999, padding: 3, gap: 4 }}>
             {(['work', 'study'] as Track[]).map(tr => (
               <button
                 key={tr}
@@ -212,7 +212,7 @@ export default function WorldMapPicker() {
                 aria-selected={track === tr}
                 onClick={() => setTrack(tr)}
                 style={{
-                  padding: '7px 18px', borderRadius: 999, border: 'none', fontSize: 13.5, fontWeight: 700, cursor: 'pointer',
+                  padding: '6px 16px', borderRadius: 999, border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer',
                   background: track === tr ? ACCENT : 'transparent',
                   color: track === tr ? 'var(--accent-ink)' : 'var(--ink-mute)',
                 }}
@@ -222,27 +222,27 @@ export default function WorldMapPicker() {
             ))}
           </div>
 
-          <h1 style={{ margin: '4px 0 0', fontFamily: 'var(--font-display)', fontSize: 'clamp(22px,3vw,30px)', fontWeight: 700, lineHeight: 1.15, maxWidth: 680 }}>
+          <h1 style={{ margin: '2px 0 0', fontFamily: 'var(--font-display)', fontSize: 'clamp(20px,2.6vw,26px)', fontWeight: 700, lineHeight: 1.15, maxWidth: 680 }}>
             {track === 'work' ? t.xH1Work : t.xH1Study}
           </h1>
-          <p style={{ margin: 0, maxWidth: 540, fontSize: 14, lineHeight: 1.5, color: 'var(--ink-mute)' }}>
+          <p style={{ margin: 0, maxWidth: 540, fontSize: 13.5, lineHeight: 1.45, color: 'var(--ink-mute)' }}>
             {track === 'work' ? t.xBodyWork : t.xBodyStudy}
           </p>
         </div>
 
         {/* Map + picker card */}
         <div style={{
-          background: 'var(--surface)', borderRadius: 24, padding: 'clamp(14px,2vw,22px)',
+          background: 'var(--surface)', borderRadius: 20, padding: 'clamp(10px,1.4vw,16px)',
           boxShadow: 'var(--shadow-1)', border: '1px solid var(--line)',
-          display: 'flex', flexDirection: 'column', gap: 16,
+          display: 'flex', flexDirection: 'column', gap: 12,
         }}>
-          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }} className="map-picker-grid">
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }} className="map-picker-grid">
             {/* Map (decorative/pointer enhancement — same state driven by the real buttons below).
                 Draggable/scroll-zoomable like any map UI; the +/-/reset buttons give a
                 keyboard-reachable, discoverable equivalent to the same pan/zoom state. */}
             <div className="map-picker-visual" style={{
               position: 'relative', flex: '1 1 420px', minWidth: 280, aspectRatio: `1000 / ${MAP_CROP_HEIGHT}`,
-              borderRadius: 16, overflow: 'hidden', background: 'var(--bg)',
+              borderRadius: 14, overflow: 'hidden', background: 'var(--bg)',
             }}>
               <svg
                 ref={svgRef}
@@ -310,10 +310,10 @@ export default function WorldMapPicker() {
                 present (not map-only), so every selection is keyboard/SR reachable
                 and works identically at phone width where the map itself is hidden
                 via CSS (.map-picker-grid media query below). */}
-            <div style={{ flex: '1 1 320px', minWidth: 260, display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ flex: '1 1 320px', minWidth: 260, display: 'flex', flexDirection: 'column', gap: 10 }}>
               <div>
-                <div style={{ fontSize: 11.5, color: 'var(--ink-faint)', fontWeight: 600, marginBottom: 8 }}>{t.xPickRegionPrompt}</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                <div style={{ fontSize: 11, color: 'var(--ink-faint)', fontWeight: 600, marginBottom: 6 }}>{t.xPickRegionPrompt}</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                   {REGION_ORDER.map(r => (
                     <button
                       key={r}
@@ -321,7 +321,7 @@ export default function WorldMapPicker() {
                       onClick={() => pickRegion(r)}
                       aria-pressed={region === r}
                       style={{
-                        padding: '8px 14px', borderRadius: 999, fontSize: 13.5, fontWeight: 600, cursor: 'pointer',
+                        padding: '6px 12px', borderRadius: 999, fontSize: 13, fontWeight: 600, cursor: 'pointer',
                         border: `1px solid ${region === r ? ACCENT : 'var(--line-2)'}`,
                         background: region === r ? 'var(--tint)' : 'var(--surface-2)',
                         color: region === r ? ACCENT : 'var(--ink-soft)',
@@ -334,9 +334,9 @@ export default function WorldMapPicker() {
               </div>
 
               <div>
-                <div style={{ fontSize: 11.5, color: 'var(--ink-faint)', fontWeight: 600, marginBottom: 8 }}>{t.xCountriesLabel}</div>
+                <div style={{ fontSize: 11, color: 'var(--ink-faint)', fontWeight: 600, marginBottom: 6 }}>{t.xCountriesLabel}</div>
                 {region ? (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, maxHeight: 160, overflowY: 'auto' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, maxHeight: 130, overflowY: 'auto' }}>
                     {COUNTRIES_BY_REGION[region].map(c => {
                       const selected = countries.includes(c.iso)
                       return (
