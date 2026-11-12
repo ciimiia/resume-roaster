@@ -171,11 +171,11 @@ export default function Navbar() {
     <header style={{
       position: 'sticky', top: 0, zIndex: 40,
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      padding: 'var(--sp-4) var(--gutter)',
+      padding: '10px var(--gutter)',
       background: 'color-mix(in srgb, var(--bg) 72%, transparent)',
       backdropFilter: 'blur(16px)', borderBottom: '1px solid var(--line)',
     }}>
-      <Logo />
+      <Logo size={26} />
 
       <nav style={{ display: 'flex', alignItems: 'center', gap: 4 }} className="nav-links">
         {links.slice(0, 2).map(link => {
