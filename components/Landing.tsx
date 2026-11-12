@@ -141,7 +141,7 @@ export default function Landing({ mode, setMode, onStart, roastedCount }: Landin
     sc[field]?.[lang as 'en' | 'fa'] || fallback
 
   return (
-    <div style={{ animation: 'fadeIn .5s both' }}>
+    <div style={{ animation: 'fadeIn .5s both', background: 'var(--bg)' }}>
       <WorldMapPicker />
       <EntryPaths onStartRoast={onStart} />
 

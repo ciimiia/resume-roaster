@@ -31,7 +31,8 @@ export default function EntryPaths({ onStartRoast }: { onStartRoast: () => void 
   const { t } = useLang()
 
   return (
-    <section style={{ maxWidth: 1180, margin: '0 auto', padding: '0 var(--gutter) clamp(32px,4vw,52px)' }}>
+    <section style={{ background: 'var(--bg)', maxWidth: '100%', margin: 0, padding: '0 0 clamp(32px,4vw,52px)' }}>
+      <div style={{ maxWidth: 1180, margin: '0 auto', padding: '0 var(--gutter)' }}>
       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
         <Card>
           <h3 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 700 }}>{t.xEntryUploadTitle}</h3>
@@ -80,6 +81,7 @@ export default function EntryPaths({ onStartRoast }: { onStartRoast: () => void 
             {t.xRoastCardBtn}
           </button>
         </Card>
+      </div>
       </div>
     </section>
   )

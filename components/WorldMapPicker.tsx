@@ -191,7 +191,7 @@ export default function WorldMapPicker() {
   }
 
   return (
-    <section id="explorer" style={{ position: 'relative', background: 'linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%)', padding: 'clamp(24px,4vw,44px) 0 clamp(36px,4vw,56px)' }}>
+    <section id="explorer" style={{ position: 'relative', background: 'var(--bg)', padding: 'clamp(24px,4vw,44px) 0 clamp(36px,4vw,56px)' }}>
       <div style={{ maxWidth: 1180, margin: '0 auto', padding: '0 var(--gutter)', display: 'flex', flexDirection: 'column', gap: 28, color: 'var(--ink)' }}>
 
         {/* Headline + track toggle */}
