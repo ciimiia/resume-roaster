@@ -3,7 +3,8 @@
 import { useCallback, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLang } from '@/lib/LangContext'
-import { WORLD_COUNTRIES, type WorldRegionId } from '@/lib/worldMapData'
+import { WORLD_COUNTRIES, projectLonLat, type WorldRegionId } from '@/lib/worldMapData'
+import { WORLD_CITIES } from '@/lib/worldCities'
 import { buildExplorerQueryString, type StudyLevel, type Track } from '@/lib/explorerQuery'
 
 const REGION_ORDER: WorldRegionId[] = ['north-america', 'latin-america', 'europe', 'africa', 'middle-east', 'asia', 'oceania']
@@ -35,6 +36,12 @@ const WIN_BOTTOM = MAP_CROP_TOP + MAP_CROP_HEIGHT
 const MAP_VIEWBOX = `0 ${MAP_CROP_TOP} ${FULL_W} ${MAP_CROP_HEIGHT}`
 const MIN_ZOOM = 1
 const MAX_ZOOM = 8
+
+// City dots fade in progressively as you zoom — tier 1 (major global
+// cities/capitals) first, tier 2 (everything else) once you're in further —
+// so the map doesn't look cluttered at the default zoomed-out view.
+const CITY_DOT_ZOOM: Record<1 | 2, number> = { 1: 1.8, 2: 3.4 }
+const CITY_LABEL_ZOOM: Record<1 | 2, number> = { 1: 2.8, 2: 4.6 }
 
 function clampNum(v: number, min: number, max: number) {
   return Math.min(max, Math.max(min, v))
@@ -279,6 +286,32 @@ export default function WorldMapPicker() {
                       />
                     )
                   })}
+
+                  {/* Cities — purely decorative/orientation aid, not interactive,
+                      so they never compete with the country <path> clicks above. */}
+                  <g style={{ pointerEvents: 'none' }}>
+                    {WORLD_CITIES.filter(city => zoom >= CITY_DOT_ZOOM[city.tier]).map(city => {
+                      const { x, y } = projectLonLat(city.lon, city.lat)
+                      const showLabel = zoom >= CITY_LABEL_ZOOM[city.tier]
+                      return (
+                        <g key={city.name}>
+                          <circle cx={x} cy={y} r={1.4 / zoom} fill="var(--accent)" stroke="var(--surface)" strokeWidth={0.4 / zoom} />
+                          {showLabel && (
+                            <text
+                              x={x + 3 / zoom}
+                              y={y + 1.6 / zoom}
+                              fontSize={5.5 / zoom}
+                              fontFamily="var(--font-mono)"
+                              fill="var(--ink)"
+                              style={{ paintOrder: 'stroke', stroke: 'var(--surface)', strokeWidth: 2.5 / zoom }}
+                            >
+                              {city.name}
+                            </text>
+                          )}
+                        </g>
+                      )
+                    })}
+                  </g>
                 </g>
               </svg>
 
