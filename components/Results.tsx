@@ -190,7 +190,7 @@ function SectionRow({ s, run, i }: { s: AnalysisResult['sections'][0]; run: bool
     <div style={{ padding: 'var(--sp-4) 0', borderBottom: '1px solid var(--line)', animation: run ? `fadeUp .5s ${0.1 + i * 0.07}s both` : 'none' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 'var(--sp-4)', marginBottom: 'var(--sp-2)' }}>
         <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 'var(--fs-md)' }}>{s.label}</span>
-        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'var(--fs-md)', color: s.score >= 75 ? 'var(--intl)' : s.score >= 55 ? 'var(--accent)' : 'var(--roast)' }}>
+        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'var(--fs-md)', color: s.score >= 75 ? 'var(--secondary)' : s.score >= 55 ? 'var(--accent)' : 'var(--danger)' }}>
           {s.score}<span style={{ color: 'var(--ink-faint)', fontSize: 13 }}>/100</span>
         </span>
       </div>
@@ -202,7 +202,7 @@ function SectionRow({ s, run, i }: { s: AnalysisResult['sections'][0]; run: bool
 
 /* ---- ListBlock ---- */
 function ListBlock({ icon, title, items, tone, run }: { icon: string; title: string; items: string[]; tone: 'win'|'fix'|'flag'; run: boolean }) {
-  const color = tone === 'win' ? 'var(--intl)' : tone === 'fix' ? 'var(--accent)' : 'var(--roast)'
+  const color = tone === 'win' ? 'var(--secondary)' : tone === 'fix' ? 'var(--accent)' : 'var(--danger)'
   return (
     <div style={cardStyle({ padding: 'var(--sp-6)' })}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-3)', marginBottom: 'var(--sp-4)' }}>
@@ -361,9 +361,9 @@ export default function Results({ mode, file, usingSample, result, onReanalyze, 
                   position: 'relative', marginTop: 10, width: '100%',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                   padding: '11px 18px', borderRadius: 'var(--r-md)', cursor: copying ? 'wait' : 'pointer',
-                  background: copied ? 'color-mix(in srgb, var(--intl) 14%, var(--surface-2))' : 'var(--surface-2)',
-                  border: `1px solid ${copied ? 'var(--intl)' : 'var(--line-2)'}`,
-                  color: copied ? 'var(--intl)' : 'var(--ink-mute)',
+                  background: copied ? 'color-mix(in srgb, var(--secondary) 14%, var(--surface-2))' : 'var(--surface-2)',
+                  border: `1px solid ${copied ? 'var(--secondary)' : 'var(--line-2)'}`,
+                  color: copied ? 'var(--secondary)' : 'var(--ink-mute)',
                   fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 14,
                   transition: 'all .2s',
                 }}

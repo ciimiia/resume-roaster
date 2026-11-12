@@ -17,7 +17,7 @@ export default function ScoreBar({ score, run = true, delay = 0 }: ScoreBarProps
     return () => clearTimeout(t)
   }, [score, run, delay])
 
-  const col = score >= 75 ? 'var(--intl)' : score >= 55 ? 'var(--accent)' : 'var(--roast)'
+  const col = score >= 75 ? 'var(--secondary)' : score >= 55 ? 'var(--accent)' : 'var(--danger)'
 
   return (
     <div style={{ height: 7, borderRadius: 99, background: 'var(--surface-3)', overflow: 'hidden', width: '100%' }}>

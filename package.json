@@ -35,8 +35,10 @@
     "test:passwordReset": "cross-env NODE_OPTIONS=--conditions=react-server tsx scripts/test-passwordReset.ts",
     "test:explorerQuery": "tsx scripts/test-explorerQuery.ts",
     "test:mapNoExternalNetwork": "tsx scripts/test-mapNoExternalNetwork.ts",
+    "test:contrastTokens": "tsx scripts/test-contrastTokens.ts",
+    "test:noHardcodedColors": "tsx scripts/test-noHardcodedColors.ts",
     "seed:jobSources": "tsx scripts/seedJobSources.ts",
-    "test:all": "npm run test:password && npm run test:fileValidation && npm run test:profileSchema && npm run test:ownership && npm run test:docxFixture && npm run test:promptInjection && npm run test:jobAdapters && npm run test:jobSanitize && npm run test:jobDedupeExpiry && npm run test:cronAuth && npm run test:matchingFilters && npm run test:rerankInjection && npm run test:matchingIntegration && npm run test:dbConnectRetry && npm run test:analyzeRateLimit && npm run test:tailoringGuard && npm run test:tailorInjection && npm run test:tailoringOwnership && npm run test:tailorPdf && npm run test:tailorCaps && npm run test:pdfRateLimit && npm run test:accountDeletionExport && npm run test:passwordReset && npm run test:explorerQuery && npm run test:mapNoExternalNetwork"
+    "test:all": "npm run test:password && npm run test:fileValidation && npm run test:profileSchema && npm run test:ownership && npm run test:docxFixture && npm run test:promptInjection && npm run test:jobAdapters && npm run test:jobSanitize && npm run test:jobDedupeExpiry && npm run test:cronAuth && npm run test:matchingFilters && npm run test:rerankInjection && npm run test:matchingIntegration && npm run test:dbConnectRetry && npm run test:analyzeRateLimit && npm run test:tailoringGuard && npm run test:tailorInjection && npm run test:tailoringOwnership && npm run test:tailorPdf && npm run test:tailorCaps && npm run test:pdfRateLimit && npm run test:accountDeletionExport && npm run test:passwordReset && npm run test:explorerQuery && npm run test:mapNoExternalNetwork && npm run test:contrastTokens && npm run test:noHardcodedColors"
   },
   "dependencies": {
     "@fontsource/vazirmatn": "^5.3.0",

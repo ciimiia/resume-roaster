@@ -49,18 +49,37 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-theme="roast">
+    <html lang="en">
       <head>
         {/*
           Load all fonts via a single <link> so the build never needs to reach
           fonts.gstatic.com. next/font/google fetches at build time and fails
-          in environments where Google Fonts is blocked/throttled.
+          in environments where Google Fonts is blocked/throttled. Vazirmatn
+          (Persian) is loaded here too, not injected dynamically on language
+          switch — it's available immediately, so FA text never has a moment
+          where it falls back to a Latin-only family while the font loads.
         */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Hanken+Grotesk:wght@400;500;600;700&family=Syne:wght@400;700;800&family=Inter:wght@400;500;600;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Hanken+Grotesk:wght@400;500;600;700&family=Syne:wght@400;700;800&family=Inter:wght@400;500;600;700&family=Vazirmatn:wght@400;500;600;700&display=swap"
           rel="stylesheet"
+        />
+        {/*
+          FOUC prevention: data-color-theme is normally set by
+          lib/ThemeContext.tsx's effect, which only runs after React
+          hydrates. :root already matches the default ("light") theme, so a
+          first-time visitor sees zero flash — but a returning visitor with
+          a stored "dark" preference would otherwise flash light-then-dark
+          for one frame. This tiny blocking script runs before first paint
+          and applies the stored preference synchronously, so there's never
+          a flash either way. Inline only (CSP already allows
+          script-src 'unsafe-inline'; no external request, nothing to fail).
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem('rr-theme');if(t==='dark')document.documentElement.setAttribute('data-color-theme','dark')}catch(e){}`,
+          }}
         />
       </head>
       <body>

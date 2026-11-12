@@ -98,7 +98,7 @@ function UniversitiesInner() {
                 <input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)} style={{ marginTop: 2 }} />
                 {t.uniConsentLabel}
               </label>
-              {error && <p style={{ color: 'var(--roast)', fontSize: 13 }}>{error}</p>}
+              {error && <p style={{ color: 'var(--danger)', fontSize: 13 }}>{error}</p>}
               <button type="submit" disabled={state === 'loading'} style={{
                 padding: '13px', borderRadius: 'var(--r-md)', border: 'none', cursor: state === 'loading' ? 'wait' : 'pointer',
                 background: 'var(--accent)', color: 'var(--accent-ink)', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15,

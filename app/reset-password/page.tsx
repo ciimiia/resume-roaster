@@ -73,12 +73,12 @@ function ResetPasswordForm() {
               <Link href="/signin" style={{ color: 'var(--accent)', fontSize: 14 }}>{t.authSignInLink}</Link>
             </>
           ) : !token ? (
-            <p style={{ fontSize: 14, color: 'var(--roast)' }}>{t.authResetErrorInvalidToken}</p>
+            <p style={{ fontSize: 14, color: 'var(--danger)' }}>{t.authResetErrorInvalidToken}</p>
           ) : (
             <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-5)' }}>
               <input type="password" required value={password} onChange={e => setPassword(e.target.value)} style={inp} autoComplete="new-password" placeholder={t.authPassword} />
               <input type="password" required value={confirm} onChange={e => setConfirm(e.target.value)} style={inp} autoComplete="new-password" placeholder={t.authConfirmPassword} />
-              {error && <div style={{ fontSize: 13, color: 'var(--roast)' }}>{error}</div>}
+              {error && <div style={{ fontSize: 13, color: 'var(--danger)' }}>{error}</div>}
               <button type="submit" disabled={loading} style={{
                 padding: '13px', borderRadius: 'var(--r-md)', border: 'none', cursor: loading ? 'wait' : 'pointer',
                 background: 'linear-gradient(140deg, var(--accent), var(--accent-2))',

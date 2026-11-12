@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import type { ModeId, Step, View, AnalysisResult } from '@/lib/types'
 import Landing from './Landing'
 import Workspace from './Workspace'
@@ -16,17 +16,6 @@ function AppInner({ roastedCount }: { roastedCount: number }) {
   const [file, setFile]             = useState<File | null>(null)
   const [usingSample, setUsingSample] = useState(false)
   const [result, setResult]         = useState<AnalysisResult | null>(null)
-
-  // data-theme is still set per mode (theme-unification kept this
-  // attribute rather than ripping it out, in case something keys off it
-  // later) but no CSS selector reassigns tokens from it anymore — the
-  // whole app uses one palette (globals.css's :root) now, with roast/
-  // coach/intl kept only as fixed semantic colors (danger/info/success)
-  // and the mode-selector cards' own accent (lib/data.ts's MODES.accent,
-  // not a CSS var).
-  useEffect(() => {
-    document.documentElement.dataset.theme = mode
-  }, [mode])
 
   const goWorkspace = () => {
     setStep('mode')

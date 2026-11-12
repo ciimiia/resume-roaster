@@ -111,7 +111,7 @@ function ContentTab({ posts }: { posts: PostWithSource[] }) {
             border: '1px solid color-mix(in srgb, var(--accent) 35%, transparent)',
           }}>{t.adminGenerated} {t.adminView}</Link>
         )}
-        {genError && <span style={{ fontSize: 13, color: 'var(--roast)' }}>{genError}</span>}
+        {genError && <span style={{ fontSize: 13, color: 'var(--danger)' }}>{genError}</span>}
       </div>
 
       {/* Posts table */}
@@ -167,10 +167,10 @@ function ContentTab({ posts }: { posts: PostWithSource[] }) {
                       onClick={() => deletePost(p.slug)}
                       disabled={deleting === p.slug}
                       style={{
-                        fontSize: 12, color: 'var(--roast)', cursor: 'pointer',
+                        fontSize: 12, color: 'var(--danger)', cursor: 'pointer',
                         padding: '6px 12px', borderRadius: 'var(--r-md)',
-                        border: '1px solid color-mix(in srgb, var(--roast) 30%, transparent)',
-                        background: 'color-mix(in srgb, var(--roast) 8%, transparent)',
+                        border: '1px solid color-mix(in srgb, var(--danger) 30%, transparent)',
+                        background: 'color-mix(in srgb, var(--danger) 8%, transparent)',
                         fontFamily: 'var(--font-mono)', transition: 'opacity .2s',
                         opacity: deleting === p.slug ? 0.5 : 1,
                       }}
@@ -347,8 +347,8 @@ interface JobSourceRow {
 const smallBtnStyle = (variant: 'default' | 'danger' = 'default'): React.CSSProperties => ({
   padding: '4px 10px', borderRadius: 6, cursor: 'pointer', fontSize: 11,
   fontFamily: 'var(--font-mono)', border: '1px solid var(--line-2)',
-  background: variant === 'danger' ? 'color-mix(in srgb, var(--roast) 10%, transparent)' : 'var(--surface-2)',
-  color: variant === 'danger' ? 'var(--roast)' : 'var(--ink-soft)',
+  background: variant === 'danger' ? 'color-mix(in srgb, var(--danger) 10%, transparent)' : 'var(--surface-2)',
+  color: variant === 'danger' ? 'var(--danger)' : 'var(--ink-soft)',
   whiteSpace: 'nowrap',
 })
 
@@ -458,7 +458,7 @@ function JobsTab() {
               {s.lastFetchedAt ? new Date(s.lastFetchedAt).toLocaleString(lang === 'fa' ? 'fa-IR' : 'en-US') : t.adminJobsNeverRun}
             </span>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--ink-soft)', opacity: s.enabled ? 1 : 0.5 }}>{s.activeJobCount}</span>
-            <span style={{ fontSize: 11, color: s.lastError ? 'var(--roast)' : 'var(--ink-faint)', opacity: s.enabled ? 1 : 0.5 }}>{s.lastError ?? '—'}</span>
+            <span style={{ fontSize: 11, color: s.lastError ? 'var(--danger)' : 'var(--ink-faint)', opacity: s.enabled ? 1 : 0.5 }}>{s.lastError ?? '—'}</span>
             <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', alignItems: 'center' }}>
               {rowMsg[s.id] && <span style={{ fontSize: 10, color: 'var(--ink-faint)' }}>{rowMsg[s.id]}</span>}
               <button disabled={rowBusy === s.id} onClick={() => toggleEnabled(s)} style={smallBtnStyle()}>
@@ -710,9 +710,9 @@ function SiteContentTab() {
               style={{
                 padding: '8px 20px', borderRadius: 'var(--r-md)',
                 background: saveState === 'saved'
-                  ? '#4DCC88'
+                  ? 'var(--secondary)'
                   : 'linear-gradient(140deg, var(--accent), var(--accent-2))',
-                color: saveState === 'saved' ? '#fff' : 'var(--accent-ink)',
+                color: saveState === 'saved' ? 'var(--secondary-ink)' : 'var(--accent-ink)',
                 border: 'none', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14,
                 cursor: saveState !== 'idle' ? 'default' : 'pointer',
                 transition: 'opacity .2s, background .3s', opacity: saveState === 'saving' ? 0.7 : 1,

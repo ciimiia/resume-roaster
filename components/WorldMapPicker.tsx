@@ -73,7 +73,7 @@ export default function WorldMapPicker() {
 
   const ready = countries.length > 0
   const ctaLabel = ready
-    ? t.xCtaReady.replace('{n}', String(countries.length)).replace('{countryWord}', countries.length === 1 ? t.xCountryWordOne : t.xCountryWordMany)
+    ? t.xCtaReady.replace('{n}', String(countries.length))
     : t.xCtaEmpty
 
   const submit = () => {
@@ -152,8 +152,8 @@ export default function WorldMapPicker() {
                     <path
                       key={c.iso + c.name}
                       d={c.d}
-                      fill={selected ? ACCENT : inActiveRegion ? 'var(--surface-3)' : 'var(--surface-2)'}
-                      stroke="var(--line-2)"
+                      fill={selected ? 'var(--map-selected)' : inActiveRegion ? 'var(--map-hover)' : 'var(--map-land)'}
+                      stroke="var(--map-line)"
                       strokeWidth={0.6}
                       strokeLinejoin="round"
                       onClick={() => toggleCountry(c.iso, c.region)}

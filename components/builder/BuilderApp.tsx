@@ -206,7 +206,7 @@ function StepExperience({ data, onChange }: { data: Experience[]; onChange: (d: 
               {t.builderJobLabel} {ei + 1}
             </span>
             <button onClick={() => remove(exp.id)} style={{ background: 'none', border: 'none', color: 'var(--ink-faint)', cursor: 'pointer', padding: 4 }}
-              onMouseEnter={e => (e.currentTarget.style.color = 'var(--roast)')}
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--danger)')}
               onMouseLeave={e => (e.currentTarget.style.color = 'var(--ink-faint)')}>
               <Icon name="x" size={16} />
             </button>
@@ -232,7 +232,7 @@ function StepExperience({ data, onChange }: { data: Experience[]; onChange: (d: 
                   <FocusTA value={b} onChange={e => setBullet(exp.id, bi, e.target.value)} placeholder="Increased revenue by 30% through..." style={{ minHeight: 60, flex: 1 }} />
                   {exp.bullets.length > 1 && (
                     <button onClick={() => removeBullet(exp.id, bi)} style={{ marginTop: 8, background: 'none', border: 'none', color: 'var(--ink-faint)', cursor: 'pointer' }}
-                      onMouseEnter={e => (e.currentTarget.style.color = 'var(--roast)')}
+                      onMouseEnter={e => (e.currentTarget.style.color = 'var(--danger)')}
                       onMouseLeave={e => (e.currentTarget.style.color = 'var(--ink-faint)')}>
                       <Icon name="x" size={14} />
                     </button>
@@ -278,7 +278,7 @@ function StepEducation({ data, onChange }: { data: Education[]; onChange: (d: Ed
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 15, color: 'var(--ink-soft)' }}>{t.builderEntryLabel} {ei + 1}</span>
             <button onClick={() => remove(edu.id)} style={{ background: 'none', border: 'none', color: 'var(--ink-faint)', cursor: 'pointer', padding: 4 }}
-              onMouseEnter={e => (e.currentTarget.style.color = 'var(--roast)')}
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--danger)')}
               onMouseLeave={e => (e.currentTarget.style.color = 'var(--ink-faint)')}>
               <Icon name="x" size={16} />
             </button>
@@ -343,7 +343,7 @@ function StepSkills({ data, onChange }: { data: string[]; onChange: (d: string[]
             {skill}
             <button onClick={() => onChange(data.filter(s => s !== skill))}
               style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--ink-mute)', display: 'flex', lineHeight: 1 }}
-              onMouseEnter={e => (e.currentTarget.style.color = 'var(--roast)')}
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--danger)')}
               onMouseLeave={e => (e.currentTarget.style.color = 'var(--ink-mute)')}>
               <Icon name="x" size={12} />
             </button>
@@ -362,7 +362,7 @@ function StepSkills({ data, onChange }: { data: string[]; onChange: (d: string[]
       {data.length > 0 && (
         <button onClick={() => onChange([])}
           style={{ alignSelf: 'flex-start', background: 'none', border: 'none', color: 'var(--ink-faint)', fontSize: 13, cursor: 'pointer', padding: 0 }}
-          onMouseEnter={e => (e.currentTarget.style.color = 'var(--roast)')}
+          onMouseEnter={e => (e.currentTarget.style.color = 'var(--danger)')}
           onMouseLeave={e => (e.currentTarget.style.color = 'var(--ink-faint)')}>
           {t.builderClearAll}
         </button>
@@ -550,7 +550,7 @@ export default function BuilderApp() {
         <div style={{ position: 'sticky', top: 90 }}>
           <div style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
             <span className="eyebrow">{t.builderLivePreview}</span>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--intl)', boxShadow: '0 0 6px var(--intl)', animation: 'blink 1.4s infinite' }} />
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--secondary)', boxShadow: '0 0 6px var(--secondary)', animation: 'blink 1.4s infinite' }} />
           </div>
           <ResumeDoc data={data} t={t} />
         </div>

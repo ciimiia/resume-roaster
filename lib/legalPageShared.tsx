@@ -23,9 +23,9 @@ export default function LegalPage({ title, sections }: { title: string; sections
           </h1>
           <div style={{
             padding: '14px 18px', borderRadius: 'var(--r-md)', fontSize: 13, lineHeight: 1.6,
-            background: 'color-mix(in srgb, var(--roast) 10%, var(--surface-2))',
-            border: '1px solid color-mix(in srgb, var(--roast) 30%, transparent)',
-            color: 'var(--roast)',
+            background: 'color-mix(in srgb, var(--danger) 10%, var(--surface-2))',
+            border: '1px solid color-mix(in srgb, var(--danger) 30%, transparent)',
+            color: 'var(--danger)',
           }}>
             {isLawyerBannerFa
               ? '⚠️ این صفحه پیش‌نویسه و مشاورهٔ حقوقی نیست. قبل از راه‌اندازی رسمی، باید یک وکیل این محتوا رو بررسی کنه — به‌خصوص برای کاربران اتحادیهٔ اروپا (GDPR).'

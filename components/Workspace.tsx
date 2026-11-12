@@ -123,7 +123,7 @@ function UploadZone({
       </div>
 
       {error && (
-        <div style={{ marginTop: 12, padding: '12px 18px', borderRadius: 'var(--r-sm)', background: 'color-mix(in srgb, var(--roast) 12%, transparent)', border: '1px solid color-mix(in srgb, var(--roast) 30%, transparent)', color: 'var(--roast)', fontSize: 14 }}>
+        <div style={{ marginTop: 12, padding: '12px 18px', borderRadius: 'var(--r-sm)', background: 'color-mix(in srgb, var(--danger) 12%, transparent)', border: '1px solid color-mix(in srgb, var(--danger) 30%, transparent)', color: 'var(--danger)', fontSize: 14 }}>
           {error}
         </div>
       )}

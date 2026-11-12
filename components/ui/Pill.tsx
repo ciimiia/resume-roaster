@@ -12,7 +12,7 @@ export default function Pill({ children, tone = 'mute', style }: PillProps) {
   const tones = {
     mute:   { color: 'var(--ink-mute)',  border: 'var(--line)',                                           bg: 'var(--surface)' },
     accent: { color: 'var(--accent)',    border: 'color-mix(in srgb, var(--accent) 35%, transparent)',   bg: 'color-mix(in srgb, var(--accent) 12%, transparent)' },
-    good:   { color: 'var(--intl)',      border: 'rgba(77,204,136,.3)',                                   bg: 'rgba(77,204,136,.1)' },
+    good:   { color: 'var(--secondary)', border: 'color-mix(in srgb, var(--secondary) 35%, transparent)', bg: 'color-mix(in srgb, var(--secondary) 12%, transparent)' },
   }[tone]
 
   return (

@@ -20,40 +20,17 @@ export function LangProvider({ children }: { children: ReactNode }) {
     if (stored === 'en' || stored === 'fa') setLangState(stored)
   }, [])
 
-  // Apply dir/lang/fonts whenever lang changes
+  // Apply dir/lang whenever lang changes. Fonts are NOT set here anymore —
+  // Vazirmatn is loaded once via the static Google Fonts <link> in
+  // app/layout.tsx (so it's available immediately, no FOUC/dynamic-insert),
+  // and globals.css's html[lang="fa"] selector repoints --font-display/
+  // --font-body/--font-mono at --font-fa (Vazirmatn) the instant `lang` is
+  // set below — every existing `fontFamily: var(--font-*)` usage in the
+  // app picks it up automatically, no component needs to know about it.
   useEffect(() => {
     const html = document.documentElement
-    if (lang === 'fa') {
-      html.lang = 'fa'
-      html.dir = 'rtl'
-      // Inject Vazirmatn once
-      if (!document.getElementById('vazirmatn-font')) {
-        const lp = document.createElement('link')
-        lp.id = 'vazirmatn-font'
-        lp.rel = 'preconnect'
-        lp.href = 'https://fonts.googleapis.com'
-        document.head.appendChild(lp)
-        const lp2 = document.createElement('link')
-        lp2.rel = 'preconnect'
-        lp2.href = 'https://fonts.gstatic.com'
-        lp2.crossOrigin = 'anonymous'
-        document.head.appendChild(lp2)
-        const link = document.createElement('link')
-        link.id = 'vazirmatn-font'
-        link.rel = 'stylesheet'
-        link.href = 'https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap'
-        document.head.appendChild(link)
-      }
-      html.style.setProperty('--font-display', "'Vazirmatn', system-ui, sans-serif")
-      html.style.setProperty('--font-body',    "'Vazirmatn', system-ui, sans-serif")
-      html.style.setProperty('--font-mono',    "'Vazirmatn', ui-monospace, monospace")
-    } else {
-      html.lang = 'en'
-      html.dir = 'ltr'
-      html.style.setProperty('--font-display', "'Space Grotesk', system-ui, sans-serif")
-      html.style.setProperty('--font-body',    "'Hanken Grotesk', system-ui, sans-serif")
-      html.style.setProperty('--font-mono',    "'Space Mono', ui-monospace, monospace")
-    }
+    html.lang = lang
+    html.dir = lang === 'fa' ? 'rtl' : 'ltr'
     localStorage.setItem('rr-lang', lang)
   }, [lang])
 

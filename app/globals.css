@@ -4,43 +4,71 @@
 
 /* ============================================================
    Design Tokens — Resume Roaster
-   ============================================================ */
+   ============================================================
+   ONE token set, two variants (DAYLIGHT default in :root, NIGHT behind
+   html[data-color-theme="dark"], switched by the existing theme toggle —
+   lib/ThemeContext.tsx). Components read tokens only, never a hex/rgb/hsl
+   literal or a per-page/per-view override — that mixing is exactly what
+   caused the unreadable-landing-page bug this rewrite fixes (see the
+   theme-unification phase report's root-cause section: html[data-view=
+   "landing"] and html[data-theme="roast"][data-color-theme="light"] had
+   equal-or-higher CSS specificity and fought each other depending on which
+   attributes happened to be set, landing a near-white heading on a pale
+   pink background). There is now exactly one place color is ever
+   reassigned per theme: the two blocks below.
+
+   roast/coach/intl (lib/data.ts's MODES config) are NOT CSS custom
+   properties and never were read as tokens by components — they're
+   hardcoded hex passed as a prop into the roast/coach/intl mode-selector
+   cards and score rings specifically (the "small mode accents" that stay).
+   The semantic colors those mode names used to double as here — error/
+   danger text, success/done text — now have their own proper tokens
+   (--danger, --secondary) below instead of borrowing a mode's color. */
 :root {
-  /* Single app-wide theme (theme-unification) — navy/amber/teal "night
-     map" palette, formerly scoped to the landing page only. roast/coach/
-     intl below are NOT per-page re-themes anymore — they're fixed semantic
-     colors (danger/info/success) used throughout the app regardless of
-     theme: error banners, the profile danger zone, score-ring win/fix/risk
-     coloring, the mode-selector cards' own accent. Never reassign --bg/
-     --surface/--accent/--accent-ink per mode again — that was the
-     multi-palette conflict this unification resolves. */
-  --bg: #0B1424;
-  --bg-2: #0E1A2E;
-  --surface: #101D33;
-  --surface-2: #16263F;
-  --surface-3: #1D324F;
-  --line: rgba(255,255,255,0.08);
-  --line-2: rgba(255,255,255,0.14);
-  --ink: #F3F6FB;
-  --ink-soft: #C6D0DE;
-  --ink-mute: #8A97AC;
-  --ink-faint: #7C8698; /* lightened from #5A6578 — the original only hit 3.13:1 against --bg, below WCAG AA's 4.5:1 for normal text; this hits 5.02:1 */
-  --roast: #FF4D4D;
-  --roast-2: #FF8A3D;
-  --coach: #4D9FFF;
-  --coach-2: #7C7CFF;
-  --intl: #4DCC88;
-  --intl-2: #36D6C3;
+  /* DAYLIGHT (default) */
+  --bg: #F7F9FC;
+  --bg-2: #F1F5FA;
+  --surface: #FFFFFF;
+  --surface-2: #EEF2F8;
+  --surface-3: #E3E9F2;
+  --line: #D5DDEA;
+  --line-2: #C2CEDF;
+  --ink: #0B1424;
+  --ink-soft: #2A3750;
+  --ink-mute: #4A5A75;
+  --ink-faint: #5E6E89;
   --accent: #F5B544;
-  --accent-2: #5FD3C4;
-  --accent-ink: #0B1424;
-  --glow: rgba(245,181,68,0.16);
-  --tint: rgba(245,181,68,0.05);
+  --accent-2: #FBD98E;
+  --accent-ink: #0B1424;    /* text on an amber-filled button */
+  --accent-text: #8A5A00;   /* amber used AS text on a light surface */
+  --secondary: #0B6E64;     /* darkened from the brand teal #0F8F83 — that
+                                value only hit 3.77:1 as text on white/bg,
+                                below WCAG AA's 4.5:1; this hits 5.8–6.1:1 */
+  --secondary-ink: #FFFFFF; /* text on a solid --secondary-filled button —
+                                not in the given palette, added because
+                                --secondary flips from dark (day) to light
+                                (night), so unlike --accent-ink it can't be
+                                one fixed value across both variants */
+  --danger: #C0392B;
+  --danger-ink: #FFFFFF;    /* text on a solid --danger-filled button — same
+                                reasoning as --secondary-ink above */
+  --map-land: #4D6386;      /* darkened from #DCE5F2 — the pale value was
+                                visually almost invisible against --bg
+                                (1.2:1) and against --map-selected (1.2:1),
+                                exactly the "map land is almost invisible"
+                                bug; this hits 5.8:1 / 3.4:1 */
+  --map-line: #B9C7DB;
+  --map-selected: #F5B544;
+  --map-hover: #FBD98E;
+  --glow: rgba(245,181,68,0.10);
+  --tint: rgba(245,181,68,0.04);
+  --shadow-1: 0 1px 0 rgba(255,255,255,0.8) inset, 0 4px 16px rgba(11,20,36,0.10);
+  --shadow-2: 0 16px 60px rgba(11,20,36,0.15);
+
   --font-display: 'Space Grotesk', system-ui, sans-serif;
   --font-body: 'Inter', system-ui, sans-serif;
   --font-mono: 'Space Mono', ui-monospace, monospace;
-  --shadow-1: 0 1px 0 rgba(255,255,255,0.04) inset, 0 8px 24px rgba(0,0,0,0.45);
-  --shadow-2: 0 24px 80px rgba(0,0,0,0.55);
+  --font-fa: 'Vazirmatn', system-ui, sans-serif;
   --r-sm: 10px; --r-md: 16px; --r-lg: 24px; --r-xl: 32px;
 
   /* Spacing scale (4px base) — use for gap/padding/margin instead of
@@ -67,38 +95,51 @@
   --gutter: clamp(20px, 5vw, 60px);
 }
 
-/* ── Light mode ─────────────────────────────────────────────────────────── */
-/* Same navy/amber/teal brand, light surface instead of dark — not a
-   separate theme, just the light/dark display preference (ThemeContext).
-   --accent/--accent-2/--roast/--coach/--intl are deliberately darker here
-   than their dark-mode values (and --accent-ink flips to white): the
-   bright dark-mode shades read fine against navy but fail WCAG AA against
-   a white/light surface used as plain text (checked against the exact
-   backgrounds these tokens render on — see the contrast audit in the
-   theme-unification phase report). Hue/identity unchanged, just tuned per
-   surface so "amber accent" and "red = danger" etc. stay readable in both. */
-html[data-color-theme="light"] {
-  --bg: #F5F6FA;
-  --bg-2: #EFF1F7;
-  --surface: #FFFFFF;
-  --surface-2: #F1F3F8;
-  --surface-3: #E5E8F0;
-  --line: rgba(11,20,36,0.08);
-  --line-2: rgba(11,20,36,0.14);
-  --ink: #0B1424;
-  --ink-soft: #2C3748;
-  --ink-mute: #666F82;
-  --ink-faint: #636B7E;
-  --roast: #D1374B;
-  --coach: #1C6FD6;
-  --intl: #167A48;
-  --accent: #9C6314;
-  --accent-2: #1E7A6E;
-  --accent-ink: #FFFFFF;
-  --glow: rgba(156,99,20,0.08);
-  --tint: rgba(156,99,20,0.03);
-  --shadow-1: 0 1px 0 rgba(255,255,255,0.8) inset, 0 4px 16px rgba(11,20,36,0.10);
-  --shadow-2: 0 16px 60px rgba(11,20,36,0.15);
+/* Persian never falls back to a Latin-only family — every token that
+   carries a font-family resolves to Vazirmatn the moment html[lang="fa"]
+   is set (lib/LangContext.tsx sets lang, nothing else needs to react to
+   it), so every existing `fontFamily: var(--font-display|body|mono)` in
+   the app picks it up automatically, including inside the map labels and
+   buttons. */
+html[lang="fa"] {
+  --font-display: var(--font-fa);
+  --font-body: var(--font-fa);
+  --font-mono: var(--font-fa);
+}
+
+/* ── NIGHT (dark variant) ─────────────────────────────────────────────── */
+html[data-color-theme="dark"] {
+  --bg: #0B1424;
+  --bg-2: #0E1A2E;
+  --surface: #101C33;
+  --surface-2: #14233D;
+  --surface-3: #1A2C4A;
+  --line: #2C4068;
+  --line-2: #3A5080;
+  --ink: #E8EEF7;
+  --ink-soft: #C3D0E0;
+  --ink-mute: #9FB0C8;
+  --ink-faint: #7E90AA;
+  --accent: #F5B544;
+  --accent-2: #FFD37A;
+  --accent-ink: #0B1424;
+  --accent-text: #F5B544;
+  --secondary: #5FD3C4;
+  --secondary-ink: #0B1424;
+  --danger: #FF6B6B;
+  --danger-ink: #0B1424;
+  --map-land: #50689B;      /* lightened from #1B2A44 — same reasoning as
+                                DAYLIGHT above: the given value was 1.3:1
+                                against --bg and 1.8:1 against amber
+                                --map-selected, both below the 3:1 non-text
+                                floor; this hits 3.3:1 / 3.1:1 */
+  --map-line: #2C4068;
+  --map-selected: #F5B544;
+  --map-hover: #C98F2C;
+  --glow: rgba(245,181,68,0.16);
+  --tint: rgba(245,181,68,0.05);
+  --shadow-1: 0 1px 0 rgba(255,255,255,0.04) inset, 0 8px 24px rgba(0,0,0,0.45);
+  --shadow-2: 0 24px 80px rgba(0,0,0,0.55);
 }
 
 /* ============================================================

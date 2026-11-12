@@ -156,7 +156,7 @@ export default function TailorClient() {
                   style={{ width: '100%', padding: '10px 14px', borderRadius: 'var(--r-md)', border: '1px solid var(--line-2)', background: 'var(--surface-2)', color: 'var(--ink)', fontFamily: 'inherit', resize: 'vertical' }} />
               </>
             )}
-            {error && <div style={{ fontSize: 13, color: 'var(--roast)', marginTop: 12 }}>{error}</div>}
+            {error && <div style={{ fontSize: 13, color: 'var(--danger)', marginTop: 12 }}>{error}</div>}
             <div style={{ marginTop: 16 }}>
               <Button onClick={runTailor} disabled={running || (!jobId && pasteText.trim().length < 40)} icon="bolt">
                 {running ? t.tailorRunning : t.tailorSubmitBtn}
@@ -172,8 +172,8 @@ export default function TailorClient() {
             </div>
 
             {result.flags.length > 0 ? (
-              <div style={cardStyle({ padding: '16px 20px', marginBottom: 16, border: '1px solid var(--roast)' })}>
-                <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--roast)', marginBottom: 8 }}>{t.tailorFlagsTitle}</div>
+              <div style={cardStyle({ padding: '16px 20px', marginBottom: 16, border: '1px solid var(--danger)' })}>
+                <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--danger)', marginBottom: 8 }}>{t.tailorFlagsTitle}</div>
                 {result.flags.map((f, i) => (
                   <div key={i} style={{ fontSize: 12.5, marginBottom: 6 }}>
                     <strong>{f.location}:</strong> {f.message}
@@ -181,7 +181,7 @@ export default function TailorClient() {
                 ))}
               </div>
             ) : (
-              <div style={{ fontSize: 12.5, color: 'var(--intl)', marginBottom: 16 }}>{t.tailorFlagsNone}</div>
+              <div style={{ fontSize: 12.5, color: 'var(--secondary)', marginBottom: 16 }}>{t.tailorFlagsNone}</div>
             )}
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
@@ -228,7 +228,7 @@ export default function TailorClient() {
                 {coverLetterRunning ? t.tailorCoverLetterRunning : t.tailorCoverLetterBtn}
               </Button>
             </div>
-            {resumePdfError && <div style={{ fontSize: 12.5, color: 'var(--roast)', marginTop: -8, marginBottom: 16 }}>{resumePdfError}</div>}
+            {resumePdfError && <div style={{ fontSize: 12.5, color: 'var(--danger)', marginTop: -8, marginBottom: 16 }}>{resumePdfError}</div>}
 
             {coverLetter && (
               <div style={cardStyle({ padding: '18px' })}>
@@ -239,7 +239,7 @@ export default function TailorClient() {
                     {coverLetterPdfLoading ? t.tailorPdfPreparing : t.tailorDownloadPdfBtn}
                   </Button>
                 </div>
-                {coverLetterPdfError && <div style={{ fontSize: 12.5, color: 'var(--roast)', marginTop: 8 }}>{coverLetterPdfError}</div>}
+                {coverLetterPdfError && <div style={{ fontSize: 12.5, color: 'var(--danger)', marginTop: 8 }}>{coverLetterPdfError}</div>}
               </div>
             )}
           </>
