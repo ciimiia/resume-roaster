@@ -40,8 +40,17 @@ const MAX_ZOOM = 8
 // City dots fade in progressively as you zoom — tier 1 (major global
 // cities/capitals) first, tier 2 (everything else) once you're in further —
 // so the map doesn't look cluttered at the default zoomed-out view.
-const CITY_DOT_ZOOM: Record<1 | 2, number> = { 1: 1.8, 2: 3.4 }
-const CITY_LABEL_ZOOM: Record<1 | 2, number> = { 1: 2.8, 2: 4.6 }
+//
+// A region's auto-framed zoom (frameRegion, 0.7x padding) varies a lot by
+// how wide that region's bounding box is — wide regions like Latin America
+// or Africa frame at barely above MIN_ZOOM, narrow ones like the Middle
+// East frame as high as ~2.75 — so gating tier-1 visibility on raw `zoom`
+// alone meant picking a wide region never revealed any cities at all. Tier
+// 1 instead uses an "effective zoom" that's floored at REGION_ZOOM_FLOOR
+// the moment any region is selected, regardless of its actual framed zoom.
+const CITY_DOT_ZOOM: Record<1 | 2, number> = { 1: 1.15, 2: 2 }
+const CITY_LABEL_ZOOM: Record<1 | 2, number> = { 1: 1.3, 2: 3 }
+const REGION_ZOOM_FLOOR = 1.3
 
 function clampNum(v: number, min: number, max: number) {
   return Math.min(max, Math.max(min, v))
@@ -294,9 +303,13 @@ export default function WorldMapPicker() {
                       they stay a constant thin line, city markers are meant to
                       grow more prominent as you zoom in, the way map pins do. */}
                   <g style={{ pointerEvents: 'none' }}>
-                    {WORLD_CITIES.filter(city => zoom >= CITY_DOT_ZOOM[city.tier]).map(city => {
+                    {WORLD_CITIES.filter(city => {
+                      const z = city.tier === 1 ? Math.max(zoom, region ? REGION_ZOOM_FLOOR : MIN_ZOOM) : zoom
+                      return z >= CITY_DOT_ZOOM[city.tier]
+                    }).map(city => {
                       const { x, y } = projectLonLat(city.lon, city.lat)
-                      const showLabel = zoom >= CITY_LABEL_ZOOM[city.tier]
+                      const z = city.tier === 1 ? Math.max(zoom, region ? REGION_ZOOM_FLOOR : MIN_ZOOM) : zoom
+                      const showLabel = z >= CITY_LABEL_ZOOM[city.tier]
                       return (
                         <g key={city.name}>
                           <circle cx={x} cy={y} r={1.3} fill="var(--accent)" stroke="var(--surface)" strokeWidth={0.5} />
