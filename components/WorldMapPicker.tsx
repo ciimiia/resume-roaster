@@ -191,19 +191,19 @@ export default function WorldMapPicker() {
   }
 
   return (
-    <section id="explorer" style={{ position: 'relative', background: 'var(--bg)', padding: 'clamp(24px,4vw,44px) 0 clamp(36px,4vw,56px)' }}>
-      <div style={{ maxWidth: 1180, margin: '0 auto', padding: '0 var(--gutter)', display: 'flex', flexDirection: 'column', gap: 28, color: 'var(--ink)' }}>
+    <section id="explorer" style={{ position: 'relative', background: 'var(--bg)', padding: 'clamp(10px,1.6vw,20px) 0 clamp(20px,3vw,32px)' }}>
+      <div style={{ maxWidth: 1180, margin: '0 auto', padding: '0 var(--gutter)', display: 'flex', flexDirection: 'column', gap: 18, color: 'var(--ink)' }}>
 
         {/* Headline + track toggle */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, textAlign: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, textAlign: 'center' }}>
           <span style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 999,
-            background: 'var(--tint)', border: '1px solid var(--line-2)', color: ACCENT, fontSize: 12.5, fontWeight: 600,
+            display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 999,
+            background: 'var(--tint)', border: '1px solid var(--line-2)', color: ACCENT, fontSize: 12, fontWeight: 600,
           }}>
             {t.xBadge}
           </span>
 
-          <div role="tablist" aria-label="Work or study" style={{ display: 'inline-flex', background: 'var(--surface-2)', border: '1px solid var(--line-2)', borderRadius: 999, padding: 4, gap: 4 }}>
+          <div role="tablist" aria-label="Work or study" style={{ display: 'inline-flex', background: 'var(--surface-2)', border: '1px solid var(--line-2)', borderRadius: 999, padding: 4, gap: 4, marginTop: 2 }}>
             {(['work', 'study'] as Track[]).map(tr => (
               <button
                 key={tr}
@@ -212,7 +212,7 @@ export default function WorldMapPicker() {
                 aria-selected={track === tr}
                 onClick={() => setTrack(tr)}
                 style={{
-                  padding: '9px 20px', borderRadius: 999, border: 'none', fontSize: 14, fontWeight: 700, cursor: 'pointer',
+                  padding: '7px 18px', borderRadius: 999, border: 'none', fontSize: 13.5, fontWeight: 700, cursor: 'pointer',
                   background: track === tr ? ACCENT : 'transparent',
                   color: track === tr ? 'var(--accent-ink)' : 'var(--ink-mute)',
                 }}
@@ -222,10 +222,10 @@ export default function WorldMapPicker() {
             ))}
           </div>
 
-          <h1 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: 'clamp(24px,3.4vw,34px)', fontWeight: 700, lineHeight: 1.15, maxWidth: 680 }}>
+          <h1 style={{ margin: '4px 0 0', fontFamily: 'var(--font-display)', fontSize: 'clamp(22px,3vw,30px)', fontWeight: 700, lineHeight: 1.15, maxWidth: 680 }}>
             {track === 'work' ? t.xH1Work : t.xH1Study}
           </h1>
-          <p style={{ margin: 0, maxWidth: 540, fontSize: 14.5, lineHeight: 1.55, color: 'var(--ink-mute)' }}>
+          <p style={{ margin: 0, maxWidth: 540, fontSize: 14, lineHeight: 1.5, color: 'var(--ink-mute)' }}>
             {track === 'work' ? t.xBodyWork : t.xBodyStudy}
           </p>
         </div>
