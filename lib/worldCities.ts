@@ -270,4 +270,26 @@ export const WORLD_CITIES: WorldCity[] = [
   { name: 'Busan', lon: 129.05, lat: 35.1, tier: 2 },
   { name: 'Surabaya', lon: 112.75, lat: -7.25, tier: 2 },
   { name: 'Cebu City', lon: 123.9, lat: 10.3, tier: 2 },
+
+  // The first non-capital pass above was skewed toward the Americas, Europe
+  // and East/South Asia — these fill in the same gap (one dot per country)
+  // for the Middle East, Central Asia and Africa.
+  { name: 'Mashhad', lon: 59.6, lat: 36.3, tier: 2 },
+  { name: 'Isfahan', lon: 51.7, lat: 32.65, tier: 2 },
+  { name: 'Basra', lon: 47.8, lat: 30.5, tier: 2 },
+  { name: 'Aleppo', lon: 37.15, lat: 36.2, tier: 2 },
+  { name: 'Aden', lon: 45.0, lat: 12.8, tier: 2 },
+  { name: 'Samarkand', lon: 66.95, lat: 39.65, tier: 2 },
+  { name: 'Kandahar', lon: 65.7, lat: 31.6, tier: 2 },
+  { name: 'Chittagong', lon: 91.8, lat: 22.35, tier: 2 },
+  { name: 'Kraków', lon: 19.95, lat: 50.05, tier: 2 },
+  { name: 'Odesa', lon: 30.7, lat: 46.5, tier: 2 },
+  { name: 'Porto', lon: -8.6, lat: 41.15, tier: 2 },
+  { name: 'Arequipa', lon: -71.5, lat: -16.4, tier: 2 },
+  { name: 'Guayaquil', lon: -79.9, lat: -2.2, tier: 2 },
+  { name: 'Maracaibo', lon: -71.65, lat: 10.65, tier: 2 },
+  { name: 'Abidjan', lon: -4.0, lat: 5.35, tier: 2 },
+  { name: 'Douala', lon: 9.7, lat: 4.05, tier: 2 },
+  { name: 'Kumasi', lon: -1.6, lat: 6.7, tier: 2 },
+  { name: 'Lubumbashi', lon: 27.5, lat: -11.65, tier: 2 },
 ]
