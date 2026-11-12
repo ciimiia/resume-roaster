@@ -288,22 +288,26 @@ export default function WorldMapPicker() {
                   })}
 
                   {/* Cities — purely decorative/orientation aid, not interactive,
-                      so they never compete with the country <path> clicks above. */}
+                      so they never compete with the country <path> clicks above.
+                      Sizes are in the <g>'s own (unscaled-by-zoom) local units —
+                      unlike the country borders above, which divide by zoom so
+                      they stay a constant thin line, city markers are meant to
+                      grow more prominent as you zoom in, the way map pins do. */}
                   <g style={{ pointerEvents: 'none' }}>
                     {WORLD_CITIES.filter(city => zoom >= CITY_DOT_ZOOM[city.tier]).map(city => {
                       const { x, y } = projectLonLat(city.lon, city.lat)
                       const showLabel = zoom >= CITY_LABEL_ZOOM[city.tier]
                       return (
                         <g key={city.name}>
-                          <circle cx={x} cy={y} r={1.4 / zoom} fill="var(--accent)" stroke="var(--surface)" strokeWidth={0.4 / zoom} />
+                          <circle cx={x} cy={y} r={1.3} fill="var(--accent)" stroke="var(--surface)" strokeWidth={0.5} />
                           {showLabel && (
                             <text
-                              x={x + 3 / zoom}
-                              y={y + 1.6 / zoom}
-                              fontSize={5.5 / zoom}
+                              x={x + 3}
+                              y={y + 1.8}
+                              fontSize={4.5}
                               fontFamily="var(--font-mono)"
                               fill="var(--ink)"
-                              style={{ paintOrder: 'stroke', stroke: 'var(--surface)', strokeWidth: 2.5 / zoom }}
+                              style={{ paintOrder: 'stroke', stroke: 'var(--surface)', strokeWidth: 1.6 }}
                             >
                               {city.name}
                             </text>
