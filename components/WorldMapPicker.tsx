@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLang } from '@/lib/LangContext'
 import { WORLD_COUNTRIES, type WorldRegionId } from '@/lib/worldMapData'
@@ -8,24 +8,46 @@ import { buildExplorerQueryString, type StudyLevel, type Track } from '@/lib/exp
 
 const REGION_ORDER: WorldRegionId[] = ['north-america', 'latin-america', 'europe', 'africa', 'middle-east', 'asia', 'oceania']
 
-// Rough bounding boxes in the same projected space as WORLD_COUNTRIES
-// (x: 0-1000, y: 0-500) — used only to pick a CSS transform-origin for the
-// "zoom toward this region" effect; not meant to be pixel-exact.
-const REGION_BBOX_CENTER: Record<WorldRegionId, { x: number; y: number }> = {
-  'north-america': { x: 19, y: 28 },
-  'latin-america': { x: 28, y: 56 },
-  europe: { x: 53, y: 21 },
-  africa: { x: 54, y: 49 },
-  'middle-east': { x: 62, y: 35 },
-  asia: { x: 79, y: 38 },
-  oceania: { x: 90, y: 65 },
+// Rough bounding boxes in the full, uncropped projected space (x: 0-1000,
+// y: 0-500) that WORLD_COUNTRIES' paths are drawn in — used to frame a
+// region when it's clicked (center it, zoom to fit it with some margin).
+// Not meant to be pixel-exact.
+const REGION_BBOX: Record<WorldRegionId, { x1: number; y1: number; x2: number; y2: number }> = {
+  'north-america': { x1: 28, y1: 42, x2: 361, y2: 236 },
+  'latin-america': { x1: 167, y1: 158, x2: 403, y2: 406 },
+  europe: { x1: 431, y1: 50, x2: 625, y2: 156 },
+  africa: { x1: 444, y1: 144, x2: 644, y2: 347 },
+  'middle-east': { x1: 569, y1: 133, x2: 675, y2: 217 },
+  asia: { x1: 667, y1: 97, x2: 917, y2: 278 },
+  oceania: { x1: 806, y1: 250, x2: 1000, y2: 381 },
 }
 
-// Cropped viewBox — drops the mostly-empty Arctic/Antarctic bands from the
-// full "0 0 1000 500" projection so the map reads wider/shorter.
+// The fixed OUTER viewBox/window — what's visible at zoom=1, pan=(0,0).
+// Content (WORLD_COUNTRIES' paths) spans the full "0 0 1000 500" projection;
+// this window only shows a band of it (drops the mostly-empty Arctic/
+// Antarctic area) by default, but panning while zoomed in can reveal the
+// rest — the crop is just the starting view, not a hard limit on content.
+const FULL_W = 1000
+const FULL_H = 500
 const MAP_CROP_TOP = 20
 const MAP_CROP_HEIGHT = 400
-const MAP_VIEWBOX = `0 ${MAP_CROP_TOP} 1000 ${MAP_CROP_HEIGHT}`
+const WIN_BOTTOM = MAP_CROP_TOP + MAP_CROP_HEIGHT
+const MAP_VIEWBOX = `0 ${MAP_CROP_TOP} ${FULL_W} ${MAP_CROP_HEIGHT}`
+const MIN_ZOOM = 1
+const MAX_ZOOM = 8
+
+function clampNum(v: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, v))
+}
+
+// A pan offset this far out would show empty space beyond the content —
+// clamp it back so the map never "runs out" under the cursor/finger.
+function clampPan(pan: { x: number; y: number }, zoom: number) {
+  return {
+    x: clampNum(pan.x, FULL_W * (1 - zoom), 0),
+    y: clampNum(pan.y, WIN_BOTTOM - FULL_H * zoom, MAP_CROP_TOP),
+  }
+}
 
 const COUNTRIES_BY_REGION: Record<WorldRegionId, { iso: string; name: string }[]> = (() => {
   const map = {} as Record<WorldRegionId, { iso: string; name: string }[]>
@@ -58,18 +80,87 @@ export default function WorldMapPicker() {
     oceania: t.xRegionOceania,
   })[r]
 
+  // Pan/zoom: a fixed outer <svg viewBox> (MAP_VIEWBOX) never changes — a
+  // <g transform="translate(...) scale(...)"> inside it does the actual
+  // panning/zooming, in the same coordinate units as the viewBox, which is
+  // what lets wheel-zoom, drag-to-pan and "frame this region" all share one
+  // simple (zoom, pan) state instead of three different mechanisms.
+  const [zoom, setZoom] = useState(1)
+  const [pan, setPan] = useState({ x: 0, y: 0 })
+  const [dragging, setDragging] = useState(false)
+  const svgRef = useRef<SVGSVGElement>(null)
+  const dragRef = useRef<{ startX: number; startY: number; startPan: { x: number; y: number } } | null>(null)
+
+  const screenDeltaToViewBox = useCallback((dx: number, dy: number) => {
+    const rect = svgRef.current?.getBoundingClientRect()
+    if (!rect || rect.width === 0 || rect.height === 0) return { x: 0, y: 0 }
+    return { x: dx * (FULL_W / rect.width), y: dy * (MAP_CROP_HEIGHT / rect.height) }
+  }, [])
+
+  const zoomAround = useCallback((focal: { x: number; y: number }, newZoom: number) => {
+    setZoom(z => {
+      const k1 = clampNum(newZoom, MIN_ZOOM, MAX_ZOOM)
+      setPan(p => {
+        // Point under `focal` (in outer-window coords) stays fixed: solve
+        // for the new pan given the same content-space point under it.
+        const contentX = (focal.x - p.x) / z
+        const contentY = (focal.y - p.y) / z
+        return clampPan({ x: focal.x - contentX * k1, y: focal.y - contentY * k1 }, k1)
+      })
+      return k1
+    })
+  }, [])
+
+  const onWheel = (e: React.WheelEvent<SVGSVGElement>) => {
+    e.preventDefault()
+    const rect = e.currentTarget.getBoundingClientRect()
+    if (rect.width === 0 || rect.height === 0) return
+    const focal = {
+      x: (e.clientX - rect.left) * (FULL_W / rect.width),
+      y: MAP_CROP_TOP + (e.clientY - rect.top) * (MAP_CROP_HEIGHT / rect.height),
+    }
+    zoomAround(focal, zoom * (e.deltaY < 0 ? 1.15 : 1 / 1.15))
+  }
+
+  const onPointerDown = (e: React.PointerEvent<SVGSVGElement>) => {
+    if (zoom <= MIN_ZOOM) return
+    e.currentTarget.setPointerCapture(e.pointerId)
+    dragRef.current = { startX: e.clientX, startY: e.clientY, startPan: pan }
+    setDragging(true)
+  }
+  const onPointerMove = (e: React.PointerEvent<SVGSVGElement>) => {
+    if (!dragRef.current) return
+    const d = screenDeltaToViewBox(e.clientX - dragRef.current.startX, e.clientY - dragRef.current.startY)
+    setPan(clampPan({ x: dragRef.current.startPan.x + d.x, y: dragRef.current.startPan.y + d.y }, zoom))
+  }
+  const endDrag = () => { dragRef.current = null; setDragging(false) }
+
+  const windowCenter = { x: FULL_W / 2, y: MAP_CROP_TOP + MAP_CROP_HEIGHT / 2 }
+  const zoomIn = () => zoomAround(windowCenter, zoom * 1.4)
+  const zoomOut = () => zoomAround(windowCenter, zoom / 1.4)
+  const resetView = () => { setZoom(1); setPan({ x: 0, y: 0 }) }
+
+  const frameRegion = (r: WorldRegionId) => {
+    const b = REGION_BBOX[r]
+    const w = b.x2 - b.x1
+    const h = b.y2 - b.y1
+    const k = clampNum(Math.min(FULL_W / w, MAP_CROP_HEIGHT / h) * 0.7, MIN_ZOOM, MAX_ZOOM)
+    const centerX = (b.x1 + b.x2) / 2
+    const centerY = (b.y1 + b.y2) / 2
+    setZoom(k)
+    setPan(clampPan({ x: windowCenter.x - centerX * k, y: windowCenter.y - centerY * k }, k))
+  }
+
+  const pickRegion = (r: WorldRegionId) => {
+    setRegion(r)
+    frameRegion(r)
+  }
+
   const toggleCountry = (iso: string, countryRegion: WorldRegionId) => {
+    if (countryRegion !== region) frameRegion(countryRegion)
     setRegion(countryRegion)
     setCountries(cs => (cs.includes(iso) ? cs.filter(c => c !== iso) : [...cs, iso]))
   }
-
-  const pickRegion = (r: WorldRegionId) => setRegion(r)
-
-  const mapTransform = useMemo(() => {
-    if (!region) return { origin: '50% 50%', scale: 1 }
-    const c = REGION_BBOX_CENTER[region]
-    return { origin: `${c.x}% ${c.y}%`, scale: 2.1 }
-  }, [region])
 
   const ready = countries.length > 0
   const ctaLabel = ready
@@ -131,37 +222,73 @@ export default function WorldMapPicker() {
           display: 'flex', flexDirection: 'column', gap: 16,
         }}>
           <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }} className="map-picker-grid">
-            {/* Map (decorative/pointer enhancement — same state driven by the real buttons below) */}
+            {/* Map (decorative/pointer enhancement — same state driven by the real buttons below).
+                Draggable/scroll-zoomable like any map UI; the +/-/reset buttons give a
+                keyboard-reachable, discoverable equivalent to the same pan/zoom state. */}
             <div className="map-picker-visual" style={{
               position: 'relative', flex: '1 1 420px', minWidth: 280, aspectRatio: `1000 / ${MAP_CROP_HEIGHT}`,
               borderRadius: 16, overflow: 'hidden', background: 'var(--bg)',
             }}>
               <svg
+                ref={svgRef}
                 viewBox={MAP_VIEWBOX}
                 aria-hidden="true"
+                onWheel={onWheel}
+                onPointerDown={onPointerDown}
+                onPointerMove={onPointerMove}
+                onPointerUp={endDrag}
+                onPointerLeave={endDrag}
+                onPointerCancel={endDrag}
                 style={{
                   position: 'absolute', inset: 0, width: '100%', height: '100%',
-                  transformOrigin: mapTransform.origin, transform: `scale(${mapTransform.scale})`,
-                  transition: 'transform .5s cubic-bezier(.16,1,.3,1)',
+                  touchAction: 'none', cursor: dragging ? 'grabbing' : zoom > MIN_ZOOM ? 'grab' : 'default',
                 }}
               >
-                {WORLD_COUNTRIES.map(c => {
-                  const selected = countries.includes(c.iso)
-                  const inActiveRegion = region === c.region
-                  return (
-                    <path
-                      key={c.iso + c.name}
-                      d={c.d}
-                      fill={selected ? 'var(--map-selected)' : inActiveRegion ? 'var(--map-hover)' : 'var(--map-land)'}
-                      stroke="var(--map-line)"
-                      strokeWidth={0.6}
-                      strokeLinejoin="round"
-                      onClick={() => toggleCountry(c.iso, c.region)}
-                      style={{ cursor: 'pointer' }}
-                    />
-                  )
-                })}
+                <g style={{
+                  transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+                  transition: dragging ? 'none' : 'transform .45s cubic-bezier(.16,1,.3,1)',
+                }}>
+                  {WORLD_COUNTRIES.map(c => {
+                    const selected = countries.includes(c.iso)
+                    const inActiveRegion = region === c.region
+                    return (
+                      <path
+                        key={c.iso + c.name}
+                        d={c.d}
+                        fill={selected ? 'var(--map-selected)' : inActiveRegion ? 'var(--map-hover)' : 'var(--map-land)'}
+                        stroke="var(--map-line)"
+                        strokeWidth={0.6 / zoom}
+                        strokeLinejoin="round"
+                        onClick={() => toggleCountry(c.iso, c.region)}
+                        style={{ cursor: 'pointer' }}
+                      />
+                    )
+                  })}
+                </g>
               </svg>
+
+              <div style={{ position: 'absolute', bottom: 10, insetInlineEnd: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {[
+                  { label: '+', action: zoomIn, title: 'Zoom in' },
+                  { label: '−', action: zoomOut, title: 'Zoom out' },
+                  { label: '⟲', action: resetView, title: 'Reset view' },
+                ].map(b => (
+                  <button
+                    key={b.title}
+                    type="button"
+                    onClick={b.action}
+                    title={b.title}
+                    aria-label={b.title}
+                    style={{
+                      width: 30, height: 30, borderRadius: 8, border: '1px solid var(--line-2)',
+                      background: 'var(--surface)', color: 'var(--ink)', fontSize: 16, lineHeight: 1,
+                      display: 'grid', placeItems: 'center', cursor: 'pointer', boxShadow: 'var(--shadow-1)',
+                    }}
+                  >
+                    {b.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Real buttons — regions, then countries of the active region. Always
