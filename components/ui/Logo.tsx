@@ -1,5 +1,7 @@
 'use client'
 
+import Image from 'next/image'
+import { useTheme } from '@/lib/ThemeContext'
 import { PRODUCT } from '@/lib/config'
 
 interface LogoProps {
@@ -7,33 +9,35 @@ interface LogoProps {
   onClick?: () => void
 }
 
-// The mark is a plain placeholder box until a real logo asset replaces it —
-// no emoji, since the previous 🔥 was a literal pun on the old name
-// ("Roaster") that doesn't carry over.
+// The real logo (public/logo.png) — mark + "michi ai" wordmark baked
+// together into one image at a 395:256 aspect ratio. `size` is the
+// rendered height; width follows that ratio.
+const ASPECT = 395 / 256
+
 export default function Logo({ size = 30, onClick }: LogoProps) {
-  const [first, ...rest] = PRODUCT.name.split(' ')
+  const { theme } = useTheme()
+  const height = size * 1.3
   return (
     <div
       onClick={onClick}
-      style={{
-        display: 'flex', alignItems: 'center', gap: 11,
-        cursor: onClick ? 'pointer' : 'default', userSelect: 'none',
-      }}
+      style={{ display: 'flex', alignItems: 'center', cursor: onClick ? 'pointer' : 'default', userSelect: 'none' }}
     >
-      <div
+      <Image
+        src="/logo.png"
+        alt={PRODUCT.name}
+        width={Math.round(height * ASPECT)}
+        height={Math.round(height)}
         style={{
-          width: size, height: size, borderRadius: 9,
-          background: 'linear-gradient(150deg, var(--accent), var(--accent-2))',
-          boxShadow: '0 6px 18px var(--glow), inset 0 1px 0 rgba(255,255,255,.4)',
-          transition: 'background .6s',
+          height, width: 'auto', display: 'block',
+          // The wordmark's ink color is baked into the PNG (dark navy),
+          // so on the dark theme's dark-navy chrome it'd be nearly
+          // illegible without this — a light pill behind the mark keeps
+          // it readable without needing a separate dark-mode asset.
+          ...(theme === 'dark' && {
+            background: '#fff', borderRadius: 8, padding: '4px 8px',
+          }),
         }}
       />
-      <span style={{
-        fontFamily: 'var(--font-display)', fontWeight: 700,
-        fontSize: size * 0.6, letterSpacing: 'var(--tracking-tight)',
-      }}>
-        {first}{rest.length > 0 && <span style={{ color: 'var(--ink-mute)' }}> {rest.join(' ')}</span>}
-      </span>
     </div>
   )
 }
