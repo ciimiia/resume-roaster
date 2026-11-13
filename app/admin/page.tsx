@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic'
 export default async function AdminPage() {
   const token = (await cookies()).get(SESSION_COOKIE)?.value
   const session = token ? await verifySession(token) : null
-  if (!session) redirect('/signin')
+  if (!session) redirect('/signin?next=%2Fadmin')
   if (!env.isAdminEmail(session.email)) redirect('/')
 
   // Fail safe — admin page should still render if the DB has a hiccup
