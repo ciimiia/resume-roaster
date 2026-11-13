@@ -8,7 +8,7 @@ import DashboardClient from './DashboardClient'
 export default async function DashboardPage() {
   const token = (await cookies()).get(SESSION_COOKIE)?.value
   const session = token ? await verifySession(token) : null
-  if (!session) redirect('/signin')
+  if (!session) redirect('/signin?next=%2Fdashboard')
 
   const [analyses, coverLetters] = await Promise.all([
     listResultsForUser(session.userId).catch(err => {
