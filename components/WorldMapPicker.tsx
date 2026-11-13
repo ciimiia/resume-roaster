@@ -78,6 +78,8 @@ export default function WorldMapPicker() {
   const [region, setRegion] = useState<WorldRegionId | null>(null)
   const [countries, setCountries] = useState<string[]>([])
   const [cities, setCities] = useState<string[]>([])
+  const [cityQuery, setCityQuery] = useState('')
+  const [cityDropdownOpen, setCityDropdownOpen] = useState(false)
   const [career, setCareer] = useState('')
   const [studyLevel, setStudyLevel] = useState<StudyLevel | ''>('')
   const [studyField, setStudyField] = useState('')
@@ -212,12 +214,21 @@ export default function WorldMapPicker() {
     })
   }
 
-  // Union of every selected country's cities — the picklist shown below the
-  // country buttons. Selecting a city is an optional refinement, not
-  // required to submit.
+  // Union of every selected country's cities — offered through a search
+  // dropdown below the country buttons rather than one button per city,
+  // which could run to dozens of entries once several countries are picked.
+  // Selecting a city is an optional refinement, not required to submit.
   const availableCities = countries.flatMap(iso => CITIES_BY_ISO[iso] ?? [])
-  const toggleCity = (name: string) => {
-    setCities(cs => (cs.includes(name) ? cs.filter(c => c !== name) : [...cs, name]))
+  const cityMatches = availableCities
+    .filter(c => !cities.includes(c.name))
+    .filter(c => c.name.toLowerCase().includes(cityQuery.trim().toLowerCase()))
+    .slice(0, 40)
+  const addCity = (name: string) => {
+    setCities(cs => (cs.includes(name) ? cs : [...cs, name]))
+    setCityQuery('')
+  }
+  const removeCity = (name: string) => {
+    setCities(cs => cs.filter(c => c !== name))
   }
 
   const ready = countries.length > 0
@@ -416,26 +427,87 @@ export default function WorldMapPicker() {
                 ) : availableCities.length === 0 ? (
                   <div style={{ fontSize: 13.5, color: 'var(--ink-faint)' }}>{t.xCitiesUnavailable}</div>
                 ) : (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, maxHeight: 130, overflowY: 'auto' }}>
-                    {availableCities.map(c => {
-                      const selected = cities.includes(c.name)
-                      return (
-                        <button
-                          key={c.name}
-                          type="button"
-                          aria-pressed={selected}
-                          onClick={() => toggleCity(c.name)}
+                  <div>
+                    {cities.length > 0 && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+                        {cities.map(name => (
+                          <span
+                            key={name}
+                            style={{
+                              display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 6px 4px 12px',
+                              borderRadius: 999, fontSize: 13, fontWeight: 600,
+                              background: ACCENT, color: 'var(--accent-ink)',
+                            }}
+                          >
+                            {name}
+                            <button
+                              type="button"
+                              onClick={() => removeCity(name)}
+                              aria-label={`Remove ${name}`}
+                              style={{
+                                display: 'grid', placeItems: 'center', width: 18, height: 18, borderRadius: '50%',
+                                border: 'none', background: 'color-mix(in srgb, var(--accent-ink) 20%, transparent)',
+                                color: 'var(--accent-ink)', fontSize: 12, lineHeight: 1, cursor: 'pointer', padding: 0,
+                              }}
+                            >
+                              ×
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        type="text"
+                        value={cityQuery}
+                        onChange={e => { setCityQuery(e.target.value); setCityDropdownOpen(true) }}
+                        onFocus={() => setCityDropdownOpen(true)}
+                        onBlur={() => setCityDropdownOpen(false)}
+                        placeholder={t.xCitiesSearchPlaceholder}
+                        role="combobox"
+                        aria-expanded={cityDropdownOpen}
+                        aria-controls="city-search-listbox"
+                        style={{
+                          width: '100%', boxSizing: 'border-box', padding: '10px 14px', borderRadius: 12,
+                          border: '1px solid var(--line-2)', background: 'var(--surface-2)', color: 'var(--ink)', fontSize: 14,
+                        }}
+                      />
+                      {cityDropdownOpen && (
+                        <div
+                          id="city-search-listbox"
+                          role="listbox"
                           style={{
-                            padding: '6px 12px', borderRadius: 999, fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                            border: `1px solid ${selected ? ACCENT : 'var(--line-2)'}`,
-                            background: selected ? ACCENT : 'var(--surface-2)',
-                            color: selected ? 'var(--accent-ink)' : 'var(--ink-soft)',
+                            position: 'absolute', top: '100%', insetInlineStart: 0, insetInlineEnd: 0, marginTop: 4,
+                            maxHeight: 180, overflowY: 'auto', background: 'var(--surface)', border: '1px solid var(--line)',
+                            borderRadius: 'var(--r-md)', boxShadow: 'var(--shadow-2)', padding: 6, zIndex: 20,
                           }}
                         >
-                          {c.name}
-                        </button>
-                      )
-                    })}
+                          {cityMatches.length === 0 ? (
+                            <div style={{ padding: '8px 10px', fontSize: 13, color: 'var(--ink-faint)' }}>{t.xCitiesNoMatch}</div>
+                          ) : (
+                            cityMatches.map(c => (
+                              <button
+                                key={c.name}
+                                type="button"
+                                role="option"
+                                aria-selected={false}
+                                // Keeps the input focused through the click so
+                                // onBlur (above) doesn't close the dropdown
+                                // before this click is registered.
+                                onMouseDown={e => e.preventDefault()}
+                                onClick={() => addCity(c.name)}
+                                style={{
+                                  display: 'block', width: '100%', textAlign: 'start', padding: '8px 10px', borderRadius: 8,
+                                  border: 'none', background: 'none', color: 'var(--ink)', fontSize: 14, cursor: 'pointer',
+                                }}
+                              >
+                                {c.name}
+                              </button>
+                            ))
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
