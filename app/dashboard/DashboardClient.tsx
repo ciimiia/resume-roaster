@@ -155,7 +155,7 @@ function CoverLetterCard({ cl, savedLabel }: { cl: CoverLetterSummary; savedLabe
       {/* Subtle gradient accent */}
       <div style={{
         position: 'absolute', inset: 0, opacity: hovered ? 1 : 0, pointerEvents: 'none',
-        background: 'radial-gradient(400px 200px at 100% 0%, color-mix(in srgb, var(--coach) 6%, transparent), transparent)',
+        background: 'radial-gradient(400px 200px at 100% 0%, color-mix(in srgb, var(--secondary) 6%, transparent), transparent)',
         transition: 'opacity .3s',
       }} />
       <div style={{ position: 'relative' }}>

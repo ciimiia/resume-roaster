@@ -115,9 +115,9 @@ export default function SignUpPage() {
 
             {error && (
               <div style={{ padding: '11px 16px', borderRadius: 'var(--r-md)', fontSize: 14,
-                background: 'color-mix(in srgb, var(--roast) 10%, var(--surface-2))',
-                border: '1px solid color-mix(in srgb, var(--roast) 30%, transparent)',
-                color: 'var(--roast)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                background: 'color-mix(in srgb, var(--danger) 10%, var(--surface-2))',
+                border: '1px solid color-mix(in srgb, var(--danger) 30%, transparent)',
+                color: 'var(--danger)', display: 'flex', alignItems: 'center', gap: 8 }}>
                 <Icon name="x" size={14} /> {error}
               </div>
             )}

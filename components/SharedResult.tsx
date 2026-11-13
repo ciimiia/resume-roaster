@@ -16,7 +16,7 @@ function SectionRow({ s, i }: { s: AnalysisResult['sections'][0]; i: number }) {
     <div style={{ padding: '18px 0', borderBottom: '1px solid var(--line)', animation: `fadeUp .5s ${0.1 + i * 0.07}s both` }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 16, marginBottom: 10 }}>
         <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 17 }}>{s.label}</span>
-        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 17, color: s.score >= 75 ? 'var(--intl)' : s.score >= 55 ? 'var(--accent)' : 'var(--roast)' }}>
+        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 17, color: s.score >= 75 ? 'var(--secondary)' : s.score >= 55 ? 'var(--accent)' : 'var(--danger)' }}>
           {s.score}<span style={{ color: 'var(--ink-faint)', fontSize: 13 }}>/100</span>
         </span>
       </div>
@@ -27,7 +27,7 @@ function SectionRow({ s, i }: { s: AnalysisResult['sections'][0]; i: number }) {
 }
 
 function ListBlock({ icon, title, items, tone }: { icon: string; title: string; items: string[]; tone: 'win' | 'fix' | 'flag' }) {
-  const color = tone === 'win' ? 'var(--intl)' : tone === 'fix' ? 'var(--accent)' : 'var(--roast)'
+  const color = tone === 'win' ? 'var(--secondary)' : tone === 'fix' ? 'var(--accent)' : 'var(--danger)'
   return (
     <div style={cardStyle({ padding: 24 })}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>

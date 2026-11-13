@@ -169,6 +169,10 @@ function JobsClientInner() {
     () => picked.countries.map(iso => ISO_TO_NAME.get(iso)).filter((n): n is string => !!n),
     [picked.countries],
   )
+  // Cities are a narrower refinement of the countries pick (from the
+  // homepage map picker's city list) — when present, match on those
+  // instead of the whole country, same free-text approach as below.
+  const pickedLocationNames = picked.cities.length ? picked.cities : pickedCountryNames
 
   const [state, setState] = useState<'loading' | 'needsApproval' | 'error' | 'ready'>('loading')
   const [items, setItems] = useState<JobMatchItem[]>([])
@@ -203,8 +207,8 @@ function JobsClientInner() {
       const q = countryFilter.trim().toLowerCase()
       list = list.filter(j => (j.location ?? '').toLowerCase().includes(q))
     }
-    if (!pickedCountriesDismissed && pickedCountryNames.length) {
-      const names = pickedCountryNames.map(n => n.toLowerCase())
+    if (!pickedCountriesDismissed && pickedLocationNames.length) {
+      const names = pickedLocationNames.map(n => n.toLowerCase())
       list = list.filter(j => names.some(n => (j.location ?? '').toLowerCase().includes(n)))
     }
     if (keywordFilter.trim()) {
@@ -215,7 +219,7 @@ function JobsClientInner() {
       ? b.matchScore - a.matchScore
       : (new Date(b.postedAt ?? 0).getTime() - new Date(a.postedAt ?? 0).getTime()))
     return list
-  }, [items, hiddenIds, remoteFilter, countryFilter, pickedCountriesDismissed, pickedCountryNames, keywordFilter, sort])
+  }, [items, hiddenIds, remoteFilter, countryFilter, pickedCountriesDismissed, pickedLocationNames, keywordFilter, sort])
 
   async function handleSave(id: string, saved: boolean) {
     setItems(prev => prev.map(j => j.id === id ? { ...j, saved } : j))
@@ -257,14 +261,14 @@ function JobsClientInner() {
 
         {state === 'ready' && (
           <>
-            {!pickedCountriesDismissed && pickedCountryNames.length > 0 && (
+            {!pickedCountriesDismissed && pickedLocationNames.length > 0 && (
               <div style={{
                 display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
                 padding: '10px 14px', borderRadius: 'var(--r-md)', background: 'var(--tint)',
                 border: '1px solid var(--line-2)', marginBottom: 'var(--sp-4)', fontSize: 13.5,
               }}>
                 <span style={{ color: 'var(--ink-mute)' }}>
-                  {t.jobsFilteredByPicker}: {pickedCountryNames.join(', ')}
+                  {t.jobsFilteredByPicker}: {pickedLocationNames.join(', ')}
                   {picked.track === 'work' && picked.career ? ` · ${picked.career}` : ''}
                 </span>
                 <button

@@ -61,10 +61,10 @@ function drawShareCard(canvas: HTMLCanvasElement, mode: ModeId, r: AnalysisResul
   ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H)
 
   ctx.textBaseline = 'middle'
-  ctx.font = '52px "Space Grotesk", sans-serif'
+  ctx.font = '52px "Plus Jakarta Sans", sans-serif'
   ctx.fillText('🔥', PAD, 110)
   ctx.fillStyle = '#F5F5F7'
-  ctx.font = '700 38px "Space Grotesk", sans-serif'
+  ctx.font = '700 38px "Plus Jakarta Sans", sans-serif'
   ctx.fillText(PRODUCT.name, PAD + 64, 112)
 
   ctx.font = '700 24px "Space Mono", monospace'
@@ -88,16 +88,16 @@ function drawShareCard(canvas: HTMLCanvasElement, mode: ModeId, r: AnalysisResul
   ctx.beginPath(); ctx.arc(cx, cy, rad, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * r.score / 100)); ctx.stroke()
 
   ctx.fillStyle = '#F5F5F7'
-  ctx.font = '700 88px "Space Grotesk", sans-serif'; ctx.textAlign = 'center'
+  ctx.font = '700 88px "Plus Jakarta Sans", sans-serif'; ctx.textAlign = 'center'
   ctx.fillText(String(r.score), cx, cy - 6)
-  ctx.fillStyle = t.a; ctx.font = '700 30px "Space Grotesk", sans-serif'
+  ctx.fillStyle = t.a; ctx.font = '700 30px "Plus Jakarta Sans", sans-serif'
   ctx.fillText(r.grade + ' · ATS', cx, cy + 56)
   ctx.textAlign = 'left'
 
   const vx = cx + rad + 70, vw = W - PAD - vx
   ctx.fillStyle = '#9A9AA8'; ctx.font = '700 20px "Space Mono", monospace'
   ctx.fillText('THE VERDICT', vx, cy - 110)
-  ctx.fillStyle = '#F5F5F7'; ctx.font = '600 42px "Space Grotesk", sans-serif'
+  ctx.fillStyle = '#F5F5F7'; ctx.font = '600 42px "Plus Jakarta Sans", sans-serif'
   wrapText(ctx, '"' + r.verdict + '"', vx, cy - 60, vw, 50)
 
   let y = 660
@@ -109,7 +109,7 @@ function drawShareCard(canvas: HTMLCanvasElement, mode: ModeId, r: AnalysisResul
     ctx.fillText(s.label, PAD, y)
     ctx.textAlign = 'right'
     ctx.fillStyle = s.score >= 75 ? '#4DCC88' : s.score >= 55 ? t.a : '#FF4D4D'
-    ctx.font = '700 28px "Space Grotesk", sans-serif'; ctx.fillText(String(s.score), W - PAD, y)
+    ctx.font = '700 28px "Plus Jakarta Sans", sans-serif'; ctx.fillText(String(s.score), W - PAD, y)
     ctx.textAlign = 'left'
     const by = y + 22, bw2 = W - PAD * 2
     ctx.fillStyle = 'rgba(255,255,255,0.08)'
@@ -191,7 +191,7 @@ function SectionRow({ s, run, i }: { s: AnalysisResult['sections'][0]; run: bool
     <div style={{ padding: 'var(--sp-4) 0', borderBottom: '1px solid var(--line)', animation: run ? `fadeUp .5s ${0.1 + i * 0.07}s both` : 'none' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 'var(--sp-4)', marginBottom: 'var(--sp-2)' }}>
         <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 'var(--fs-md)' }}>{s.label}</span>
-        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'var(--fs-md)', color: s.score >= 75 ? 'var(--intl)' : s.score >= 55 ? 'var(--accent)' : 'var(--roast)' }}>
+        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'var(--fs-md)', color: s.score >= 75 ? 'var(--secondary)' : s.score >= 55 ? 'var(--accent)' : 'var(--danger)' }}>
           {s.score}<span style={{ color: 'var(--ink-faint)', fontSize: 13 }}>/100</span>
         </span>
       </div>
@@ -203,7 +203,7 @@ function SectionRow({ s, run, i }: { s: AnalysisResult['sections'][0]; run: bool
 
 /* ---- ListBlock ---- */
 function ListBlock({ icon, title, items, tone, run }: { icon: string; title: string; items: string[]; tone: 'win'|'fix'|'flag'; run: boolean }) {
-  const color = tone === 'win' ? 'var(--intl)' : tone === 'fix' ? 'var(--accent)' : 'var(--roast)'
+  const color = tone === 'win' ? 'var(--secondary)' : tone === 'fix' ? 'var(--accent)' : 'var(--danger)'
   return (
     <div style={cardStyle({ padding: 'var(--sp-6)' })}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--sp-3)', marginBottom: 'var(--sp-4)' }}>
@@ -362,9 +362,9 @@ export default function Results({ mode, file, usingSample, result, onReanalyze, 
                   position: 'relative', marginTop: 10, width: '100%',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                   padding: '11px 18px', borderRadius: 'var(--r-md)', cursor: copying ? 'wait' : 'pointer',
-                  background: copied ? 'color-mix(in srgb, var(--intl) 14%, var(--surface-2))' : 'var(--surface-2)',
-                  border: `1px solid ${copied ? 'var(--intl)' : 'var(--line-2)'}`,
-                  color: copied ? 'var(--intl)' : 'var(--ink-mute)',
+                  background: copied ? 'color-mix(in srgb, var(--secondary) 14%, var(--surface-2))' : 'var(--surface-2)',
+                  border: `1px solid ${copied ? 'var(--secondary)' : 'var(--line-2)'}`,
+                  color: copied ? 'var(--secondary)' : 'var(--ink-mute)',
                   fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 14,
                   transition: 'all .2s',
                 }}

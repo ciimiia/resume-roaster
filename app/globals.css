@@ -4,35 +4,95 @@
 
 /* ============================================================
    Design Tokens — Resume Roaster
-   ============================================================ */
+   ============================================================
+   ONE token set, two variants (DAYLIGHT default in :root, NIGHT behind
+   html[data-color-theme="dark"], switched by the existing theme toggle —
+   lib/ThemeContext.tsx). Components read tokens only, never a hex/rgb/hsl
+   literal or a per-page/per-view override — that mixing is exactly what
+   caused the unreadable-landing-page bug this rewrite fixes (see the
+   theme-unification phase report's root-cause section: html[data-view=
+   "landing"] and html[data-theme="roast"][data-color-theme="light"] had
+   equal-or-higher CSS specificity and fought each other depending on which
+   attributes happened to be set, landing a near-white heading on a pale
+   pink background). There is now exactly one place color is ever
+   reassigned per theme: the two blocks below.
+
+   roast/coach/intl (lib/data.ts's MODES config) are NOT CSS custom
+   properties and never were read as tokens by components — they're
+   hardcoded hex passed as a prop into the roast/coach/intl mode-selector
+   cards and score rings specifically (the "small mode accents" that stay).
+   The semantic colors those mode names used to double as here — error/
+   danger text, success/done text — now have their own proper tokens
+   (--danger, --secondary) below instead of borrowing a mode's color. */
 :root {
-  --bg: #0A0A0F;
-  --bg-2: #0E0E15;
-  --surface: #121219;
-  --surface-2: #17171F;
-  --surface-3: #1E1E27;
-  --line: rgba(255,255,255,0.08);
-  --line-2: rgba(255,255,255,0.14);
-  --ink: #F5F5F7;
-  --ink-soft: #C7C7D1;
-  --ink-mute: #84848F;
-  --ink-faint: #56565F;
-  --roast: #FF4D4D;
-  --roast-2: #FF8A3D;
-  --coach: #4D9FFF;
-  --coach-2: #7C7CFF;
-  --intl: #4DCC88;
-  --intl-2: #36D6C3;
-  --accent: #6E6E7A;
-  --accent-2: #6E6E7A;
-  --accent-ink: #0A0A0F;
-  --glow: rgba(110,110,122,0.0);
-  --tint: transparent;
-  --font-display: 'Space Grotesk', system-ui, sans-serif;
-  --font-body: 'Hanken Grotesk', system-ui, sans-serif;
+  /* DAYLIGHT (default) — light purple/white brand, replaces the earlier
+     navy/amber/teal "night map" palette per direct feedback on a reference
+     screenshot (lavender hero, white cards, vivid purple CTA, amber/orange
+     secondary action). Same token names, same mechanism — only the hex
+     values below changed, nothing else needed to. */
+  --bg: #F6F4FF;
+  --bg-2: #FFFFFF;
+  --surface: #FFFFFF;
+  --surface-2: #F3F0FF;
+  --surface-3: #ECE7FC;
+  --line: #E4DEFC;
+  --line-2: #D6CCF5;
+  --ink: #1E1B4B;
+  --ink-soft: #3C3768;
+  --ink-mute: #6B6487;
+  --ink-faint: #6E6A8C;
+  --accent: #6D4DF2;
+  --accent-2: #8B6DF5;
+  --accent-ink: #FFFFFF;    /* text on a purple-filled button */
+  --accent-text: #6D4DF2;   /* purple used AS text on a light surface */
+  --secondary: #96600E;     /* darkened from the reference screenshot's
+                                "Find Universities" amber/orange (~#C7821E)
+                                — that value only hit 2.9:1 as text on
+                                white/bg, below WCAG AA's 4.5:1; this hits
+                                4.85–5.3:1. Same hue family, just deeper. */
+  --secondary-ink: #FFFFFF; /* text on a solid --secondary-filled button —
+                                not in the given palette, added because
+                                --secondary flips from dark (day) to light
+                                (night), so unlike --accent-ink it can't be
+                                one fixed value across both variants */
+  --danger: #C0392B;
+  --danger-ink: #FFFFFF;    /* text on a solid --danger-filled button — same
+                                reasoning as --secondary-ink above */
+  --map-land: #170F38;      /* a near-black deep purple, not a pale lavender
+                                — forced by the math: --map-selected is
+                                --accent (a mid-bright purple, luminance
+                                0.15), so for map-land to clear 3:1 against
+                                BOTH --bg (near-white, luminance 0.92) and
+                                --map-selected simultaneously, no mid-tone
+                                value works (solved the inequality: only
+                                luminance <=0.017 or >=0.885 satisfies both,
+                                and >=0.885 would make unselected land
+                                lighter than --bg, invisible against it —
+                                see the phase report for the full
+                                derivation). Reads as a dark silhouette
+                                world map on a light lavender ocean. */
+  --map-line: #6D5FB0;
+  --map-selected: #6D4DF2;
+  --map-hover: #352A70;
+  --glow: rgba(109,77,242,0.10);
+  --tint: rgba(109,77,242,0.04);
+  --shadow-1: 0 1px 0 rgba(255,255,255,0.8) inset, 0 4px 16px rgba(30,27,75,0.10);
+  --shadow-2: 0 16px 60px rgba(30,27,75,0.15);
+
+  /* ONE Latin family for both display and body — Plus Jakarta Sans. To
+     switch typeface app-wide, change ONLY these two lines plus the single
+     Google Fonts <link> in app/layout.tsx (same weights: 400/500/600/700/
+     800). Good drop-in alternatives, same approach: DM Sans, Manrope,
+     Outfit — all have a comparable weight range and x-height, so nothing
+     else here (letter-spacing, line-height) should need retuning. */
+  --font-display: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
   --font-mono: 'Space Mono', ui-monospace, monospace;
-  --shadow-1: 0 1px 0 rgba(255,255,255,0.04) inset, 0 8px 24px rgba(0,0,0,0.4);
-  --shadow-2: 0 24px 80px rgba(0,0,0,0.6);
+  --font-fa: 'Vazirmatn', system-ui, sans-serif;
+  /* Plus Jakarta Sans needs less tightening than Space Grotesk did — see
+     html[lang="fa"] below for why this must be a token, not a literal
+     per-component value. */
+  --tracking-tight: -0.02em;
   --r-sm: 10px; --r-md: 16px; --r-lg: 24px; --r-xl: 32px;
 
   /* Spacing scale (4px base) — use for gap/padding/margin instead of
@@ -59,76 +119,61 @@
   --gutter: clamp(20px, 5vw, 60px);
 }
 
-/* ── Light mode ─────────────────────────────────────────────────────────── */
-html[data-color-theme="light"] {
-  --bg: #F4F4F6;
-  --bg-2: #EEEEF2;
-  --surface: #FFFFFF;
-  --surface-2: #F0F0F4;
-  --surface-3: #E4E4EA;
-  --line: rgba(0,0,0,0.08);
-  --line-2: rgba(0,0,0,0.14);
-  --ink: #0A0A0F;
-  --ink-soft: #2C2C38;
-  --ink-mute: #6B6B78;
-  --ink-faint: #9A9AAA;
-  --shadow-1: 0 1px 0 rgba(255,255,255,0.8) inset, 0 4px 16px rgba(0,0,0,0.10);
-  --shadow-2: 0 16px 60px rgba(0,0,0,0.15);
+/* Persian never falls back to a Latin-only family — every token that
+   carries a font-family resolves to Vazirmatn the moment html[lang="fa"]
+   is set (lib/LangContext.tsx sets lang, nothing else needs to react to
+   it), so every existing `fontFamily: var(--font-display|body|mono)` in
+   the app picks it up automatically, including inside the map labels and
+   buttons. */
+html[lang="fa"] {
+  --font-display: var(--font-fa);
+  --font-body: var(--font-fa);
+  --font-mono: var(--font-fa);
+  /* Negative letter-spacing breaks Arabic-script letter joining — never
+     apply Latin tracking to Persian text. --tracking-tight is the one
+     place a handful of display elements (the logo wordmark, button
+     labels, the score-ring number) get a tight-but-not-cramped Latin
+     tracking value; this neutralizes it the moment lang="fa". */
+  --tracking-tight: normal;
 }
 
-/* Light mode per-theme accent overrides — keep glows subtle */
-html[data-color-theme="light"][data-theme="roast"] {
-  --glow: rgba(255,77,77,0.08);
-  --tint: rgba(255,77,77,0.03);
-  --bg: #FDF4F4; --bg-2: #F9EDED;
-  --surface: #FFFFFF; --surface-2: #F9F0F0; --surface-3: #F3E8E8;
-}
-html[data-color-theme="light"][data-theme="coach"] {
-  --glow: rgba(77,159,255,0.07);
-  --tint: rgba(77,159,255,0.02);
-}
-html[data-color-theme="light"][data-theme="intl"] {
-  --glow: rgba(77,204,136,0.07);
-  --tint: rgba(77,204,136,0.02);
-}
-
-html[data-theme="roast"] {
-  --accent: #FF4D4D; --accent-2: #FF8A3D;
-  --glow: rgba(255,77,77,0.16); --tint: rgba(255,77,77,0.05);
-  --bg: #0E0809; --bg-2: #140A0B; --surface: #17100F;
-  --surface-2: #1D1413; --surface-3: #261917; --accent-ink: #160404;
-}
-html[data-theme="coach"] {
-  --accent: #4D9FFF; --accent-2: #7C7CFF;
-  --glow: rgba(77,159,255,0.14); --tint: rgba(77,159,255,0.04);
-  --accent-ink: #02060f;
-}
-html[data-theme="intl"] {
-  --accent: #4DCC88; --accent-2: #36D6C3;
-  --glow: rgba(77,204,136,0.14); --tint: rgba(77,204,136,0.04);
-  --accent-ink: #02100a;
-}
-
-/* ── Home page ("night map" palette) ─────────────────────────────────────
-   Overrides whatever mode/color-theme is active while the landing view is
-   shown (App.tsx sets html[data-view]) so the whole home page — Navbar
-   included — reads as one design instead of the dark per-mode roast/coach/
-   intl theme used in Workspace/Results.
-   NOTE (landing-map-refactor): this is a THIRD distinct palette in the
-   codebase — the default dark roast/coach/intl theme above, the light
-   purple one from the earlier explorer-hero iteration (not merged), and
-   this navy/amber/teal one. Flagged in the phase report; not resolved here
-   — product decision on one consistent app-wide theme is pending. */
-html[data-view="landing"] {
-  --bg: #0B1424; --bg-2: #0E1A2E;
-  --surface: #101D33; --surface-2: #16263F; --surface-3: #1D324F;
-  --line: rgba(255,255,255,0.08); --line-2: rgba(255,255,255,0.14);
-  --ink: #F3F6FB; --ink-soft: #C6D0DE; --ink-mute: #8A97AC; --ink-faint: #5A6578;
-  --accent: #F5B544; --accent-2: #5FD3C4; --accent-ink: #0B1424;
-  --glow: rgba(245,181,68,0.16); --tint: rgba(245,181,68,0.05);
-  --shadow-1: 0 1px 0 rgba(255,255,255,0.04) inset, 0 8px 24px rgba(0,0,0,0.45);
-  --shadow-2: 0 24px 80px rgba(0,0,0,0.55);
-  --font-body: 'Inter', system-ui, sans-serif;
+/* ── NIGHT (dark variant) ─────────────────────────────────────────────── */
+html[data-color-theme="dark"] {
+  --bg: #130B2E;
+  --bg-2: #190F3A;
+  --surface: #1C1240;
+  --surface-2: #241754;
+  --surface-3: #2D1F66;
+  --line: #342A70;
+  --line-2: #443780;
+  --ink: #EDE9FB;
+  --ink-soft: #CFC5EC;
+  --ink-mute: #A79BD1;
+  --ink-faint: #8E80BE;
+  --accent: #9178F7;
+  --accent-2: #B49CFA;
+  --accent-ink: #140A30;
+  --accent-text: #9178F7;
+  --secondary: #E0A030;
+  --secondary-ink: #140A30;
+  --danger: #FF6B6B;
+  --danger-ink: #140A30;
+  --map-land: #F6F4FF;      /* a near-white pale lavender, not a dark fill —
+                                same forced-by-the-math reasoning as
+                                DAYLIGHT's near-black land, mirrored: --bg is
+                                near-black here (luminance 0.006) and
+                                --map-selected/--accent is mid-light
+                                (luminance 0.26), so map-land must be far
+                                lighter than --accent to clear 3:1 against
+                                it while also clearing --bg — reads as a
+                                pale glowing map on a near-black "ocean". */
+  --map-line: #C9BDEE;
+  --map-selected: #9178F7;
+  --map-hover: #DCD0F5;
+  --glow: rgba(145,120,247,0.18);
+  --tint: rgba(145,120,247,0.06);
+  --shadow-1: 0 1px 0 rgba(255,255,255,0.04) inset, 0 8px 24px rgba(0,0,0,0.5);
+  --shadow-2: 0 24px 80px rgba(0,0,0,0.6);
 }
 
 /* ============================================================

@@ -24,6 +24,9 @@ function UniversitiesInner() {
   const searchParams = useSearchParams()
   const picked = parseExplorerQuery(searchParams)
   const countryNames = picked.countries.map(iso => ISO_TO_NAME.get(iso)).filter((n): n is string => !!n)
+  // Cities are a narrower refinement from the homepage picker's city list —
+  // shown in place of the full country names when present.
+  const locationNames = picked.cities.length ? picked.cities : countryNames
   const level = picked.track === 'study' ? picked.level : ''
   const field = picked.track === 'study' ? picked.field : ''
 
@@ -81,11 +84,11 @@ function UniversitiesInner() {
         </div>
 
         <div style={cardStyle({ padding: 'var(--sp-7)' })}>
-          {countryNames.length === 0 ? (
+          {locationNames.length === 0 ? (
             <p style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--ink-mute)', marginBottom: 'var(--sp-5)' }}>{t.uniNoSelection}</p>
           ) : (
             <div style={{ fontSize: 13.5, color: 'var(--ink-mute)', marginBottom: 'var(--sp-5)' }}>
-              {countryNames.join(', ')}{field ? ` · ${field}` : ''}{level ? ` · ${level}` : ''}
+              {locationNames.join(', ')}{field ? ` · ${field}` : ''}{level ? ` · ${level}` : ''}
             </div>
           )}
 
@@ -98,7 +101,7 @@ function UniversitiesInner() {
                 <input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)} style={{ marginTop: 2 }} />
                 {t.uniConsentLabel}
               </label>
-              {error && <p style={{ color: 'var(--roast)', fontSize: 13 }}>{error}</p>}
+              {error && <p style={{ color: 'var(--danger)', fontSize: 13 }}>{error}</p>}
               <button type="submit" disabled={state === 'loading'} style={{
                 padding: '13px', borderRadius: 'var(--r-md)', border: 'none', cursor: state === 'loading' ? 'wait' : 'pointer',
                 background: 'var(--accent)', color: 'var(--accent-ink)', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15,

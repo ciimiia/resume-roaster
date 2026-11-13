@@ -16,16 +16,17 @@ function roundTrip(q: ExplorerQuery) {
 
 // --- work track round-trip ---
 {
-  const q: ExplorerQuery = { track: 'work', countries: ['US', 'DE', 'CA'], career: 'Software Engineer' }
+  const q: ExplorerQuery = { track: 'work', countries: ['US', 'DE', 'CA'], cities: ['New York', 'Berlin'], career: 'Software Engineer' }
   const back = roundTrip(q)
   check('work: track round-trips', back.track === 'work')
   check('work: countries round-trip in order', JSON.stringify(back.countries) === JSON.stringify(['US', 'DE', 'CA']))
+  check('work: cities round-trip in order', JSON.stringify(back.cities) === JSON.stringify(['New York', 'Berlin']))
   check('work: career round-trips', back.track === 'work' && back.career === 'Software Engineer')
 }
 
 // --- study track round-trip ---
 {
-  const q: ExplorerQuery = { track: 'study', countries: ['NL', 'DE'], level: 'master', field: 'Computer Science' }
+  const q: ExplorerQuery = { track: 'study', countries: ['NL', 'DE'], cities: [], level: 'master', field: 'Computer Science' }
   const back = roundTrip(q)
   check('study: track round-trips', back.track === 'study')
   check('study: level round-trips', back.track === 'study' && back.level === 'master')
@@ -34,9 +35,10 @@ function roundTrip(q: ExplorerQuery) {
 
 // --- empty selection ---
 {
-  const q: ExplorerQuery = { track: 'work', countries: [], career: '' }
+  const q: ExplorerQuery = { track: 'work', countries: [], cities: [], career: '' }
   const back = roundTrip(q)
   check('empty: countries is []', back.countries.length === 0)
+  check('empty: cities is []', back.cities.length === 0)
   check('empty: career is empty string', back.track === 'work' && back.career === '')
 }
 
@@ -61,6 +63,14 @@ function roundTrip(q: ExplorerQuery) {
 {
   const parsed = parseExplorerQuery(new URLSearchParams('track=work&countries=US,us,US'))
   check('duplicate countries deduped', parsed.countries.length === 1 && parsed.countries[0] === 'US')
+}
+
+// --- cities: dedupe + whitespace trimming, empty entries dropped ---
+{
+  const parsed = parseExplorerQuery(new URLSearchParams('track=work&cities=New York, New York ,,Berlin'))
+  check('duplicate cities deduped', parsed.cities.filter(c => c === 'New York').length === 1)
+  check('city names trimmed', parsed.cities.includes('New York') && parsed.cities.includes('Berlin'))
+  check('empty city entries dropped', parsed.cities.length === 2)
 }
 
 if (failures > 0) {

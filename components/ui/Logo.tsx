@@ -30,7 +30,7 @@ export default function Logo({ size = 30, onClick }: LogoProps) {
       />
       <span style={{
         fontFamily: 'var(--font-display)', fontWeight: 700,
-        fontSize: size * 0.6, letterSpacing: '-0.03em',
+        fontSize: size * 0.6, letterSpacing: 'var(--tracking-tight)',
       }}>
         {first}{rest.length > 0 && <span style={{ color: 'var(--ink-mute)' }}> {rest.join(' ')}</span>}
       </span>

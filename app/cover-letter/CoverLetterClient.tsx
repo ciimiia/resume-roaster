@@ -156,9 +156,9 @@ export default function CoverLetterPage() {
             {(fieldError || error) && (
               <div style={{
                 padding: '12px 18px', borderRadius: 'var(--r-md)', fontSize: 14,
-                background: 'color-mix(in srgb, var(--roast) 10%, var(--surface-2))',
-                border: '1px solid color-mix(in srgb, var(--roast) 30%, transparent)',
-                color: 'var(--roast)',
+                background: 'color-mix(in srgb, var(--danger) 10%, var(--surface-2))',
+                border: '1px solid color-mix(in srgb, var(--danger) 30%, transparent)',
+                color: 'var(--danger)',
               }}>
                 {fieldError || error}
               </div>
@@ -219,10 +219,10 @@ export default function CoverLetterPage() {
                       display: 'flex', alignItems: 'center', gap: 8,
                       padding: '11px 20px', borderRadius: 'var(--r-md)',
                       background: copied
-                        ? 'color-mix(in srgb, var(--intl) 14%, var(--surface-2))'
+                        ? 'color-mix(in srgb, var(--secondary) 14%, var(--surface-2))'
                         : 'linear-gradient(140deg, var(--accent), var(--accent-2))',
-                      border: copied ? '1px solid var(--intl)' : 'none',
-                      color: copied ? 'var(--intl)' : 'var(--accent-ink)',
+                      border: copied ? '1px solid var(--secondary)' : 'none',
+                      color: copied ? 'var(--secondary)' : 'var(--accent-ink)',
                       fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14,
                       cursor: 'pointer', transition: 'all .2s var(--ease-out)',
                     }}

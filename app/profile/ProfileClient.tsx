@@ -262,7 +262,7 @@ export default function ProfileClient({ initialProfile, initialPreferences, init
             </span>
           </label>
           {uploadError && (
-            <div style={{ marginTop: 'var(--sp-3)', padding: '10px 14px', borderRadius: 'var(--r-sm)', background: 'color-mix(in srgb, var(--roast) 10%, var(--surface-2))', border: '1px solid color-mix(in srgb, var(--roast) 30%, transparent)', color: 'var(--roast)', fontSize: 13.5 }}>
+            <div style={{ marginTop: 'var(--sp-3)', padding: '10px 14px', borderRadius: 'var(--r-sm)', background: 'color-mix(in srgb, var(--danger) 10%, var(--surface-2))', border: '1px solid color-mix(in srgb, var(--danger) 30%, transparent)', color: 'var(--danger)', fontSize: 13.5 }}>
               {uploadError}
             </div>
           )}
@@ -290,7 +290,7 @@ export default function ProfileClient({ initialProfile, initialPreferences, init
                 </div>
               ))}
               {retryError && (
-                <div style={{ fontSize: 13, color: 'var(--roast)' }}>{retryError}</div>
+                <div style={{ fontSize: 13, color: 'var(--danger)' }}>{retryError}</div>
               )}
             </div>
           )}
@@ -375,7 +375,7 @@ export default function ProfileClient({ initialProfile, initialPreferences, init
                           onChange={e => setProfile(p => ({ ...p, experience: p.experience.map((x, j) => j === i ? { ...x, bullets: splitLines(e.target.value) } : x) }))} />
                       </Field>
                       <button onClick={() => setProfile(p => ({ ...p, experience: p.experience.filter((_, j) => j !== i) }))}
-                        style={{ alignSelf: 'flex-start', background: 'none', border: 'none', color: 'var(--roast)', fontSize: 12.5, cursor: 'pointer' }}>{t.profileRemoveEntry}</button>
+                        style={{ alignSelf: 'flex-start', background: 'none', border: 'none', color: 'var(--danger)', fontSize: 12.5, cursor: 'pointer' }}>{t.profileRemoveEntry}</button>
                     </div>
                   ))}
                 </div>
@@ -402,7 +402,7 @@ export default function ProfileClient({ initialProfile, initialPreferences, init
                       </Field>
                       <div style={{ display: 'flex', alignItems: 'flex-end' }}>
                         <button onClick={() => setProfile(p => ({ ...p, education: p.education.filter((_, j) => j !== i) }))}
-                          style={{ background: 'none', border: 'none', color: 'var(--roast)', fontSize: 12.5, cursor: 'pointer' }}>{t.profileRemoveEntry}</button>
+                          style={{ background: 'none', border: 'none', color: 'var(--danger)', fontSize: 12.5, cursor: 'pointer' }}>{t.profileRemoveEntry}</button>
                       </div>
                     </div>
                   ))}
@@ -422,7 +422,7 @@ export default function ProfileClient({ initialProfile, initialPreferences, init
             <div style={{ display: 'flex', gap: 'var(--sp-3)', marginTop: 'var(--sp-6)', paddingTop: 'var(--sp-5)', borderTop: '1px solid var(--line)' }}>
               <Button icon="check" onClick={() => saveProfile(true)} disabled={savingProfile}>{t.profileApproveBtn}</Button>
               <Button variant="ghost" onClick={() => saveProfile(false)} disabled={savingProfile}>{t.profileSaveBtn}</Button>
-              {profileSaved && <span style={{ alignSelf: 'center', fontSize: 13, color: 'var(--intl)' }}>{t.profileSaved}</span>}
+              {profileSaved && <span style={{ alignSelf: 'center', fontSize: 13, color: 'var(--secondary)' }}>{t.profileSaved}</span>}
             </div>
           </div>
         )}
@@ -508,7 +508,7 @@ export default function ProfileClient({ initialProfile, initialPreferences, init
 
           <div style={{ display: 'flex', gap: 'var(--sp-3)', marginTop: 'var(--sp-6)', paddingTop: 'var(--sp-5)', borderTop: '1px solid var(--line)' }}>
             <Button onClick={savePrefs} disabled={savingPrefs}>{t.profileSaveBtn}</Button>
-            {prefsSaved && <span style={{ alignSelf: 'center', fontSize: 13, color: 'var(--intl)' }}>{t.profileSaved}</span>}
+            {prefsSaved && <span style={{ alignSelf: 'center', fontSize: 13, color: 'var(--secondary)' }}>{t.profileSaved}</span>}
           </div>
         </div>
 
@@ -519,29 +519,29 @@ export default function ProfileClient({ initialProfile, initialPreferences, init
             border: '1px solid var(--line-2)', color: 'var(--ink)', fontFamily: 'var(--font-display)',
             fontWeight: 600, fontSize: 14, cursor: downloadingData ? 'wait' : 'pointer',
           }}>{t.profileDownloadDataBtn}</button>
-          {downloadError && <p style={{ fontSize: 13, color: 'var(--roast)', marginTop: 'var(--sp-3)' }}>{downloadError}</p>}
+          {downloadError && <p style={{ fontSize: 13, color: 'var(--danger)', marginTop: 'var(--sp-3)' }}>{downloadError}</p>}
         </div>
 
         {/* Danger zone */}
-        <div style={cardStyle({ padding: 'var(--sp-6)', border: '1px solid color-mix(in srgb, var(--roast) 30%, var(--line))' })}>
-          <h3 style={{ fontSize: 16, color: 'var(--roast)', marginBottom: 'var(--sp-1)' }}>{t.profileDangerZoneTitle}</h3>
+        <div style={cardStyle({ padding: 'var(--sp-6)', border: '1px solid color-mix(in srgb, var(--danger) 30%, var(--line))' })}>
+          <h3 style={{ fontSize: 16, color: 'var(--danger)', marginBottom: 'var(--sp-1)' }}>{t.profileDangerZoneTitle}</h3>
           <p style={{ fontSize: 13.5, color: 'var(--ink-mute)', marginBottom: 'var(--sp-4)' }}>{t.profileDangerZoneDesc}</p>
           {deleteDone
-            ? <p style={{ fontSize: 14, color: 'var(--intl)' }}>{t.profileDeleteDone}</p>
+            ? <p style={{ fontSize: 14, color: 'var(--secondary)' }}>{t.profileDeleteDone}</p>
             : <button onClick={deleteMyData} disabled={deleting} style={{
                 padding: '10px 20px', borderRadius: 'var(--r-md)', background: 'none',
-                border: '1px solid var(--roast)', color: 'var(--roast)', fontFamily: 'var(--font-display)',
+                border: '1px solid var(--danger)', color: 'var(--danger)', fontFamily: 'var(--font-display)',
                 fontWeight: 600, fontSize: 14, cursor: deleting ? 'wait' : 'pointer',
               }}>{t.profileDeleteBtn}</button>}
 
-          <div style={{ marginTop: 'var(--sp-5)', paddingTop: 'var(--sp-5)', borderTop: '1px solid color-mix(in srgb, var(--roast) 20%, var(--line))' }}>
-            <h4 style={{ fontSize: 15, color: 'var(--roast)', marginBottom: 'var(--sp-1)' }}>{t.profileDeleteAccountTitle}</h4>
+          <div style={{ marginTop: 'var(--sp-5)', paddingTop: 'var(--sp-5)', borderTop: '1px solid color-mix(in srgb, var(--danger) 20%, var(--line))' }}>
+            <h4 style={{ fontSize: 15, color: 'var(--danger)', marginBottom: 'var(--sp-1)' }}>{t.profileDeleteAccountTitle}</h4>
             <p style={{ fontSize: 13.5, color: 'var(--ink-mute)', marginBottom: 'var(--sp-4)' }}>{t.profileDeleteAccountDesc}</p>
             {accountDeleted
-              ? <p style={{ fontSize: 14, color: 'var(--intl)' }}>{t.profileDeleteAccountDone}</p>
+              ? <p style={{ fontSize: 14, color: 'var(--secondary)' }}>{t.profileDeleteAccountDone}</p>
               : <button onClick={deleteMyAccount} disabled={deletingAccount} style={{
-                  padding: '10px 20px', borderRadius: 'var(--r-md)', background: 'var(--roast)',
-                  border: '1px solid var(--roast)', color: '#fff', fontFamily: 'var(--font-display)',
+                  padding: '10px 20px', borderRadius: 'var(--r-md)', background: 'var(--danger)',
+                  border: '1px solid var(--danger)', color: 'var(--danger-ink)', fontFamily: 'var(--font-display)',
                   fontWeight: 700, fontSize: 14, cursor: deletingAccount ? 'wait' : 'pointer',
                 }}>{t.profileDeleteAccountBtn}</button>}
           </div>
