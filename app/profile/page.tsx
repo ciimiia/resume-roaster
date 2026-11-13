@@ -9,7 +9,7 @@ import ProfileClient from './ProfileClient'
 export default async function ProfilePage() {
   const token = (await cookies()).get(SESSION_COOKIE)?.value
   const session = token ? await verifySession(token) : null
-  if (!session) redirect('/signin')
+  if (!session) redirect('/signin?next=%2Fprofile')
 
   const [profile, preferences, resumes] = await Promise.all([
     getProfileForUser(session.userId).catch(err => {
