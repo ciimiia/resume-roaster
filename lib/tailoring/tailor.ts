@@ -14,6 +14,7 @@
  */
 import 'server-only'
 import { env } from '@/lib/env'
+import { PRODUCT } from '@/lib/config'
 import type { ParsedProfile } from '@/lib/resumeProfile'
 import { TailorResponseSchema, type TailorResponse } from './types'
 import { buildProfileText } from '@/lib/matching/profileText'
@@ -71,7 +72,7 @@ export async function tailorProfile(profile: ParsedProfile, jobText: string): Pr
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': env.siteUrl,
-        'X-Title': 'Resume Roaster Tailoring',
+        'X-Title': `${PRODUCT.name} Tailoring`,
       },
       body: JSON.stringify({
         model: env.tailorModel,

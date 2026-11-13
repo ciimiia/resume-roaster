@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     'Upload your PDF and get brutal, honest, AI-powered resume feedback in 12 seconds. ATS score, red flags, and actionable fixes — free.',
   keywords: [
     'AI resume feedback', 'ATS resume checker', 'resume review', 'resume score',
-    'resume roaster', 'free resume checker', 'ATS optimization', 'resume tips',
+    'michi ai', 'free resume checker', 'ATS optimization', 'resume tips',
     'job search', 'career advice',
   ],
   authors: [{ name: PRODUCT.name }],
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     description:
       'Upload your PDF and get brutal, honest, AI-powered resume feedback in 12 seconds. Free.',
     images: [OG_IMAGE],
-    creator: '@resumeroaster',
+    creator: `@${PRODUCT.slug.replace(/-/g, '')}`,
   },
   alternates: { canonical: SITE_URL },
   robots: { index: true, follow: true },

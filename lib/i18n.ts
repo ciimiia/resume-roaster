@@ -1,4 +1,5 @@
 import type { ModeId } from './types'
+import { PRODUCT } from './config'
 
 export type Lang = 'en' | 'fa'
 
@@ -110,7 +111,7 @@ const en = {
   ctaBtn: 'Upload your resume',
 
   // ── Footer ────────────────────────────────────────────
-  footer: '© 2026 Resume Roaster · No resumes were truly harmed.',
+  footer: `© 2026 ${PRODUCT.name} · No resumes were truly harmed.`,
 
   // ── Workspace ─────────────────────────────────────────
   stepChooseMode: 'Choose mode',
@@ -305,7 +306,7 @@ const en = {
   clEmptyJob: 'Please paste the job description.',
 
   // ── Blog ──────────────────────────────────────────────
-  blogEyebrow: 'RESUME ROASTER · BLOG',
+  blogEyebrow: `${PRODUCT.name.toUpperCase()} · BLOG`,
   blogH1a: 'Career advice worth',
   blogH1b: 'actually reading.',
   blogSubtitle: 'ATS strategy, resume writing, and how to land the job — no fluff.',
@@ -316,7 +317,7 @@ const en = {
   blogCTATitle: 'Ready to put this into practice?',
   blogCTABody: 'Upload your resume and get AI feedback in 12 seconds.',
   blogCTABtn: '🔥 Roast my resume',
-  blogAuthor: 'Resume Roaster',
+  blogAuthor: PRODUCT.name,
 
   // ── Builder ───────────────────────────────────────────
   builderTitle: 'Resume Builder',
@@ -368,7 +369,7 @@ const en = {
 
   // ── Shared result page ───────────────────────────────
   sharedTryYourOwn: '🔥 Try your own',
-  sharedViaBadge: 'Shared via Resume Roaster',
+  sharedViaBadge: `Shared via ${PRODUCT.name}`,
   sharedReadyTitle: 'Ready to roast yours?',
   sharedReadyBody: 'Upload your resume and get AI feedback in 12 seconds — free.',
 
@@ -743,7 +744,7 @@ const fa: typeof en = {
   ctaBody: 'دقیقاً چی — قبل از اینکه استخدام‌کننده بفهمه.',
   ctaBtn: 'رزومه‌ات رو آپلود کن',
 
-  footer: '© ۱۴۰۵ رزومه روستر · هیچ رزومه‌ای واقعاً آسیب ندید.',
+  footer: `© ۱۴۰۵ ${PRODUCT.name} · هیچ رزومه‌ای واقعاً آسیب ندید.`,
 
   stepChooseMode: 'انتخاب حالت',
   stepUploadResume: 'آپلود رزومه',
@@ -928,7 +929,7 @@ const fa: typeof en = {
   clEmptyResume: 'لطفاً متن رزومه‌ات رو جای‌گذار کن.',
   clEmptyJob: 'لطفاً شرح شغل رو جای‌گذار کن.',
 
-  blogEyebrow: 'رزومه روستر · بلاگ',
+  blogEyebrow: `${PRODUCT.name} · بلاگ`,
   blogH1a: 'توصیه‌های شغلی که ارزش',
   blogH1b: 'خواندن دارند.',
   blogSubtitle: 'استراتژی ATS، نوشتن رزومه، و چطور شغل بگیری — بدون حرف اضافه.',
@@ -939,7 +940,7 @@ const fa: typeof en = {
   blogCTATitle: 'آماده‌ای تجربه کنی؟',
   blogCTABody: 'رزومه‌ات رو آپلود کن و در ۱۲ ثانیه بازخورد هوش مصنوعی بگیر.',
   blogCTABtn: '🔥 رزومه‌ام رو داغ کن',
-  blogAuthor: 'رزومه روستر',
+  blogAuthor: PRODUCT.name,
 
   builderTitle: 'ساخت رزومه',
   builderExportPdf: 'خروجی PDF',
@@ -990,7 +991,7 @@ const fa: typeof en = {
 
   // ── Shared result page ───────────────────────────────
   sharedTryYourOwn: '🔥 خودت رو امتحان کن',
-  sharedViaBadge: 'اشتراک‌گذاری از Resume Roaster',
+  sharedViaBadge: `اشتراک‌گذاری از ${PRODUCT.name}`,
   sharedReadyTitle: 'آماده‌ای رزومه‌ات رو داغ کنی؟',
   sharedReadyBody: 'رزومه‌ات رو آپلود کن و در ۱۲ ثانیه بازخورد هوش مصنوعی بگیر — رایگان.',
 

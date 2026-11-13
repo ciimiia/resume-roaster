@@ -15,6 +15,7 @@
 import 'server-only'
 import { z } from 'zod'
 import { env } from '@/lib/env'
+import { PRODUCT } from '@/lib/config'
 import type { MatchCandidate } from './retrieve'
 
 const MAX_DESCRIPTION_CHARS = 2000 // keeps the prompt's token count bounded regardless of how long a posting is
@@ -91,7 +92,7 @@ export async function rerankJobs(profileText: string, candidates: MatchCandidate
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': env.siteUrl,
-        'X-Title': 'Resume Roaster Job Matching',
+        'X-Title': `${PRODUCT.name} Job Matching`,
       },
       body: JSON.stringify({
         model: env.rerankModel,

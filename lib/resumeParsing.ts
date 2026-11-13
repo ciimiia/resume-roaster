@@ -16,6 +16,7 @@
 
 import 'server-only'
 import { env } from '@/lib/env'
+import { PRODUCT } from '@/lib/config'
 import { ParsedProfileSchema, EMPTY_PROFILE, type ParsedProfile } from '@/lib/resumeProfile'
 
 // NOTE: extractResumeText (PDF/DOCX → raw text) intentionally does NOT live
@@ -91,7 +92,7 @@ export async function parseResumeToProfile(resumeText: string): Promise<ResumePa
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': env.siteUrl,
-        'X-Title': 'Resume Roaster Profile Parser',
+        'X-Title': `${PRODUCT.name} Profile Parser`,
       },
       body: JSON.stringify({
         model: env.openRouterModel,

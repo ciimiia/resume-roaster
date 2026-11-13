@@ -7,6 +7,7 @@
  */
 import 'server-only'
 import { env } from '@/lib/env'
+import { PRODUCT } from '@/lib/config'
 import type { TailoredProfile } from './types'
 
 const MAX_JOB_TEXT_CHARS = 6000
@@ -55,7 +56,7 @@ export async function generateTailoredCoverLetter(tailored: TailoredProfile, job
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': env.siteUrl,
-        'X-Title': 'Resume Roaster Tailored Cover Letter',
+        'X-Title': `${PRODUCT.name} Tailored Cover Letter`,
       },
       body: JSON.stringify({
         model: env.tailorCoverLetterModel,

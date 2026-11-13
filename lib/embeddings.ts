@@ -14,6 +14,7 @@
 
 import 'server-only'
 import { env } from '@/lib/env'
+import { PRODUCT } from '@/lib/config'
 
 export const EMBEDDING_DIMENSIONS = 1536
 
@@ -43,7 +44,7 @@ export async function embedTexts(texts: string[]): Promise<EmbedResult> {
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
         'HTTP-Referer': env.siteUrl,
-        'X-Title': 'Resume Roaster Embeddings',
+        'X-Title': `${PRODUCT.name} Embeddings`,
       },
       body: JSON.stringify({
         model: env.embeddingModel,

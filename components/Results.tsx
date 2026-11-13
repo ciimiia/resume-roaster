@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { MODES, MODE_ORDER, RESULTS as CANNED } from '@/lib/data'
 import type { ModeId, AnalysisResult } from '@/lib/types'
 import { useLang } from '@/lib/LangContext'
+import { PRODUCT } from '@/lib/config'
 import Button from './ui/Button'
 import Icon from './ui/Icon'
 import Logo from './ui/Logo'
@@ -64,7 +65,7 @@ function drawShareCard(canvas: HTMLCanvasElement, mode: ModeId, r: AnalysisResul
   ctx.fillText('🔥', PAD, 110)
   ctx.fillStyle = '#F5F5F7'
   ctx.font = '700 38px "Space Grotesk", sans-serif'
-  ctx.fillText('Resume Roaster', PAD + 64, 112)
+  ctx.fillText(PRODUCT.name, PAD + 64, 112)
 
   ctx.font = '700 24px "Space Mono", monospace'
   const badge = `${M.glyph} ${M.name.toUpperCase()}`
@@ -119,7 +120,7 @@ function drawShareCard(canvas: HTMLCanvasElement, mode: ModeId, r: AnalysisResul
   })
 
   ctx.fillStyle = '#56565F'; ctx.font = '400 24px "Space Mono", monospace'
-  ctx.fillText('resumeroaster.app', PAD, H - 60)
+  ctx.fillText(`${PRODUCT.slug.replace(/-/g, '')}.app`, PAD, H - 60)
   ctx.textAlign = 'right'; ctx.fillStyle = t.a
   ctx.fillText('Get yours roasted →', W - PAD, H - 60)
   ctx.textAlign = 'left'
@@ -143,7 +144,7 @@ function ShareModal({ mode, result, onClose }: { mode: ModeId; result: AnalysisR
 
   const download = () => {
     const a = document.createElement('a')
-    a.download = `resume-roaster-${mode}.png`
+    a.download = `${PRODUCT.slug}-${mode}.png`
     a.href = canvasRef.current!.toDataURL('image/png')
     a.click()
   }
@@ -152,7 +153,7 @@ function ShareModal({ mode, result, onClose }: { mode: ModeId; result: AnalysisR
     if (navigator.share && canvasRef.current) {
       canvasRef.current.toBlob(b => {
         const f = new File([b!], 'roast.png', { type: 'image/png' })
-        navigator.share({ files: [f], title: 'My Resume Roast', text: `I scored ${result.score} on Resume Roaster 🔥` }).catch(() => {})
+        navigator.share({ files: [f], title: 'My Resume Roast', text: `I scored ${result.score} on ${PRODUCT.name} 🔥` }).catch(() => {})
       })
     } else { download() }
   }
