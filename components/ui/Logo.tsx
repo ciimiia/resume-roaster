@@ -1,7 +1,5 @@
 'use client'
 
-import Image from 'next/image'
-import { useTheme } from '@/lib/ThemeContext'
 import { PRODUCT } from '@/lib/config'
 
 interface LogoProps {
@@ -9,35 +7,38 @@ interface LogoProps {
   onClick?: () => void
 }
 
-// The real logo (public/logo.png) — mark + "michi ai" wordmark baked
-// together into one image at a 395:256 aspect ratio. `size` is the
-// rendered height; width follows that ratio.
-const ASPECT = 395 / 256
+// Hand-built SVG recreation of the provided reference mark (a winding
+// "road" stroke — "michi" means road/path in Japanese — with a dot above
+// it), not the reference image itself. The road stroke uses var(--ink) so
+// it stays legible in both themes automatically; the dot and "ai" use a
+// fixed brand orange, same reasoning lib/data.ts's MODES colors use for
+// staying fixed regardless of theme — it's an identity color, not UI chrome.
+const BRAND_ORANGE = '#E2542A'
 
 export default function Logo({ size = 30, onClick }: LogoProps) {
-  const { theme } = useTheme()
-  const height = size * 1.3
+  const [first, ...rest] = PRODUCT.name.split(' ')
   return (
     <div
       onClick={onClick}
-      style={{ display: 'flex', alignItems: 'center', cursor: onClick ? 'pointer' : 'default', userSelect: 'none' }}
+      style={{
+        display: 'flex', alignItems: 'center', gap: size * 0.3,
+        cursor: onClick ? 'pointer' : 'default', userSelect: 'none',
+      }}
     >
-      <Image
-        src="/logo.png"
-        alt={PRODUCT.name}
-        width={Math.round(height * ASPECT)}
-        height={Math.round(height)}
-        style={{
-          height, width: 'auto', display: 'block',
-          // The wordmark's ink color is baked into the PNG (dark navy),
-          // so on the dark theme's dark-navy chrome it'd be nearly
-          // illegible without this — a light pill behind the mark keeps
-          // it readable without needing a separate dark-mode asset.
-          ...(theme === 'dark' && {
-            background: '#fff', borderRadius: 8, padding: '4px 8px',
-          }),
-        }}
-      />
+      <svg width={size} height={size} viewBox="0 0 120 120" fill="none" aria-hidden="true">
+        <path
+          d="M40,103 C16,103 16,76 34,69 C53,62 57,47 41,41 C28,36 21,29 23,19"
+          stroke="var(--ink)" strokeWidth="11" strokeLinecap="round" strokeLinejoin="round"
+        />
+        <circle cx="26" cy="15" r="13" fill={BRAND_ORANGE} />
+      </svg>
+      <span style={{
+        fontFamily: 'var(--font-display)', fontWeight: 800,
+        fontSize: size * 0.62, letterSpacing: 'var(--tracking-tight)', color: 'var(--ink)',
+      }}>
+        {first}
+        {rest.length > 0 && <span style={{ color: BRAND_ORANGE, fontWeight: 600 }}> {rest.join(' ').toLowerCase()}</span>}
+      </span>
     </div>
   )
 }

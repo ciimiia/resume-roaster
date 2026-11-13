@@ -46,7 +46,7 @@ const ALLOWLIST: { file: string; reason: string }[] = [
   // Purely decorative, not text/contrast-relevant: a gloss highlight line,
   // macOS-style window dots, placeholder avatar circles.
   { file: 'components/ui/Button.tsx', reason: 'Fixed white gloss-highlight inset shadow — decorative, not text' },
-  { file: 'components/ui/Logo.tsx', reason: 'Fixed white pill behind the logo PNG in dark mode — the wordmark\'s ink color is baked into the image, not a CSS token' },
+  { file: 'components/ui/Logo.tsx', reason: 'Brand orange for the logo mark\'s dot + "ai" wordmark — a fixed identity color, same reasoning as lib/data.ts\'s MODES colors' },
   { file: 'components/Landing.tsx', reason: 'StatTicker avatar-dot colors + macOS traffic-light dots — decorative icons' },
 ]
 const ALLOWED_FILES = new Set(ALLOWLIST.map(a => a.file))
